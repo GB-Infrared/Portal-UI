@@ -1,0 +1,38 @@
+/* React-only additions.
+   Two kinds of rule live here and nothing else:
+     1. empty states — the HTML prototype always has demo data, so it never
+        needed them; this build has no data at all until a backend is wired in.
+     2. chrome the prototype styled inline in JS (the toasts on the home page).
+   Every value is a token. No colour literal appears below this line. */
+
+/* ---------- toasts · shared by both pages ---------- */
+#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
+#toasts .toast{background:var(--elev);border:1px solid var(--line);border-left:3px solid var(--green);
+  border-radius:9px;padding:10px 14px;font-size:12.5px;color:var(--text);
+  box-shadow:0 12px 30px -8px var(--shadow);animation:tpop .18s ease-out}
+@keyframes tpop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- date field ---------- */
+/* The prototype drew a static date plus the design's calendar glyph. React uses
+   a real <input type="date">, which brings its own picker button — so the native
+   one is made invisible and stretched over the whole field: the design glyph is
+   what you see, and clicking anywhere on the field still opens the picker. */
+.page-monitoring .input{position:relative}
+.page-monitoring .input input[type="date"]::-webkit-calendar-picker-indicator{
+  position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:pointer}
+
+/* ---------- empty states ---------- */
+/* A chart with no series still draws its axes, so the page reads as a chart
+   rather than a hole. This note sits over the plot to say why it is bare. */
+.chart-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint)}
+
+/* list / table / rail placeholders */
+.empty-note{display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:26px 16px;font-size:12.5px;color:var(--faint);text-align:center}
+.empty-note.tall{padding:44px 16px}
+.empty-note.boxed{border:1px dashed var(--line);border-radius:var(--r-md);background:var(--panel-2)}
+
+/* a value that has no reading yet — keeps the number's slot without pretending */
+.novalue{color:var(--dim)}

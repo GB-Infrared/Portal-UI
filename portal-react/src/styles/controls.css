@@ -1,0 +1,138 @@
+/* ---------- the portal's one dropdown ----------
+   Home, Monitoring and Alarms all ask the same shape of question — narrow this
+   list to some of these values — so they all open the same control: a button
+   that names the current answer, over an elevated panel of rows. Unscoped on
+   purpose: this is the one idiom shared across every page, and a copy per page
+   is how three pages drift apart.
+
+   Native <select> was what these replaced. It cannot show a count beside an
+   option, cannot take several values without a modifier key, and renders
+   differently on every OS — three reasons that all matter on a filter bar. */
+.msel{position:relative;display:flex}
+.mbtn{display:flex;align-items:center;width:100%;min-width:150px;height:34px;
+  padding:0 28px 0 11px;border-radius:var(--r-sm);border:1px solid var(--line);
+  color:var(--text);font-size:13px;font-weight:600;font-family:inherit;text-align:left;cursor:pointer;
+  background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%238d99a6" stroke-width="1.6" stroke-linecap="round"/></svg>') no-repeat right 10px center}
+/* Controls answer in NEUTRAL. Green on this portal means producing/healthy; a
+   pointer resting on a dropdown is neither, and a green wash there competes
+   with every reading that uses the colour to mean something. */
+.mbtn:hover,.msel.open .mbtn{border-color:var(--line-hi);background-color:var(--hover)}
+.mbtn .mlab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* "nothing chosen" is a real state, not a value — said in the muted voice so a
+   set filter is legible at a glance across a whole bar */
+.mbtn .mlab.any{color:var(--muted);font-weight:600}
+
+.mpanel{position:absolute;top:calc(100% + 6px);left:0;z-index:80;width:214px;min-width:100%;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:8px;
+  max-height:min(60vh,460px);overflow-y:auto;scrollbar-width:thin}
+/* hung from the right where the control sits at a card's right edge */
+.mpanel.right{left:auto;right:0}
+.mhead{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);padding:2px 8px 7px}
+/* The rows are <label>s and often sit inside a .field, whose own label rule
+   would otherwise set every option in tiny faint tracked-out caps — the voice
+   reserved for the name ABOVE a control, printed inside it. Stated explicitly:
+   a value reads as a value. */
+.mrow{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;width:100%;
+  font-size:12.5px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--text);
+  cursor:pointer;background:transparent;border:none;text-align:left;font-family:inherit}
+.mrow:hover{background:var(--hover)}
+.mrow input{width:14px;height:14px;min-width:0;accent-color:var(--green);flex:none}
+.mrow .n{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--faint);margin-left:auto}
+.mrow i{width:7px;height:7px;border-radius:50%;flex:none;margin-left:6px}
+.mrow i.critical,.mrow i.alarm{background:var(--red)}
+.mrow i.warn{background:var(--amber)}
+.mrow i.event{background:var(--faint)}
+.mfoot{display:flex;gap:6px;padding:8px 4px 2px;border-top:1px solid var(--line-soft);margin-top:6px}
+.mfoot button{flex:1;padding:6px 0;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font-size:11.5px;font-weight:700;font-family:inherit;cursor:pointer}
+.mfoot button:hover{border-color:var(--line-hi);color:var(--text);background:var(--hover)}
+
+/* ---------- plant picker ----------
+   A site is chosen on its state, not just on its name, so each option is a card
+   carrying whatever that page can say about it — live power on Home, capacity
+   and device count on Monitoring, open alarms on Alarms. The page supplies the
+   state line; this file only says how it is set. */
+.pplant{width:224px;padding:7px;display:flex;flex-direction:column;gap:5px;
+  max-height:min(60vh,320px);overflow-y:auto;scrollbar-width:thin}
+.pplant.wide{width:268px}
+.mpanel .pcard{display:flex;flex-direction:column;gap:3px;min-width:0;width:100%;
+  text-align:left;font-family:inherit;color:var(--text);cursor:pointer;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:7px 10px}
+.mpanel .pcard:hover{background:var(--hover);border-color:var(--line-hi)}
+/* the plant already on screen is marked by SURFACE, not by colour — a green
+   "current" would read as a health light rather than as a selection */
+.mpanel .pcard.on{background:var(--sel);border-color:var(--line-hi)}
+.mpanel .pcard .top,.mpanel .pcard .row{display:flex;align-items:baseline;gap:6px;min-width:0}
+.mpanel .pcard .nm{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--text);
+  line-height:1.15;white-space:nowrap}
+/* a dot, not the word: at this size CURRENT would take a third of the line */
+.mpanel .pcard.on .nm::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
+  margin-left:6px;vertical-align:middle;background:var(--line-hi)}
+.mpanel .pcard .cap{font-family:var(--mono);font-size:9.5px;font-weight:800;color:var(--text);white-space:nowrap}
+.mpanel .pcard .dv{margin-left:auto;font-size:8.5px;font-weight:800;letter-spacing:.05em;
+  color:var(--faint);white-space:nowrap}
+/* the open count is the other half of the decision, so it is stated on every
+   card — including the ones with nothing open, which is itself the answer */
+.mpanel .pcard .alm{display:inline-flex;align-items:center;gap:4px;
+  font-size:8.5px;font-weight:800;letter-spacing:.05em;white-space:nowrap}
+.mpanel .pcard .alm::before{content:"";width:5px;height:5px;border-radius:50%;flex:none}
+.mpanel .pcard .alm.hot{color:var(--red)}    .mpanel .pcard .alm.hot::before{background:var(--red)}
+.mpanel .pcard .alm.cold{color:var(--faint)} .mpanel .pcard .alm.cold::before{background:var(--green)}
+
+/* ---------- date + time window ----------
+   One field, two controls. A datetime-local input looks tidy until it is
+   opened: the browser answers it with a calendar AND two spinner columns in a
+   single popup, wide enough to land across the field beside it. A date input
+   and a time picker sharing one box open the two compact controls this portal
+   already uses, and the field still says one thing. */
+.dt{position:relative;display:flex;align-items:stretch;height:34px;background:var(--panel-2);
+  border:1px solid var(--line);border-radius:var(--r-sm)}
+.dt:hover{border-color:var(--line-hi)}
+.dt:focus-within{border-color:var(--line-hi);background-color:var(--hover)}
+.dt input[type=date]{height:100%;min-width:132px;border:none;background:transparent;color:var(--text);
+  font-family:var(--mono);font-weight:600;font-size:12.5px;padding:0 9px;outline:none;
+  cursor:pointer;user-select:none;-webkit-user-select:none}
+/* The field reads as a button, so it must not look like text to be dragged
+   over. user-select handles a real drag-selection, but the blue block on the
+   day is NOT that — it is the input's own segment highlight, drawn inside the
+   control's shadow DOM, which user-select cannot reach. Each segment has to be
+   told separately not to paint it, and again under :focus, where the UA sheet
+   would otherwise win. */
+.dt input[type=date]::selection{background:transparent}
+.dt input[type=date]::-webkit-datetime-edit-day-field,
+.dt input[type=date]::-webkit-datetime-edit-month-field,
+.dt input[type=date]::-webkit-datetime-edit-year-field,
+.dt input[type=date]::-webkit-datetime-edit-day-field:focus,
+.dt input[type=date]::-webkit-datetime-edit-month-field:focus,
+.dt input[type=date]::-webkit-datetime-edit-year-field:focus{
+  background:transparent;color:inherit;outline:none;padding:0}
+.dt input::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.55}
+.dt input:hover::-webkit-calendar-picker-indicator{opacity:1}
+:root[data-theme="dark"] .dt input::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.6}
+
+/* Hours and minutes are two SEPARATE dropdowns, never open together. The
+   browser's time popup lays its two columns out independently, so they drift
+   out of step as you scroll and open a ragged gap down the middle — and a
+   custom two-column panel only moves that problem indoors, since two lists side
+   by side have to be kept in step by hand. Two dropdowns that cannot both be
+   open have nothing to be out of step with: the alignment problem is removed
+   rather than solved. */
+.tpick{display:flex;align-items:center;gap:2px;padding:0 7px;border-left:1px solid var(--line)}
+.tbit{position:relative;height:26px;min-width:31px;padding:0 5px;border-radius:6px;
+  border:1px solid transparent;background:transparent;color:var(--text);cursor:pointer;
+  font-family:var(--mono);font-size:12.5px;font-weight:600}
+.tbit:hover{background:var(--hover);border-color:var(--line-hi)}
+.tbit.open{background:var(--sel);border-color:var(--line-hi)}
+.tsep{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--faint)}
+.tlist{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);z-index:80;
+  display:flex;flex-direction:column;gap:2px;width:62px;max-height:214px;
+  overflow-y:auto;scrollbar-width:thin;padding:5px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-md);
+  box-shadow:0 18px 44px -16px var(--shadow)}
+.tlist button{flex:none;height:26px;border:1px solid transparent;border-radius:6px;
+  background:transparent;color:var(--text);cursor:pointer;
+  font-family:var(--mono);font-size:12.5px;font-weight:600}
+.tlist button:hover{background:var(--hover)}
+.tlist button.on{background:var(--sel);border-color:var(--line-hi)}

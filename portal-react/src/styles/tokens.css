@@ -1,0 +1,98 @@
+/* Design tokens - the single source of colour for both pages.
+   Ported verbatim from monitoring.html. */
+:root{
+  /* ---- LIGHT · UTILITY BLUE (default) · enterprise solar-portal palette ---- */
+  --bg:#f1f4f8;            /* page background            */
+  --panel:#ffffff;         /* card surface               */
+  --panel-2:#f5f8fb;       /* nested surface / inputs    */
+  --line:#dde4ec;          /* card borders               */
+  --line-soft:#e9eef4;     /* gridlines, dividers        */
+  --line-hi:#b5c2d1;       /* hover / active borders     */
+  --text:#152234;          /* primary text               */
+  --muted:#5a6b7f;         /* secondary text             */
+  --faint:#8494a6;         /* tertiary text              */
+  --dim:#aab6c4;           /* dead readouts (offline)    */
+  --elev:#ffffff;          /* tooltips, toasts           */
+  --sel:#e8f0fb;           /* selected card surface      */
+  --hover:rgba(11,99,206,.07);
+  --hover-soft:rgba(11,99,206,.045);
+  --grid-v:rgba(21,34,52,.05);
+  --shadow:rgba(19,38,63,.16);
+  --scrim:rgba(13,29,48,.42);
+  --on-accent:#ffffff;     /* text on a filled accent    */
+  /* header bar — same surface family as the cards */
+  --topbar:var(--panel);
+  --topbar-fg:var(--text);
+  --topbar-fg-2:var(--muted);
+  --topbar-tab:var(--muted);
+  --topbar-hover:var(--hover);
+  --topbar-active:var(--green-soft);
+  --green:#12a150;         /* producing / healthy        */
+  --green-rgb:18,161,80;   /* same green, for rgba() glows */
+  --green-soft:rgba(18,161,80,.12);
+  --green-deep:#0b7a3c;
+  --blue:#1a73c8;          /* series 2                   */
+  --blue-soft:rgba(26,115,200,.12);
+  --red:#d92d20;           /* offline / alarms           */
+  --red-soft:rgba(217,45,32,.1);
+  --amber:#dc7a06;         /* yield / deviations         */
+  --amber-soft:rgba(220,122,6,.12);
+  --brand:#a87b0f;         /* wordmark · gold            */
+  --mono:ui-monospace,'SF Mono','Cascadia Code','Roboto Mono',Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
+  --r-lg:14px; --r-md:10px; --r-sm:8px;
+  /* One hue per charted device, spaced around the wheel and clear of the
+     alarm red. Tokens rather than literals in a component, because a colour
+     that carries on white does not carry on navy - the dark theme redefines
+     these and the charts follow without knowing a theme exists. */
+  --s1:#12a150; --s2:#1a73c8; --s3:#dc7a06; --s4:#8b5cf6;
+  --s5:#e11d74; --s6:#0e9aa7; --s7:#b45309; --s8:#4f46e5;
+  --s9:#0f766e; --s10:#a16207; --s11:#be185d; --s12:#0284c7;
+}
+/* ---- DARK · same hues on navy. Only the base tokens are redefined; the
+   header/brand tokens above reference them, so they follow automatically. ---- */
+:root[data-theme="dark"]{
+  /* deeper page + clearly lifted cards, so surfaces separate instead of merging */
+  --bg:#0a1017;
+  --panel:#151e2b;
+  --panel-2:#1d2836;
+  --line:#2c3a4c;
+  --line-soft:#232f3e;
+  --line-hi:#42556c;
+  --text:#eff4fa;
+  --muted:#a3b4c8;
+  --faint:#7a8ca1;
+  --dim:#4d5f74;
+  --elev:#1a2432;
+  --sel:#1e2c3d;
+  --hover:rgba(255,255,255,.07);
+  --hover-soft:rgba(255,255,255,.04);
+  --grid-v:rgba(255,255,255,.04);
+  --shadow:rgba(0,0,0,.65);
+  --scrim:rgba(3,8,14,.7);
+  --on-accent:#04121f;
+  /* Accents are LIFTED for navy, not copied from light.
+     They used to be identical in both themes on the theory that only the
+     surfaces changed — but a hue picked to carry on white is too dark to carry
+     on #151e2b, and the greens and reds sank into the card instead of reading
+     off it. These are the same hues moved up in lightness and eased back in
+     saturation, so the meaning is unchanged and the contrast is not.
+     The soft washes are correspondingly stronger: .12 of a dark ink over a dark
+     card is invisible, where over white it was a tint. */
+  --green:#2fd07a;
+  --green-rgb:47,208,122;
+  --green-soft:rgba(47,208,122,.16);
+  --green-deep:#7ee2ab;    /* headline numbers, must out-read the body */
+  --blue:#5aa2f0;
+  --blue-soft:rgba(90,162,240,.16);
+  --red:#ff6b6b;
+  --red-soft:rgba(255,107,107,.15);
+  --amber:#f0b249;
+  --amber-soft:rgba(240,178,73,.16);
+  --brand:#e3b23c;         /* wordmark · gold, lifted for navy */
+  /* the same twelve hues, lifted the same way */
+  --s1:#2fd07a; --s2:#5aa2f0; --s3:#f0b249; --s4:#a78bfa;
+  --s5:#f472b6; --s6:#22d3ee; --s7:#fbbf24; --s8:#818cf8;
+  --s9:#2dd4bf; --s10:#facc15; --s11:#fb7185; --s12:#38bdf8;
+}
