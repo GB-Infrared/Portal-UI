@@ -138,10 +138,10 @@ export default function Alarms() {
 
           <div className="ttools">
             {/* what is ticked here is what the table shows AND what the file
-                carries, which is why it is not called "columns" any more */}
+                carries — the panel head says so, since the button cannot */}
             <div className="msel-inline">
               <PanelSelect multiple head="Shown in the table and the export" id="a-cols"
-                           fixedLabel="FIELDS"
+                           fixedLabel="COLUMNS"
                            options={ALARM_COLUMNS.filter(c => !c.locked)
                              .map(c => ({ value: c.key, label: c.label }))}
                            value={cols} onChange={setCols} />
