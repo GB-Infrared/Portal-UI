@@ -1,0 +1,1555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ENEROPS OS · Analysis</title>
+<link rel="icon" href="logo/favicon.png">
+<style>
+
+:root{
+  /* ---- LIGHT · UTILITY BLUE (default) · enterprise solar-portal palette ---- */
+  --bg:#f1f4f8;            /* page background            */
+  --panel:#ffffff;         /* card surface               */
+  --panel-2:#f5f8fb;       /* nested surface / inputs    */
+  --line:#dde4ec;          /* card borders               */
+  --line-soft:#e9eef4;     /* gridlines, dividers        */
+  --line-hi:#b5c2d1;       /* hover / active borders     */
+  --text:#152234;          /* primary text               */
+  --muted:#5a6b7f;         /* secondary text             */
+  --faint:#8494a6;         /* tertiary text              */
+  --dim:#aab6c4;           /* dead readouts (offline)    */
+  --elev:#ffffff;          /* tooltips, toasts           */
+  --sel:#e8f0fb;           /* selected card surface      */
+  --hover:rgba(11,99,206,.07);
+  --hover-soft:rgba(11,99,206,.045);
+  --grid-v:rgba(21,34,52,.05);
+  --shadow:rgba(19,38,63,.16);
+  --on-accent:#ffffff;     /* text on a filled accent    */
+  --topbar:var(--panel);
+  --topbar-fg:var(--text);
+  --topbar-fg-2:var(--muted);
+  --topbar-tab:var(--muted);
+  --topbar-hover:var(--hover);
+  --topbar-active:var(--green-soft);
+  --green:#12a150;         /* producing / healthy        */
+  --green-rgb:18,161,80;
+  --green-soft:rgba(18,161,80,.12);
+  --green-deep:#0b7a3c;
+  --blue:#1a73c8;
+  --blue-soft:rgba(26,115,200,.12);
+  --red:#d92d20;           /* offline / alarms           */
+  --red-soft:rgba(217,45,32,.1);
+  --amber:#dc7a06;         /* yield / deviations         */
+  --amber-soft:rgba(220,122,6,.12);
+  --brand:#a87b0f;         /* wordmark · gold            */
+
+  /* ---------- series palette ----------
+     Four slots, assigned to devices in fixed order and never cycled: a device
+     keeps its colour when another is switched off, so the eye can carry a
+     reading from the chart to the legend to the table.
+
+     Validated, not eyeballed - all-pairs, on this page's own card surface:
+     CVD separation, normal-vision separation, chroma and contrast all clear.
+     RED IS NOT IN THE SET. On this portal red means offline/alarm, and a
+     device that happened to land in slot 4 would be wearing a fault colour
+     while producing normally. Amber is likewise the deviation colour, so the
+     series ochre is pulled well off it in both lightness and hue. */
+  --s1:#1a73c8; --s2:#c47a00; --s3:#00806a; --s4:#c569a0;
+
+  --mono:ui-monospace,'SF Mono','Cascadia Code','Roboto Mono',Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
+  --r-lg:14px; --r-md:10px; --r-sm:8px;
+}
+/* ---- DARK · same hues on navy. Only the base tokens are redefined; the
+   header/brand tokens above reference them, so they follow automatically. ---- */
+:root[data-theme="dark"]{
+  --bg:#0a1017;
+  --panel:#151e2b;
+  --panel-2:#1d2836;
+  --line:#2c3a4c;
+  --line-soft:#232f3e;
+  --line-hi:#42556c;
+  --text:#eff4fa;
+  --muted:#a3b4c8;
+  --faint:#7a8ca1;
+  --dim:#4d5f74;
+  --elev:#1a2432;
+  --sel:#1e2c3d;
+  --hover:rgba(255,255,255,.07);
+  --hover-soft:rgba(255,255,255,.04);
+  --grid-v:rgba(255,255,255,.04);
+  --shadow:rgba(0,0,0,.65);
+  --on-accent:#04121f;
+  --green:#2fd07a;
+  --green-rgb:47,208,122;
+  --green-soft:rgba(47,208,122,.16);
+  --green-deep:#7ee2ab;
+  --blue:#5aa2f0;
+  --blue-soft:rgba(90,162,240,.16);
+  --red:#ff6b6b;
+  --red-soft:rgba(255,107,107,.15);
+  --amber:#f0b249;
+  --amber-soft:rgba(240,178,73,.16);
+  --brand:#e3b23c;
+  /* Series are LIFTED for navy, same four hue families - a device does not
+     change identity when the theme flips, only how brightly it is drawn.
+     Re-validated against the dark card, not flipped automatically. */
+  --s1:#5aa2f0; --s2:#cf9227; --s3:#0b8168; --s4:#e290bd;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scrollbar-color:var(--line-hi) transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.45;
+     -webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:20px;
+  height:58px;padding:0 22px;border-bottom:1px solid var(--line);
+  background:var(--topbar);color:var(--topbar-fg)}
+.brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.brand .logo{height:34px;width:auto;display:block;flex:none}
+.brand .btext{display:flex;flex-direction:column;justify-content:center;gap:1px}
+.brand .word{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--brand);
+  letter-spacing:.2px;line-height:1.05}
+.brand .sub{font-size:9px;letter-spacing:.16em;color:var(--topbar-fg-2);text-transform:uppercase;
+  font-weight:600;line-height:1}
+@media (max-width:820px){ .brand .sub{display:none} }
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;padding:8px 13px;border-radius:9px;color:var(--topbar-tab);font-size:13.5px;font-weight:500;white-space:nowrap}
+.tab:hover{color:var(--topbar-fg);background:var(--topbar-hover)}
+.tab.active{color:var(--green);background:var(--topbar-active);font-weight:600}
+.topbar .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.clock{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--topbar-fg);letter-spacing:.02em}
+.refresh{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--topbar-fg-2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(var(--green-rgb),.55);
+  animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(var(--green-rgb),.5)}70%{box-shadow:0 0 0 8px rgba(var(--green-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--green-rgb),0)}}
+select{appearance:none;background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%238d99a6" stroke-width="1.6" stroke-linecap="round"/></svg>') no-repeat right 10px center;
+  border:1px solid var(--line);color:var(--text);border-radius:var(--r-sm);
+  padding:8px 28px 8px 11px;font-size:13px;font-family:inherit;outline:none}
+select:hover{border-color:var(--line-hi);background-color:var(--hover)}
+select:focus{border-color:var(--line-hi);background-color:var(--hover)}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;
+  background:transparent;border:1px solid transparent;color:var(--muted)}
+.iconbtn:hover{color:var(--text);background:var(--hover);border-color:var(--line)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--panel-2);
+  display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--text);
+  border:1px solid var(--line)}
+
+/* ---------- page shell ----------
+   One column, no rail. Analysis is driven entirely by the bar above it, and a
+   rail would take width from a chart whose whole job is a long time axis. */
+.wrap{max-width:2400px;margin:0 auto;padding:14px clamp(14px,1.5vw,28px) 34px;
+  display:flex;flex-direction:column;gap:14px}
+.toprow{max-width:2400px;margin:0 auto;padding:16px clamp(14px,1.5vw,28px) 0}
+
+/* ---------- filter bar ---------- */
+.filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:9px;padding:0 2px 2px;min-width:0}
+.field{position:relative;display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.field select,.field .input,.field input{height:34px;min-width:116px}
+.field select{padding-top:0;padding-bottom:0}
+/* Y1 and Y2 are each a PAIR - the category narrows the list the value is
+   picked from - so they are ruled together and read as one control, not four.
+   Without this the bar is eight equal boxes and nothing says which value
+   belongs to which category. */
+.pair{display:flex;align-items:flex-end;gap:6px;padding:0 9px 0 0;border-right:1px solid var(--line);margin-right:3px}
+.pair:last-of-type{border-right:none}
+.axtag{display:inline-flex;align-items:center;gap:5px}
+.axtag i{width:14px;height:0;border-top-width:2px;border-top-color:var(--muted);display:inline-block}
+.axtag i.solid{border-top-style:solid}
+.axtag i.dash{border-top-style:dashed}
+
+/* ---------- one window, two controls ----------
+   A datetime-local field looks tidy until it is opened: the browser answers it
+   with a calendar AND two spinner columns in a single popup, wide enough to
+   land across the field beside it. A date input and a time input sharing one
+   box open the two compact pickers this portal already uses elsewhere, and the
+   field still says one thing. Lifted from the alarms bar unchanged, so a
+   window is set the same way on both pages. */
+.dt{position:relative;display:flex;align-items:stretch;height:34px;background:var(--panel-2);
+  border:1px solid var(--line);border-radius:var(--r-sm)}
+.dt:hover{border-color:var(--line-hi)}
+.dt:focus-within{border-color:var(--line-hi);background-color:var(--hover)}
+.dt input{height:100%;border:none;background:transparent;color:var(--text);
+  font-family:var(--mono);font-weight:600;font-size:12.5px;padding:0 9px;outline:none}
+.dt input[type=date]{min-width:132px}
+.field input::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.55}
+.field input:hover::-webkit-calendar-picker-indicator{opacity:1}
+:root[data-theme="dark"] .field input::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.6}
+.dt input[type=date]{user-select:none;-webkit-user-select:none;cursor:pointer}
+.dt input[type=date]::selection{background:transparent}
+.dt input[type=date]::-webkit-datetime-edit-day-field,
+.dt input[type=date]::-webkit-datetime-edit-month-field,
+.dt input[type=date]::-webkit-datetime-edit-year-field{
+  background:transparent;color:inherit;outline:none;padding:0}
+.dt input[type=date]::-webkit-datetime-edit-day-field:focus,
+.dt input[type=date]::-webkit-datetime-edit-month-field:focus,
+.dt input[type=date]::-webkit-datetime-edit-year-field:focus{
+  background:transparent;color:inherit;outline:none}
+/* the window is invalid until it is a window - said on the control, not in a toast */
+.dt.bad{border-color:var(--red)}
+.dtwarn{font-size:10px;font-weight:700;color:var(--red);letter-spacing:.04em}
+
+/* ---------- the time half ----------
+   Hours and minutes are two separate dropdowns, not two columns of one panel:
+   two lists that are never open together cannot drift out of step with each
+   other. Same control as the alarms bar. */
+.tpick{display:flex;align-items:center;gap:2px;padding:0 7px;border-left:1px solid var(--line)}
+.tbit{position:relative;height:26px;min-width:31px;padding:0 5px;border-radius:6px;
+  border:1px solid transparent;background:transparent;color:var(--text);
+  font-family:var(--mono);font-size:12.5px;font-weight:600}
+.tbit:hover{background:var(--hover);border-color:var(--line-hi)}
+.tbit.open{background:var(--sel);border-color:var(--line-hi)}
+.tsep{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--faint)}
+.tlist{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);z-index:80;
+  display:flex;flex-direction:column;gap:2px;width:62px;max-height:214px;
+  overflow-y:auto;scrollbar-width:thin;padding:5px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-md);
+  box-shadow:0 18px 44px -16px var(--shadow)}
+.tlist[hidden]{display:none}
+.tlist button{flex:none;height:26px;border:1px solid transparent;border-radius:6px;
+  background:transparent;color:var(--text);
+  font-family:var(--mono);font-size:12.5px;font-weight:600}
+.tlist button:hover{background:var(--hover)}
+.tlist button.on{background:var(--sel);border-color:var(--line-hi)}
+
+/* ---------- dropdown panels (one idiom, four uses) ---------- */
+.msel{position:relative;display:flex}
+.mbtn{display:flex;align-items:center;width:100%;min-width:150px;height:34px;
+  padding:0 28px 0 11px;border-radius:var(--r-sm);border:1px solid var(--line);
+  color:var(--text);font-size:13px;font-weight:600;text-align:left;
+  background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%238d99a6" stroke-width="1.6" stroke-linecap="round"/></svg>') no-repeat right 10px center}
+.mbtn:hover,.msel.open .mbtn{border-color:var(--line-hi);background-color:var(--hover)}
+.mbtn .mlab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mbtn .mlab.any{color:var(--muted);font-weight:600}
+/* a value control that has nothing to offer yet says so instead of opening empty */
+.mbtn:disabled{opacity:.5;cursor:default}
+.mbtn:disabled:hover{border-color:var(--line);background-color:var(--panel-2)}
+.colpanel{position:absolute;top:calc(100% + 6px);left:0;z-index:80;width:236px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:8px;
+  max-height:min(60vh,460px);overflow-y:auto;scrollbar-width:thin}
+.colpanel[hidden]{display:none}
+.colhead{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);padding:4px 8px 8px}
+.colrow{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;
+  font-size:12.5px;font-weight:600;cursor:pointer;width:100%;background:transparent;
+  border:none;color:inherit;text-align:left}
+.colrow:hover{background:var(--hover)}
+.colrow input{width:14px;height:14px;accent-color:var(--green);flex:none}
+.colrow.locked{cursor:default;color:var(--muted)}
+.colrow.locked:hover{background:transparent}
+.colrow .req{margin-left:auto;font-size:8px;font-weight:800;letter-spacing:.09em;
+  color:var(--faint);background:var(--panel-2);border:1px solid var(--line);
+  padding:2px 6px;border-radius:5px}
+/* a device that does not report the chosen parameter is offered but marked -
+   ticking it is allowed, and the column it adds is honestly all dashes */
+.colrow .noda{margin-left:auto;font-size:8.5px;font-weight:800;letter-spacing:.08em;color:var(--faint)}
+.colrow .swatch{width:9px;height:9px;border-radius:3px;flex:none}
+.coldiv{height:1px;background:var(--line-soft);margin:6px 4px}
+.colfoot{display:flex;gap:6px;padding:8px 4px 2px;border-top:1px solid var(--line-soft);margin-top:6px}
+.colfoot button{flex:1;padding:6px 0;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font-size:11.5px;font-weight:700}
+.colfoot button:hover{border-color:var(--line-hi);color:var(--text);background:var(--hover)}
+.mpanel{width:214px;min-width:100%}
+/* The rows are <label>s inside a .field, so the filter bar's own label rule
+   reached them and set every option in tiny faint tracked-out caps - the voice
+   reserved for the name ABOVE a control, printed inside it. Stated back. */
+.mpanel .colrow{font-size:12.5px;font-weight:600;letter-spacing:0;
+  text-transform:none;color:var(--text)}
+.mpanel .colrow input{min-width:0}
+.unit{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--faint)}
+
+/* ---------- plant picker ---------- */
+.pplant{width:268px;padding:7px;display:flex;flex-direction:column;gap:5px;
+  max-height:min(60vh,320px);overflow-y:auto;scrollbar-width:thin}
+.pcard{display:flex;flex-direction:column;gap:3px;min-width:0;width:100%;
+  text-align:left;font-family:inherit;color:var(--text);
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:7px 10px}
+.pcard:hover{background:var(--hover);border-color:var(--line-hi)}
+.pcard.on{background:var(--sel);border-color:var(--line-hi)}
+.pcard .top,.pcard .row{display:flex;align-items:baseline;gap:6px;min-width:0}
+.pcard .nm{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--text);
+  line-height:1.15;white-space:nowrap}
+.pcard.on .nm::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
+  margin-left:6px;vertical-align:middle;background:var(--line-hi)}
+.pcard .ad{flex:1 1 0;min-width:0;text-align:right;font-size:9px;color:var(--faint);
+  line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard .cap{font-family:var(--mono);font-size:9.5px;font-weight:800;color:var(--text);white-space:nowrap}
+.pcard .dv{margin-left:auto;font-size:8.5px;font-weight:800;letter-spacing:.05em;
+  color:var(--faint);white-space:nowrap}
+
+/* ---------- card ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg)}
+.card .chead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:13px 16px 10px}
+.chead .title{font-size:14.5px;font-weight:700;white-space:nowrap;flex:none}
+.chead .tools{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* ---------- legend ----------
+   Identity is never colour alone: every chip carries the device name, and the
+   axis it reads is carried by the LINE STYLE drawn in the chip - solid for Y1,
+   dashed for Y2 - which is the same mark the chart draws. */
+.legend{display:flex;gap:7px;flex-wrap:wrap;min-width:0}
+.lg{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel-2);font-size:12px;cursor:pointer;user-select:none;white-space:nowrap;flex:none}
+.lg:hover{border-color:var(--line-hi)}
+.lg.off{opacity:.38}
+.lg i{width:16px;height:0;border-top-width:2.5px;display:inline-block;flex:none}
+.lg i.solid{border-top-style:solid}
+.lg i.dash{border-top-style:dashed}
+.lg .n{color:var(--text);font-weight:700;font-family:var(--mono);font-size:11.5px}
+.lg .p{color:var(--muted);font-weight:600;font-size:11px}
+
+/* ---------- chart ---------- */
+.chartwrap{position:relative;padding:4px 10px 14px}
+.chartwrap svg{width:100%;height:auto;display:block}
+.gl{stroke:var(--line-soft);stroke-width:1}
+.gl.v{stroke:var(--grid-v)}
+.axt{fill:var(--faint);font-size:10.5px;font-family:var(--mono)}
+.axtitle{fill:var(--muted);font-size:10.5px;font-family:var(--sans);font-weight:700;letter-spacing:.06em}
+#xh{stroke:var(--text)}
+.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;background:var(--elev);
+  border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-width:150px;
+  box-shadow:0 10px 26px -8px var(--shadow);z-index:5}
+.tip .tt{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--muted);margin-bottom:5px}
+.tip .tr{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);padding:2px 0}
+.tip .tr i{width:13px;height:0;border-top-width:2.5px;flex:none}
+.tip .tr i.solid{border-top-style:solid}
+.tip .tr i.dash{border-top-style:dashed}
+.tip .tr b{margin-left:auto;font-family:var(--mono);color:var(--text);font-weight:700}
+/* the state before a query is complete - the plot keeps its frame and says what
+   is missing, rather than collapsing to a bare box */
+.chartnote{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;color:var(--faint);font-family:var(--mono);font-size:12.5px;text-align:center;padding:0 20px}
+
+/* ---------- table ---------- */
+/* Cells are CENTRED. Numbers in a column read fastest right-aligned - the
+   decimal points line up and magnitude is visible without reading a digit -
+   so that is what these tables did. Centred is the house style now; the
+   mono face keeps the digits on a common width, which is what stops a
+   centred column of numbers from going ragged. */
+.ttools{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.tbtn{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;
+  letter-spacing:.04em;background:transparent;border:1px solid var(--line);color:var(--muted)}
+.tbtn:hover{color:var(--text);border-color:var(--line-hi);background:var(--hover)}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:520px}
+thead th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  padding:9px 16px;border-bottom:1px solid var(--line-soft);text-align:center;white-space:nowrap}
+thead .grp th{border-bottom:none;padding-bottom:2px;font-size:11.5px;color:var(--text);letter-spacing:.06em}
+/* the device name spans its parameter columns, so the pairing is structural */
+thead .grp th.dev{text-align:center;border-bottom:1px solid var(--line-soft)}
+thead th.ts, tbody td.ts{text-align:center}
+thead th.ph{color:var(--faint);font-weight:600}
+tbody td{padding:9px 16px;font-family:var(--mono);font-size:12.5px;font-weight:600;text-align:center;
+  border-bottom:1px solid var(--line-soft);color:var(--text);white-space:nowrap}
+tbody td.ts{color:var(--muted);font-weight:600}
+tbody td.nil{color:var(--faint)}
+tbody tr:hover{background:var(--hover-soft)}
+/* the y2 half of a device's pair is ruled off from the y1 half, so a wide table
+   does not read as one undifferentiated block of numbers */
+thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
+.empty-note{display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:12.5px;font-family:var(--mono)}
+.empty-note.tall{min-height:170px}
+.colpick{position:relative;display:inline-flex}
+
+/* ---------- pager ---------- */
+.tfoot{display:flex;align-items:center;gap:16px;padding:11px 16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.tfoot .sp{margin-left:auto}
+.pgbtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--muted)}
+.pgbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi)}
+.pgbtn:disabled{opacity:.35;cursor:default}
+.tfoot .range{font-family:var(--mono)}
+
+/* ---------- toasts ---------- */
+#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
+.toast{background:var(--elev);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:9px;
+  padding:10px 14px;font-size:12.5px;color:var(--text);box-shadow:0 12px 30px -8px var(--shadow);
+  animation:tin .18s ease-out}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@media (max-width:820px){
+  .topbar{gap:12px;padding:0 14px}
+  .wrap{padding:12px 14px 30px}
+  .toprow{padding:12px 14px 0}
+  .clock{display:none}
+  .pair{border-right:none;padding-right:0;margin-right:0}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+</style>
+<script>/* stored theme applied before first paint, so there is no flash */
+try{var _t=localStorage.getItem('enerops-theme');if(_t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}
+</script>
+</head>
+<body>
+
+<!-- ======================= TOP BAR ======================= -->
+<header class="topbar">
+  <div class="brand"><img class="logo" src="logo/logo-mark.png" alt="EnerOps Data Systems Pvt Ltd"><span class="btext"><span class="word">ENEROPS OS</span><span class="sub">SITE OVERVIEW</span></span></div>
+  <nav class="tabs">
+    <a class="tab" href="home.html">Home</a>
+    <a class="tab" href="monitoring.html">Monitoring</a>
+    <a class="tab" href="alarms.html">Alarms</a>
+    <a class="tab active" href="#">Analysis</a>
+    <a class="tab" href="kpi.html">KPI</a>
+  </nav>
+  <div class="right">
+    <span class="clock" id="clk">12:10:03 PM</span>
+    <div class="refresh"><span class="dot" id="livedot"></span>
+      <span>Refresh</span>
+      <select id="refresh-sel" style="padding:5px 26px 5px 9px;font-size:12px">
+        <option value="off" selected>Off</option>
+        <option value="300">5 min</option>
+        <option value="600">10 min</option>
+        <option value="900">15 min</option>
+      </select>
+    </div>
+    <button class="iconbtn" id="themebtn" onclick="toggleTheme()" title="Switch to dark theme"></button>
+    <div class="avatar">V</div>
+  </div>
+</header>
+
+<!-- ======================= FILTER BAR ======================= -->
+<!-- No APPLY. Every control here re-reads on change, so the chart and the table
+     are always showing what the bar says they are showing. A separate apply
+     step lets the two disagree - the selectors describe one query, the plot
+     still shows the last one confirmed - and a reader who trusts the bar then
+     reads the wrong curve. This is the same contract the monitoring and alarms
+     bars are built on, so a query is set the same way across the portal. -->
+<div class="toprow">
+  <div class="filters">
+    <div class="field"><label>Plant</label>
+      <div class="msel" id="pl-pick"></div>
+      <input type="hidden" id="pl-sel" value="Sangria">
+    </div>
+    <!-- Device is the ONE control that takes several values: analysis is
+         comparison, and "INV03 against INV06" is the question the page is for.
+         Everything else stays single - two categories or two units on one axis
+         would not be a reading. -->
+    <div class="field"><label>Device</label><div class="msel" id="m-dev"></div></div>
+
+    <div class="pair">
+      <div class="field"><label><span class="axtag"><i class="solid"></i>Y1 category</span></label>
+        <div class="msel" id="y1c-pick"></div>
+        <input type="hidden" id="y1c-sel" value="AC Power">
+      </div>
+      <div class="field"><label>Y1 value</label>
+        <div class="msel" id="y1v-pick"></div>
+        <input type="hidden" id="y1v-sel" value="P_AC">
+      </div>
+    </div>
+
+    <div class="pair">
+      <div class="field"><label><span class="axtag"><i class="dash"></i>Y2 category</span></label>
+        <div class="msel" id="y2c-pick"></div>
+        <input type="hidden" id="y2c-sel" value="Irradiance">
+      </div>
+      <div class="field"><label>Y2 value</label>
+        <div class="msel" id="y2v-pick"></div>
+        <input type="hidden" id="y2v-sel" value="POA">
+      </div>
+    </div>
+
+    <div class="field"><label>Start date time</label>
+      <div class="dt" id="dt-from">
+        <input type="date" id="f-from-d" value="2026-08-13" aria-label="Start date">
+        <div class="tpick" data-time="f-from-t"></div>
+        <input type="hidden" id="f-from-t" value="00:00">
+      </div>
+    </div>
+    <div class="field"><label>End date time</label>
+      <div class="dt" id="dt-to">
+        <input type="date" id="f-to-d" value="2026-08-14" aria-label="End date">
+        <div class="tpick" data-time="f-to-t"></div>
+        <input type="hidden" id="f-to-t" value="00:00">
+      </div>
+    </div>
+    <div class="field"><label>&nbsp;</label><span class="dtwarn" id="dtwarn" hidden>End must be after start</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ======================= ANALYSIS DATA ======================= -->
+  <div class="card">
+    <div class="chead">
+      <div class="title">Analysis Data</div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <!-- One plot, two scales: Y1 left, Y2 right. The lines are drawn the way
+         Monitoring draws its power curve - same weight, same joins, and the same
+         fill fading away underneath - so a curve read on one page is read the
+         same way on the other. -->
+    <div class="chartwrap" id="chartwrap">
+      <svg id="chart" viewBox="0 0 1300 340" xmlns="http://www.w3.org/2000/svg">
+        <defs id="gdefs"></defs>
+        <g id="axes"></g>
+        <g id="areas"></g>
+        <g id="series"></g>
+        <line id="xh" y1="14" y2="266" stroke-width="1" opacity="0"/>
+        <g id="dots"></g>
+      </svg>
+      <div class="tip" id="tip"></div>
+      <div class="chartnote" id="chartnote" hidden></div>
+    </div>
+  </div>
+
+  <!-- ======================= TABLE ======================= -->
+  <!-- Same shape as the monitoring history table: device names across the top,
+       the parameter each one reports beneath, time stamps down the side. The
+       column picker is the filter - what is ticked here is what the table shows
+       AND what the CSV carries. -->
+  <div class="card">
+    <div class="ttools">
+      <div class="colpick" id="colpick">
+        <button class="tbtn" id="colbtn" type="button" aria-expanded="false" onclick="colToggle(event)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 4.5v15M12 4.5v15M19 4.5v15"/></svg>COLUMNS</button>
+        <div class="colpanel" id="colpanel" hidden></div>
+      </div>
+      <button class="tbtn" type="button" onclick="exportCsv()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.2-4.2M12 15l4.2-4.2M4.5 20h15"/></svg>EXPORT CSV</button>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="tfoot">
+      <span>Rows per page</span>
+      <select id="per" style="padding:5px 26px 5px 9px;font-size:12px">
+        <option>25</option><option>50</option><option>75</option>
+        <option selected>100</option><option>150</option><option>200</option>
+      </select>
+      <span class="sp"></span>
+      <span class="range" id="range">0-0 of 0</span>
+      <button class="pgbtn" id="prev" type="button" onclick="pageBy(-1)">&lsaquo;</button>
+      <button class="pgbtn" id="next" type="button" onclick="pageBy(1)">&rsaquo;</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="toasts"></div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+
+/* ---------- toasts ---------- */
+window.T=function(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  $('toasts').appendChild(t);setTimeout(()=>t.remove(),2600);return false;
+};
+
+/* ---------- theme toggle ---------- */
+const ICO_MOON='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>';
+const ICO_SUN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>';
+function applyTheme(t){
+  const root=document.documentElement, b=$('themebtn');
+  if(t==='dark') root.setAttribute('data-theme','dark'); else root.removeAttribute('data-theme');
+  if(b){ b.innerHTML=(t==='dark')?ICO_SUN:ICO_MOON;
+         b.title=(t==='dark')?'Switch to light theme':'Switch to dark theme'; }
+  try{localStorage.setItem('enerops-theme',t);}catch(e){}
+}
+window.toggleTheme=function(){
+  const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  applyTheme(next);
+  /* the series colours are theme tokens read at draw time, so the plot has to
+     be redrawn for a device to keep its identity across the flip */
+  fitChart(true); drawChart(); renderLegend();
+  T(next==='dark'?'Dark theme':'Light theme');
+};
+applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light');
+
+/* ---------- simulated plant clock (anchored for demo) ---------- */
+const START_T=12+10/60+3/3600, t0=Date.now();
+const nowT=()=>START_T+(Date.now()-t0)/3600000;
+function fmtClock(t,withS){t=((t%24)+24)%24;let h=Math.floor(t),m=Math.floor((t-h)*60),s=Math.floor((t*3600)%60);
+  const ap=h<12?'AM':'PM';let hh=h%12;if(hh===0)hh=12;
+  return hh+':'+pad(m)+(withS?(':'+pad(s)):'')+' '+ap;}
+
+/* =======================================================================
+   PARAMETER CATALOGUE
+   Category narrows; value picks. The two dropdowns are one decision, so the
+   value list is rebuilt from the category rather than offering every tag on
+   the plant at once - which is what makes the pair worth having over a single
+   flat list of forty parameters.
+   ======================================================================= */
+const CATS=[
+  {k:'AC Power',      vals:[['P_AC','kW'],['S_AC','kVA'],['Q_AC','kVAR'],['COS_PHI','']]},
+  {k:'AC Electrical', vals:[['V_AC','V'],['I_AC','A'],['F_AC','Hz']]},
+  {k:'DC Input',      vals:[['P_DC','kW'],['V_DC','V'],['I_DC','A']]},
+  {k:'Energy',        vals:[['E_TODAY','kWh'],['E_TOTAL','kWh']]},
+  {k:'Temperature',   vals:[['T_INT','°C'],['T_MOD','°C'],['T_AMB','°C']]},
+  {k:'Irradiance',    vals:[['GHI','W/m²'],['POA','W/m²']]},
+  {k:'Performance',   vals:[['PR','%'],['CUF','%'],['SPEC_YIELD','kWh/kWp']]}
+];
+/* "None" is a real answer for the second axis: most analysis is one parameter
+   over time, and a second scale that is not wanted should be switchable off
+   rather than set to something harmless. */
+const NONE='— None —';
+const catOf=k=>CATS.filter(c=>c.k===k)[0];
+const unitOf=v=>{
+  for(const c of CATS) for(const p of c.vals) if(p[0]===v) return p[1];
+  return '';
+};
+const labelOf=v=>{const u=unitOf(v); return v+(u?' ('+u+')':'');};
+
+/* ---------- devices ----------
+   The same fleet the alarms page lists, so a device named in an alarm can be
+   looked up here under the same id. */
+const DEVICES=['INV01','INV02','INV03','INV04','INV05','INV06','INV07','MFM01','WMS01'];
+const KIND=id=>id.slice(0,3);        /* INV | MFM | WMS */
+/* Which parameters a device actually reports. A weather station has no power
+   factor and an inverter has no irradiance - asking for one returns null, which
+   prints as a dash rather than a zero. Nothing measured and zero measured are
+   different facts, and a chart that draws the first as the second is lying. */
+const REPORTS={
+  INV:['P_AC','S_AC','Q_AC','COS_PHI','V_AC','I_AC','F_AC','P_DC','V_DC','I_DC',
+       'E_TODAY','E_TOTAL','T_INT','PR','CUF','SPEC_YIELD'],
+  MFM:['P_AC','S_AC','Q_AC','COS_PHI','V_AC','I_AC','F_AC','E_TODAY','E_TOTAL'],
+  WMS:['T_MOD','T_AMB','GHI','POA']
+};
+const reports=(id,v)=>!!v&&REPORTS[KIND(id)].indexOf(v)>=0;
+
+const PLANTS=[
+  {id:'Sangria', addr:'2 DLP, Kikarwali Road Nathwana Sangria', ac:2500, dev:9},
+  {id:'Rioja',   addr:'Plot 14, Bikaner Road, Bikaner',         ac:1800, dev:7},
+  {id:'Mendoza', addr:'NH-52, Pokhran Road, Jaisalmer',         ac:3200, dev:12}
+];
+
+/* =======================================================================
+   TELEMETRY MODEL
+   Deterministic: the same device, parameter and instant always give the same
+   number, so a screenshot taken today still matches the page tomorrow and the
+   table cannot disagree with the chart it was drawn from.
+   ======================================================================= */
+const SUNRISE=6.2, SUNSET=19.35, SPAN=SUNSET-SUNRISE;
+const hash=(s)=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0)/4294967296;};
+const jit=(id,v,ms)=>hash(id+'|'+v+'|'+Math.round(ms/60000))-0.5;
+const bell=t=>(t<=SUNRISE||t>=SUNSET)?0:Math.sin(Math.PI*(t-SUNRISE)/SPAN);
+/* one day's weather, stable for a given date */
+const dayK=d=>{const s=Math.sin((d.getFullYear()*372+d.getMonth()*31+d.getDate())*12.9898)*43758.5453;
+  return 0.72+0.28*Math.abs(s-Math.floor(s));};
+/* a passing cloud, so two devices on the same site dip together and the page
+   has something worth comparing */
+const cloud=t=>(t>9.05&&t<9.5)?(.86+.07*Math.sin((t-9.05)*22)):1;
+/* each inverter carries its own capacity factor, fixed by its id */
+const devF=id=>KIND(id)==='INV'?(0.78+hash(id)*0.3):1;
+const RATED=350;                        /* kW per inverter, for PR and the gauge maths */
+
+function value(id,v,ms){
+  if(!reports(id,v)) return null;
+  const d=new Date(ms);
+  const t=d.getHours()+d.getMinutes()/60+d.getSeconds()/3600;
+  const k=dayK(d), b=bell(t)*k*cloud(t);
+  const n=jit(id,v,ms);
+  const f=devF(id);
+  const ghi=b*1010, poa=ghi*1.06;
+  const pac=Math.max(0,b*RATED*0.86*f+(b>0?n*3.2:0));
+  switch(v){
+    case 'P_AC':   return KIND(id)==='MFM'?pac*6.4:pac;
+    case 'S_AC':   return (KIND(id)==='MFM'?pac*6.4:pac)*1.002+Math.abs(n)*0.4;
+    case 'Q_AC':   return b>0?Math.abs(n)*2.4:0;
+    case 'COS_PHI':return b>0?0.997+n*0.004:0;
+    case 'V_AC':   return 415+n*2.6;
+    case 'I_AC':   return pac>0?pac*1000/(Math.sqrt(3)*415):0;
+    case 'F_AC':   return 49.98+n*0.06;
+    case 'P_DC':   return pac>0?pac/0.985:0;
+    case 'V_DC':   return b>0?622+n*9:0;
+    case 'I_DC':   return b>0?(pac/0.985)*1000/(622+n*9):0;
+    /* energy is an integral, not a sample: it only ever climbs, and it resets
+       at midnight. Integrated over the day so far rather than accumulated by
+       the page, so scrolling back to an earlier hour gives the same number. */
+    case 'E_TODAY':return dayEnergy(id,d,t);
+    case 'E_TOTAL':return 40000+hash(id)*22000+dayEnergy(id,d,t);
+    case 'T_INT':  return 26+b*34*f+n*1.1;
+    case 'T_AMB':  return 21+bell(t)*11*k+n*0.7;
+    case 'T_MOD':  return 21+bell(t)*11*k+poa/810*24+n*0.9;
+    case 'GHI':    return ghi;
+    case 'POA':    return poa;
+    case 'PR':     return b>0?78.5+n*3.4:0;
+    case 'CUF':    return b>0?21.5+n*2.2:0;
+    case 'SPEC_YIELD': return dayEnergy(id,d,t)/RATED;
+  }
+  return null;
+}
+/* kWh delivered since midnight, by 10-minute strips - enough resolution for a
+   curve that has to look like an integral of the power line above it */
+function dayEnergy(id,d,t){
+  const f=devF(id), s=KIND(id)==='MFM'?6.4:1, k=dayK(d);
+  let e=0;
+  for(let x=SUNRISE;x<t;x+=1/6) e+=Math.max(0,bell(x)*k*cloud(x))*RATED*0.86*f*s/6;
+  return e;
+}
+
+/* =======================================================================
+   THE QUERY
+   ======================================================================= */
+/* The page opens on the canonical solar question: two inverters' AC power
+   against the irradiance that drove it. The weather station is in the selection
+   because it is the only device that reports POA - without it the second axis
+   would open empty, and a control that appears broken on first load reads as a
+   broken control rather than as an honest "this device does not report that". */
+let SEL=['INV06','INV07','WMS01'];      /* chosen devices, in fleet order */
+let PAGE=0, PER=100;
+let OFF={};                             /* legend toggles, keyed device|axis */
+
+const y1=()=>$('y1v-sel').value;
+const y2=()=>$('y2c-sel').value===NONE?'':$('y2v-sel').value;
+
+/* the two ends of the window as epoch ms - null while they disagree */
+function winRange(){
+  const a=Date.parse($('f-from-d').value+'T'+($('f-from-t').value||'00:00')+':00');
+  const b=Date.parse($('f-to-d').value+'T'+($('f-to-t').value||'00:00')+':00');
+  return (isFinite(a)&&isFinite(b)&&b>a)?[a,b]:null;
+}
+/* ---------- resolution ----------
+   The window sets the step, not a control. A month at five-minute resolution is
+   nine thousand points of ink for a question nobody asked, and a six-hour window
+   at one point an hour is four points pretending to be a curve. The ladder is
+   climbed until the count fits. */
+const LADDER=[1,5,15,30,60,180,360,720,1440];       /* minutes */
+const MAXPTS=1100;
+function stepMin(span){
+  for(const m of LADDER) if(span/(m*60000)<=MAXPTS) return m;
+  return LADDER[LADDER.length-1];
+}
+
+/* the rows the query resolves to; every reading on the page comes from here, so
+   the chart and the table can never be drawn from different data */
+let ROWS=[], STEP=5;
+function buildRows(){
+  const w=winRange();
+  ROWS=[];
+  if(!w) return;
+  STEP=stepMin(w[1]-w[0]);
+  const ms=STEP*60000;
+  const a=y1(), b=y2();
+  for(let t=w[0];t<=w[1];t+=ms){
+    const r={t:t,v1:{},v2:{}};
+    SEL.forEach(function(id){
+      r.v1[id]=value(id,a,t);
+      if(b) r.v2[id]=value(id,b,t);
+    });
+    ROWS.push(r);
+  }
+}
+
+/* ---------- the stamp ----------
+   The monitoring table's format, unchanged: a reading is a point in TIME, not a
+   time of day. "12:05:02" reads fine while you are looking at one day and is
+   ambiguous the moment the window spans two - which of the thirty-one 12:05s is
+   this? Sortable YYYY-MM-DD, and a 24-hour clock so there is no AM/PM to lose. */
+function stamp(ms){
+  const d=new Date(ms);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+
+         ' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+}
+
+/* =======================================================================
+   CHART
+   ======================================================================= */
+/* Colour follows the DEVICE, assigned in fleet order and never cycled: a device
+   keeps its slot when another is switched off in the legend, so the survivors
+   are not repainted under the reader. Past four plotted devices there is no
+   fifth hue that stays apart from the other four for a colour-blind reader - so
+   there is no fifth line. The rest stay in the table, and the chart says so. */
+const SLOTS=['var(--s1)','var(--s2)','var(--s3)','var(--s4)'];
+const PLOTCAP=4;
+const plotted=()=>SEL.slice(0,PLOTCAP);
+const colorOf=id=>SLOTS[plotted().indexOf(id)]||'var(--dim)';
+
+let W=1300,H=340;
+const ML=58,MT=16,MB=40;
+/* the right gutter exists only to hold the Y2 scale. With one axis, or with the
+   two axes split onto their own panels, it is 58px of nothing between the last
+   reading and the card edge - so it is only reserved when it is used. */
+let MR=58;
+let PW=W-ML-MR, PH=H-MT-MB;
+
+/* ---------- the scale ----------
+   Four intervals of a round step, so every gridline is a number a reader can
+   hold and the five labels the axis draws land exactly on them.
+
+   The baseline is NOT always zero. Power falls to zero every night, so a zero
+   baseline is the honest frame for it - but grid frequency lives between 49.9
+   and 50.1, and forcing that onto a 0-50 axis draws a dead flat line at the top
+   and hides the only thing anyone opens the page to see. Zero is kept whenever
+   the data actually comes near it, and dropped when the reading is a narrow
+   band a long way above it. */
+function niceScale(mn,mx){
+  if(!isFinite(mn)||!isFinite(mx)) return [0,1];
+  /* a window with nothing but zeros in it - a night, or a device that was down
+     all day. Left to the general case this drew a 0 to 0.05 axis, which prints
+     five decimal gridlines under a flat line and reads as a precision instrument
+     measuring nothing. A plain 0-1 frame says the same thing without the theatre. */
+  if(mn===0&&mx===0) return [0,1];
+  if(mn>=0&&mn<=0.25*mx) mn=0;            /* the data reaches for zero - keep it */
+  if(mx<=0&&mn<0&&mx>=0.25*mn) mx=0;
+  if(mx===mn){ mx=mn+(Math.abs(mn)||1)*0.05; }
+  const raw=(mx-mn)/4;
+  const e=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/e;
+  const step=(f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*e;
+  return [Math.floor(mn/step)*step, Math.ceil(mx/step)*step];
+}
+
+/* the extent of one axis across the devices currently drawn */
+function extent(which){
+  let mx=-Infinity,mn=Infinity,any=false;
+  ROWS.forEach(function(r){
+    plotted().forEach(function(id){
+      if(OFF[id+'|'+which]) return;
+      const v=(which===1?r.v1:r.v2)[id];
+      if(v==null||!isFinite(v)) return;
+      any=true; if(v>mx)mx=v; if(v<mn)mn=v;
+    });
+  });
+  if(!any) return null;
+  return niceScale(mn,mx);
+}
+
+const fmtNum=v=>Math.abs(v)>=1000?v.toFixed(0):Math.abs(v)>=100?v.toFixed(1):v.toFixed(2);
+/* zero is written "0", not "0.00" - an axis that prints two decimals on its
+   baseline claims a precision the gridline does not have, and it is the widest
+   label on the scale for the least information */
+const axNum=v=>Math.abs(v)<1e-9?'0'
+              :Math.abs(v)>=1000?v.toLocaleString('en-US',{maximumFractionDigits:0})
+              :Math.abs(v)>=10?v.toFixed(0):v.toFixed(Math.abs(v)>=1?1:2);
+
+/* x is time across the window; both views share it */
+function xOf(t){
+  const w=winRange(); if(!w) return ML;
+  return ML+(t-w[0])/(w[1]-w[0])*PW;
+}
+/* ---------- time ticks ----------
+   Ticks land on ROUND times, not on equal fractions of the window. Cutting the
+   span into n equal parts put the labels on 03:25, 06:51, 10:17 - arithmetically
+   even and useless, because nobody reads a chart by asking what happened at
+   ten past. The step is taken off a ladder of intervals a clock actually has,
+   and the ticks are aligned to local midnight so a day boundary is always one
+   of them. */
+const TSTEPS=[6e4,12e4,3e5,6e5,9e5,18e5,                     /* 1,2,5,10,15,30 min */
+              36e5,72e5,108e5,216e5,432e5,                    /* 1,2,3,6,12 h       */
+              864e5,1728e5,6048e5,12096e5];                   /* 1,2,7,14 d         */
+function timeTicks(from,to,maxN){
+  const span=to-from;
+  let step=TSTEPS[TSTEPS.length-1];
+  for(const s of TSTEPS){ if(span/s<=maxN){ step=s; break; } }
+  /* months are not a fixed number of milliseconds, so a long window steps by
+     whole days off the ladder rather than pretending otherwise */
+  const d0=new Date(from); d0.setHours(0,0,0,0);
+  let t=d0.getTime();
+  while(t<from) t+=step;
+  const out=[];
+  for(;t<=to;t+=step) out.push(t);
+  return {ticks:out,step:step};
+}
+/* a label that says as much as the step needs and no more */
+function xLabel(ms,step){
+  const d=new Date(ms);
+  if(step<864e5) return pad(d.getHours())+':'+pad(d.getMinutes());
+  return pad(d.getDate())+'/'+pad(d.getMonth()+1);
+}
+
+function fitChart(force){
+  const box=$('chartwrap');
+  const cw=Math.max(320,Math.round(box.clientWidth-20));
+  const nh=Math.round(Math.min(620,Math.max(260,cw*0.26)));
+  /* the right gutter only exists when there is a second scale to print in it */
+  const nmr=y2()?58:20;
+  if(!force && cw===W && nh===H && nmr===MR) return false;
+  W=cw; H=nh; MR=nmr; PW=W-ML-MR; PH=H-MT-MB;
+  $('chart').setAttribute('viewBox','0 0 '+W+' '+H);
+  return true;
+}
+
+/* one plot band, read by both scales: Y1 down the left of it, Y2 down the right */
+function bands(){ return [{top:MT,h:PH,which:1}]; }
+
+function drawChart(){
+  const svg=$('chart'), b2=y2();
+  const w=winRange();
+  const note=$('chartnote');
+  $('axes').innerHTML=''; $('series').innerHTML=''; $('dots').innerHTML='';
+  $('areas').innerHTML=''; $('gdefs').innerHTML='';
+
+  if(!w){ note.hidden=false; note.textContent='Set a window: the end must be after the start.'; return; }
+  if(!SEL.length){ note.hidden=false; note.textContent='Pick one or more devices to plot.'; drawFrame(null,null); return; }
+  if(!ROWS.length){ note.hidden=false; note.textContent='No readings in this window.'; drawFrame(null,null); return; }
+
+  const e1=extent(1), e2=b2?extent(2):null;
+  if(!e1&&!e2){
+    note.hidden=false;
+    note.textContent='None of the selected devices reports '+
+      [y1(),b2].filter(Boolean).join(' or ')+'.';
+    drawFrame(null,null); return;
+  }
+  note.hidden=true;
+  drawFrame(e1,e2);
+  drawSeries(e1,e2);
+}
+
+/* ---------- axes ----------
+   Each axis is titled with the parameter AND its unit, and the title carries the
+   line style that reads it. On a two-scale plot the axis a line belongs to is
+   the one thing a reader cannot work out from the picture, so it is never left
+   to be worked out. */
+function drawFrame(e1,e2){
+  const w=winRange(); if(!w) return;
+  const band=bands()[0], b2=y2();
+  let s='';
+
+  if(e1||e2) for(let i=0;i<=4;i++){
+    const y=band.top+band.h*(i/4);
+    s+='<line class="gl" x1="'+ML+'" y1="'+y.toFixed(1)+'" x2="'+(W-MR)+'" y2="'+y.toFixed(1)+'"/>';
+  }
+
+  /* Y1 scale, left: the labels END at the gutter and run leftward, or they
+     would be printed across the plot they are labelling */
+  if(e1) s+=yScale(e1,band,'end',ML-8);
+  /* Y2 reads the same frame from the right-hand gutter */
+  if(b2&&e2) s+=yScale(e2,band,'start',W-MR+8);
+
+  const tt=timeTicks(w[0],w[1],Math.max(2,Math.min(14,Math.floor(PW/86))));
+  const yTop=band.top, yBot=band.top+band.h;
+  tt.ticks.forEach(function(t){
+    const x=xOf(t);
+    s+='<line class="gl v" x1="'+x.toFixed(1)+'" y1="'+yTop+'" x2="'+x.toFixed(1)+'" y2="'+yBot.toFixed(1)+'"/>';
+    s+='<text class="axt" x="'+x.toFixed(1)+'" y="'+(H-14)+'" text-anchor="middle">'+xLabel(t,tt.step)+'</text>';
+  });
+
+  /* the window, spelled out under the axis - the bar above can be scrolled off */
+  s+='<text class="axt" x="'+(W/2)+'" y="'+(H-1)+'" text-anchor="middle" style="letter-spacing:.08em">'+
+     stamp(w[0])+'  →  '+stamp(w[1])+'</text>';
+
+  /* axis titles: parameter, unit, and the stroke that reads it */
+  if(e1) s+=axTitle(labelOf(y1()),'Y1',band,14,false);
+  if(b2&&e2) s+=axTitle(labelOf(y2()),'Y2',band,W-13,true);
+  $('axes').innerHTML=s;
+}
+function yScale(e,band,anchor,x){
+  let s='';
+  for(let i=0;i<=4;i++){
+    const v=e[1]-(e[1]-e[0])*(i/4), y=band.top+band.h*(i/4);
+    s+='<text class="axt" x="'+x+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="'+anchor+'">'+axNum(v)+'</text>';
+  }
+  return s;
+}
+/* The title carries the parameter, its unit, AND the stroke that reads it. On a
+   two-scale plot the axis a line belongs to is the one thing the picture cannot
+   tell you, so it is never left to be worked out. */
+function axTitle(txt,which,band,x,dashed){
+  const cy=band.top+band.h/2;
+  return '<g transform="translate('+x+','+cy+') rotate(-90)">'+
+    '<text class="axtitle" x="0" y="0" text-anchor="middle">'+which+' · '+esc(txt)+
+      ' · '+(dashed?'dashed':'solid')+'</text></g>';
+}
+
+function drawSeries(e1,e2){
+  const band=bands()[0], b2=y2();
+  let s='', ar='', defs='';
+  plotted().forEach(function(id){
+    [1,2].forEach(function(which){
+      if(which===2&&!b2) return;
+      if(OFF[id+'|'+which]) return;
+      const e=which===1?e1:e2; if(!e) return;
+      const yOf=v=>band.top+(1-(v-e[0])/(e[1]-e[0]))*band.h;
+      /* a gap in the data is a GAP: the path is broken rather than bridged, so
+         a device that stopped reporting does not get a straight line drawn
+         across the hours it was silent - and the fill is broken with it, one
+         closed shape per run of readings rather than one shape over the hole */
+      let d='', pen=false, runs=[], run=null;
+      ROWS.forEach(function(r){
+        const v=(which===1?r.v1:r.v2)[id];
+        if(v==null||!isFinite(v)){ pen=false; run=null; return; }
+        const x=xOf(r.t), y=yOf(v);
+        d+=(pen?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';
+        if(!run){ run={x0:x, pts:''}; runs.push(run); }
+        run.pts+=(run.pts?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';
+        run.x1=x;
+        pen=true;
+      });
+      if(!d) return;
+      const col=colorOf(id), gid='ar-'+id+'-'+which;
+      /* The fill Monitoring puts under its power curve, per device colour: it
+         fades to nothing at the baseline, so four series can overlap without the
+         plot turning into a block of paint. */
+      defs+='<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'+
+        '<stop offset="0" stop-color="'+col+'" stop-opacity="'+(which===1?'.26':'.16')+'"/>'+
+        '<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient>';
+      const base=(band.top+band.h).toFixed(1);
+      runs.forEach(function(r){
+        if(r.x1===r.x0) return;                 /* a single point has no area */
+        ar+='<path d="'+r.pts.trim()+' L'+r.x1.toFixed(1)+' '+base+' L'+r.x0.toFixed(1)+' '+base+
+            ' Z" fill="url(#'+gid+')"/>';
+      });
+      s+='<path d="'+d.trim()+'" fill="none" stroke="'+col+'" stroke-width="2" '+
+         'stroke-linejoin="round" stroke-linecap="round"'+
+         (which===2?' stroke-dasharray="6 4"':'')+'/>';
+    });
+  });
+  $('gdefs').innerHTML=defs;
+  $('areas').innerHTML=ar;
+  $('series').innerHTML=s;
+}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ---------- legend ----------
+   Present whenever anything is plotted, and every chip names its device and its
+   parameter - identity never rests on colour alone. Clicking one drops that
+   line; the others keep their colours, because the colour belongs to the device
+   and not to its position in what is left. */
+function renderLegend(){
+  const b2=y2(), out=[];
+  plotted().forEach(function(id){
+    [1,2].forEach(function(which){
+      if(which===2&&!b2) return;
+      const p=which===1?y1():y2();
+      /* A device is only paired with a parameter it actually reports. Listing
+         "INV06 POA" greyed out was meant to be honest about the gap, but it reads
+         as the inverter having an irradiance channel that is merely offline - and
+         with two categories chosen the strip fills with those phantom pairs
+         faster than with the real ones. What a device cannot measure is not a
+         series that is switched off; it is not a series. */
+      if(!reports(id,p)) return;
+      const off=!!OFF[id+'|'+which];
+      out.push('<span class="lg'+(off?' off':'')+'" '+
+        'onclick="legToggle(\''+id+'\','+which+')">'+
+        '<i class="'+(which===1?'solid':'dash')+'" style="border-top-color:'+colorOf(id)+'"></i>'+
+        '<span class="n">'+id+'</span><span class="p">'+esc(p)+'</span></span>');
+    });
+  });
+  if(SEL.length>PLOTCAP)
+    out.push('<span class="lg" style="cursor:default" title="Colour cannot keep more than four series apart for a colour-blind reader. The rest are in the table below.">'+
+      '<span class="p">+'+(SEL.length-PLOTCAP)+' more in table</span></span>');
+  $('legend').innerHTML=out.join('');
+}
+window.legToggle=function(id,which){
+  const k=id+'|'+which;
+  OFF[k]=!OFF[k];
+  renderLegend(); drawChart();
+};
+
+/* ---------- hover: crosshair + tooltip ---------- */
+const tip=$('tip'), xh=$('xh'), wrapEl=$('chartwrap');
+$('chart').addEventListener('mousemove',function(e){
+  const svg=$('chart'), r=svg.getBoundingClientRect();
+  const vx=(e.clientX-r.left)/r.width*W, vy=(e.clientY-r.top)/r.height*H;
+  if(!ROWS.length||vx<ML||vx>W-MR||vy<MT||vy>MT+PH){ hideTip(); return; }
+  const w=winRange(); if(!w){ hideTip(); return; }
+  /* snap to a sampled instant: the value between two samples was never measured */
+  const frac=(vx-ML)/PW;
+  let i=Math.round(frac*(ROWS.length-1));
+  i=Math.max(0,Math.min(ROWS.length-1,i));
+  const row=ROWS[i], x=xOf(row.t);
+  const b2=y2();
+
+  let html='', n=0;
+  plotted().forEach(function(id){
+    [1,2].forEach(function(which){
+      if(which===2&&!b2) return;
+      if(OFF[id+'|'+which]) return;
+      const v=(which===1?row.v1:row.v2)[id];
+      if(v==null||!isFinite(v)) return;
+      const p=which===1?y1():y2();
+      html+='<div class="tr"><i class="'+(which===1?'solid':'dash')+'" style="border-top-color:'+colorOf(id)+'"></i>'+
+            id+' <span style="opacity:.7">'+esc(p)+'</span><b>'+fmtNum(v)+(unitOf(p)?' '+unitOf(p):'')+'</b></div>';
+      n++;
+    });
+  });
+  if(!n){ hideTip(); return; }
+
+  xh.setAttribute('x1',x); xh.setAttribute('x2',x);
+  xh.setAttribute('y1',MT); xh.setAttribute('y2',MT+PH);
+  xh.style.opacity=.25;
+  tip.innerHTML='<div class="tt">'+stamp(row.t)+'</div>'+html;
+  const wr=wrapEl.getBoundingClientRect();
+  let lx=(x/W)*r.width+(r.left-wr.left)+14;
+  if(lx+190>wr.width) lx-=214;
+  tip.style.left=Math.max(4,lx)+'px';
+  tip.style.top=Math.max(6,(e.clientY-wr.top)-18)+'px';
+  tip.style.opacity=1;
+});
+$('chart').addEventListener('mouseleave',hideTip);
+function hideTip(){ tip.style.opacity=0; xh.style.opacity=0; }
+
+/* =======================================================================
+   TABLE  ·  the monitoring history layout
+   Device names across the top, the parameter each one reports beneath, time
+   stamps down the side. With a second axis chosen each device spans two
+   columns - Y1 then Y2 - so the pairing stays structural rather than being
+   spelled out in a column name.
+   ======================================================================= */
+let COLS=[];                            /* devices shown in the table */
+const PH_COLS=3;
+
+function syncCols(){
+  /* a device dropped from the query cannot stay a column; one added arrives
+     shown, because ticking it in the bar is already the request to see it */
+  COLS=COLS.filter(id=>SEL.indexOf(id)>=0);
+  SEL.forEach(id=>{ if(COLS.indexOf(id)<0) COLS.push(id); });
+  COLS.sort((a,b)=>DEVICES.indexOf(a)-DEVICES.indexOf(b));
+}
+
+/* The table is the chart's data, so it carries the same pairs the chart draws and
+   no others: a device gets a column for each parameter IT reports, which is one
+   for an inverter asked for power and irradiance, one for the weather station,
+   and none at all for a device that reports neither. Columns of dashes were a
+   truthful answer to a question nobody asked - "what would POA be on INV06" -
+   and they cost half the table's width to say "not applicable". */
+function plan(){
+  const b2=y2(), out=[];
+  COLS.forEach(function(id){
+    const cells=[];
+    if(reports(id,y1())) cells.push({which:1,p:y1()});
+    if(b2&&reports(id,y2())) cells.push({which:2,p:y2()});
+    if(cells.length) out.push({id:id,cells:cells});
+  });
+  return out;
+}
+
+function renderTable(){
+  const cols=plan();
+  const blank=!cols.length||!ROWS.length;
+  const ph=n=>Array.from({length:PH_COLS},()=>'<th class="ph">'+n+'</th>').join('');
+
+  $('thead').innerHTML=
+    '<tr class="grp"><th class="ts" rowspan="2" style="vertical-align:bottom;border-bottom:1px solid var(--line-soft)">Time Stamp</th>'+
+    (blank?ph('Device Name')
+          :cols.map(d=>'<th class="dev sep" colspan="'+d.cells.length+'">'+d.id+'</th>').join(''))+
+    '</tr><tr>'+
+    (blank?ph('Variable Name')
+          :cols.map(d=>d.cells.map((c,i)=>'<th'+(i?'':' class="sep"')+'>'+esc(labelOf(c.p))+'</th>').join('')).join(''))+
+    '</tr>';
+
+  if(blank){
+    $('tbody').innerHTML='<tr><td colspan="'+(PH_COLS+1)+'"><div class="empty-note tall">'+
+      (!ROWS.length?'No data':!COLS.length?'No columns selected'
+        :'None of these devices reports '+[y1(),y2()].filter(Boolean).join(' or '))+
+      '</div></td></tr>';
+    $('range').textContent='0-0 of 0';
+    $('prev').disabled=true; $('next').disabled=true;
+    return;
+  }
+
+  const pages=Math.max(1,Math.ceil(ROWS.length/PER));
+  if(PAGE>=pages) PAGE=pages-1;
+  if(PAGE<0) PAGE=0;
+  const from=PAGE*PER, slice=ROWS.slice(from,from+PER);
+
+  $('tbody').innerHTML=slice.map(function(r){
+    return '<tr><td class="ts">'+stamp(r.t)+'</td>'+
+      cols.map(d=>d.cells.map(function(c,i){
+        const v=(c.which===1?r.v1:r.v2)[d.id];
+        const nil=(v==null||!isFinite(v));
+        const cl=[i?'':'sep',nil?'nil':''].filter(Boolean).join(' ');
+        return '<td'+(cl?' class="'+cl+'"':'')+'>'+(nil?'—':fmtNum(v))+'</td>';
+      }).join('')).join('')+'</tr>';
+  }).join('');
+
+  $('range').textContent=(from+1)+'-'+Math.min(from+PER,ROWS.length)+' of '+ROWS.length;
+  $('prev').disabled=PAGE<=0;
+  $('next').disabled=from+PER>=ROWS.length;
+}
+window.pageBy=function(d){ PAGE=Math.max(0,PAGE+d); renderTable(); };
+$('per').addEventListener('change',function(){ PER=parseInt(this.value,10); PAGE=0; renderTable(); });
+
+/* ---------- column picker ---------- */
+function renderColPanel(){
+  $('colpanel').innerHTML=
+    '<div class="colhead">Shown in the table and the export</div>'+
+    '<label class="colrow locked"><input type="checkbox" checked disabled>Time Stamp'+
+      '<span class="req">REQUIRED</span></label>'+
+    '<div class="coldiv"></div>'+
+    (SEL.length?SEL.map(function(id){
+      const on=COLS.indexOf(id)>=0;
+      const has=reports(id,y1())||(y2()&&reports(id,y2()));
+      return '<label class="colrow"><input type="checkbox"'+(on?' checked':'')+
+        ' onchange="colSet(\''+id+'\',this.checked)">'+
+        '<span class="swatch" style="background:'+colorOf(id)+'"></span>'+id+
+        (has?'':'<span class="noda">NO DATA</span>')+'</label>';
+    }).join('')
+    :'<div class="colhead" style="padding:8px">No devices selected in the bar above</div>')+
+    '<div class="colfoot">'+
+      '<button type="button" onclick="colAll(1)">All</button>'+
+      '<button type="button" onclick="colAll(0)">None</button></div>';
+}
+window.colToggle=function(ev){
+  ev.stopPropagation();
+  const p=$('colpanel'), open=p.hidden;
+  if(open) renderColPanel();
+  p.hidden=!open;
+  $('colbtn').setAttribute('aria-expanded',open?'true':'false');
+};
+function colClose(){ $('colpanel').hidden=true; $('colbtn').setAttribute('aria-expanded','false'); }
+window.colSet=function(id,on){
+  const i=COLS.indexOf(id);
+  if(on&&i<0) COLS.push(id); else if(!on&&i>=0) COLS.splice(i,1);
+  COLS.sort((a,b)=>DEVICES.indexOf(a)-DEVICES.indexOf(b));
+  renderTable();
+};
+window.colAll=function(on){ COLS=on?SEL.slice():[]; renderColPanel(); renderTable(); };
+document.addEventListener('click',function(e){ if(!$('colpick').contains(e.target)) colClose(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') colClose(); });
+
+/* ---------- export ----------
+   The file carries the same two header rows the table shows, for EVERY row the
+   query resolves to - not just the page on screen. A real file, not a toast, so
+   the choice can actually be checked. */
+window.exportCsv=function(){
+  /* the same plan the table is drawn from, so the file and the page cannot
+     disagree about which device reports what */
+  const cols=plan(), q=s=>/[",\r\n]/.test(s)?'"'+String(s).replace(/"/g,'""')+'"':String(s);
+  const devRow=[''].concat(cols.map(d=>d.cells.map(()=>d.id)).flat()).map(q).join(',');
+  const varRow=['Time Stamp'].concat(cols.map(d=>d.cells.map(c=>labelOf(c.p))).flat()).map(q).join(',');
+  const body=ROWS.map(function(r){
+    const cells=[stamp(r.t)];
+    cols.forEach(function(d){
+      d.cells.forEach(function(c){
+        const v=(c.which===1?r.v1:r.v2)[d.id];
+        cells.push((v==null||!isFinite(v))?'':fmtNum(v));
+      });
+    });
+    return cells.map(q).join(',');
+  });
+  const csv=[devRow,varRow].concat(body).join('\r\n');
+  /* leading BOM: without it Excel reads the file in the system codepage and any
+     non-ASCII in a unit - the ° in °C, the ² in W/m² - comes out as mojibake */
+  const url=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  const a=document.createElement('a');
+  /* named for the window it covers, so two exports an hour apart do not
+     overwrite each other in the downloads folder */
+  a.href=url; a.download='Analysis_'+$('f-from-d').value+'_'+$('f-to-d').value+'.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),0);
+  T('Exported '+body.length+' rows · '+cols.length+' device'+(cols.length===1?'':'s'));
+};
+
+/* =======================================================================
+   THE BAR APPLIES ITSELF
+   ======================================================================= */
+function applyQuery(msg){
+  const w=winRange();
+  $('dt-from').classList.toggle('bad',!w);
+  $('dt-to').classList.toggle('bad',!w);
+  $('dtwarn').hidden=!!w;
+  buildRows(); syncCols();
+  PAGE=0;
+  renderLegend(); fitChart(true); drawChart(); renderTable();
+  if(msg) T(msg);
+}
+
+/* one panel idiom on the bar, and only one of them is ever open */
+const PICKS=[];
+function pickClose(except){ PICKS.forEach(function(p){ if(p!==except) p.close(); }); }
+document.addEventListener('click',function(){ pickClose(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') pickClose(); });
+
+/* ---------- single-choice dropdown (radio rows) ---------- */
+function singleSelect(o){
+  const el=$(o.value), mount=$(o.mount);
+  const btn=document.createElement('button');
+  btn.type='button'; btn.className='mbtn'; btn.setAttribute('aria-expanded','false');
+  const lab=document.createElement('span'); lab.className='mlab'; btn.appendChild(lab);
+  const pan=document.createElement('div'); pan.className='colpanel mpanel'; pan.hidden=true;
+  mount.appendChild(btn); mount.appendChild(pan);
+
+  const api={
+    close:function(){ if(!pan.hidden) open(false); },
+    set:function(v){ el.value=v; paint(); },
+    /* the value list is rebuilt when its category changes - that is the whole
+       point of the pair */
+    options:function(list,keep){
+      o.options=list;
+      if(list.indexOf(el.value)<0) el.value=keep&&list.length?list[0]:(list[0]||'');
+      paint();
+    }
+  };
+  function paint(){
+    const empty=!o.options.length;
+    btn.disabled=empty;
+    lab.textContent=empty?'—':(o.render?o.render(el.value):el.value);
+    lab.className='mlab'+(empty?' any':'');
+  }
+  function draw(){
+    pan.innerHTML='<div class="colhead">'+o.head+'</div>'+
+      o.options.map(function(v){
+        return '<label class="colrow"><input type="radio" name="'+o.value+'-r" value="'+esc(v)+'"'+
+          (v===el.value?' checked':'')+'>'+esc(o.render?o.render(v):v)+
+          (o.unit&&unitOf(v)?'<span class="unit">'+esc(unitOf(v))+'</span>':'')+'</label>';
+      }).join('');
+  }
+  function open(on){
+    if(on){ pickClose(api); draw(); }
+    pan.hidden=!on; mount.classList.toggle('open',on);
+    btn.setAttribute('aria-expanded',on?'true':'false');
+  }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); if(!btn.disabled) open(pan.hidden); });
+  pan.addEventListener('click',function(e){ e.stopPropagation(); });
+  pan.addEventListener('change',function(e){
+    const r=e.target; if(r.type!=='radio') return;
+    el.value=r.value; paint();
+    open(false);                        /* one choice, so the panel is done */
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  PICKS.push(api); paint();
+  return api;
+}
+
+/* ---------- Y1 / Y2 pairs ---------- */
+const Y1C=singleSelect({mount:'y1c-pick',value:'y1c-sel',head:'Y1 category',options:CATS.map(c=>c.k)});
+const Y1V=singleSelect({mount:'y1v-pick',value:'y1v-sel',head:'Y1 value',unit:1,
+  options:catOf('AC Power').vals.map(v=>v[0])});
+/* Y2 offers None first: a second scale you did not ask for is a second scale
+   you have to discount while reading */
+const Y2C=singleSelect({mount:'y2c-pick',value:'y2c-sel',head:'Y2 category',options:[NONE].concat(CATS.map(c=>c.k))});
+const Y2V=singleSelect({mount:'y2v-pick',value:'y2v-sel',head:'Y2 value',unit:1,
+  options:catOf('Irradiance').vals.map(v=>v[0])});
+
+$('y1c-sel').addEventListener('change',function(){
+  Y1V.options(catOf(this.value).vals.map(v=>v[0]),true);
+  applyQuery('Y1 · '+this.value+' · '+y1());
+});
+$('y2c-sel').addEventListener('change',function(){
+  if(this.value===NONE){ Y2V.options([],false); applyQuery('Y2 off · one scale'); return; }
+  Y2V.options(catOf(this.value).vals.map(v=>v[0]),true);
+  applyQuery('Y2 · '+this.value+' · '+y2());
+});
+$('y1v-sel').addEventListener('change',function(){ applyQuery('Y1 · '+labelOf(this.value)); });
+$('y2v-sel').addEventListener('change',function(){ applyQuery('Y2 · '+labelOf(this.value)); });
+
+/* ---------- device multi-select ----------
+   The column picker's panel with the fleet in it - one idiom on the page for
+   "tick several", not two. */
+(function(){
+  const mount=$('m-dev');
+  const btn=document.createElement('button');
+  btn.type='button'; btn.className='mbtn'; btn.setAttribute('aria-expanded','false');
+  const lab=document.createElement('span'); lab.className='mlab'; btn.appendChild(lab);
+  const pan=document.createElement('div'); pan.className='colpanel mpanel'; pan.hidden=true;
+  mount.appendChild(btn); mount.appendChild(pan);
+
+  function label(){
+    lab.className='mlab'+(SEL.length?'':' any');
+    lab.textContent=!SEL.length?'Select devices'
+      :SEL.length===1?SEL[0]
+      :SEL.length+' selected';
+  }
+  function draw(){
+    pan.innerHTML='<div class="colhead">Devices · plotted in fleet order</div>'+
+      DEVICES.map(function(id){
+        const on=SEL.indexOf(id)>=0;
+        const i=plotted().indexOf(id);
+        return '<label class="colrow"><input type="checkbox" value="'+id+'"'+(on?' checked':'')+'>'+
+          (i>=0?'<span class="swatch" style="background:'+SLOTS[i]+'"></span>':
+                '<span class="swatch" style="background:transparent"></span>')+id+
+          (on&&i<0?'<span class="noda">TABLE ONLY</span>':'')+'</label>';
+      }).join('')+
+      '<div class="colfoot"><button type="button" value="all">All</button>'+
+      '<button type="button" value="none">None</button></div>';
+  }
+  const api={close:function(){ if(!pan.hidden) open(false); }};
+  function open(on){
+    if(on){ pickClose(api); draw(); }
+    pan.hidden=!on; mount.classList.toggle('open',on);
+    btn.setAttribute('aria-expanded',on?'true':'false');
+  }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); open(pan.hidden); });
+  pan.addEventListener('click',function(e){
+    e.stopPropagation();
+    const b=e.target.closest('.colfoot button'); if(!b) return;
+    SEL=b.value==='all'?DEVICES.slice():[];
+    draw(); label(); applyQuery();
+  });
+  pan.addEventListener('change',function(e){
+    const cb=e.target; if(cb.type!=='checkbox') return;
+    const i=SEL.indexOf(cb.value);
+    if(cb.checked&&i<0) SEL.push(cb.value); else if(!cb.checked&&i>=0) SEL.splice(i,1);
+    /* fleet order, always - so "3 selected" expands the same way every time and
+       the colour slots do not shuffle with the order they were ticked in */
+    SEL.sort((a,b)=>DEVICES.indexOf(a)-DEVICES.indexOf(b));
+    draw(); label(); applyQuery();
+  });
+  PICKS.push(api); label();
+})();
+
+/* ---------- plant picker ---------- */
+(function(){
+  const el=$('pl-sel'), mount=$('pl-pick');
+  const btn=document.createElement('button');
+  btn.type='button'; btn.className='mbtn'; btn.setAttribute('aria-expanded','false');
+  const lab=document.createElement('span'); lab.className='mlab'; btn.appendChild(lab);
+  const pan=document.createElement('div'); pan.className='colpanel pplant'; pan.hidden=true;
+  mount.appendChild(btn); mount.appendChild(pan);
+  lab.textContent=el.value;
+  const nfi=v=>v.toLocaleString('en-US');
+  function draw(){
+    pan.innerHTML=PLANTS.map(function(p){
+      const on=p.id===el.value;
+      return '<button type="button" class="pcard'+(on?' on':'')+'" value="'+p.id+'"'+
+        ' aria-current="'+(on?'true':'false')+'" title="'+p.id+' · '+p.addr+'">'+
+        '<span class="top"><span class="nm">'+p.id+'</span>'+
+          '<span class="ad">'+p.addr+'</span></span>'+
+        '<span class="row"><span class="cap">'+nfi(p.ac)+' kW AC</span>'+
+          '<span class="dv">'+p.dev+' DEVICES</span></span></button>';
+    }).join('');
+  }
+  const api={close:function(){ if(!pan.hidden) open(false); }};
+  function open(on){
+    if(on){ pickClose(api); draw(); }
+    pan.hidden=!on; mount.classList.toggle('open',on);
+    btn.setAttribute('aria-expanded',on?'true':'false');
+  }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); open(pan.hidden); });
+  pan.addEventListener('click',function(e){
+    e.stopPropagation();
+    const b=e.target.closest('.pcard'); if(!b) return;
+    el.value=b.value; lab.textContent=b.value;
+    open(false);
+    applyQuery(b.value);
+  });
+  PICKS.push(api);
+})();
+
+/* ---------- time dropdowns ----------
+   The hidden input is the value: everything else on the page asks the field for
+   "HH:MM" and gets it, exactly as it did when this was a time input, so the
+   query wiring never learns that the control changed. */
+function wireTimePicks(){
+  document.querySelectorAll('.tpick').forEach(function(box){
+    const el=$(box.dataset.time);
+    const bits={};
+    function parts(){
+      const m=/^(\d{1,2}):(\d{2})/.exec(el.value||'');
+      return m?[+m[1],+m[2]]:[0,0];
+    }
+    function bit(k,n){
+      const b=document.createElement('button');
+      b.type='button'; b.className='tbit'; b.dataset.part=k;
+      b.setAttribute('aria-label',k==='h'?'Hour':'Minute');
+      const list=document.createElement('div'); list.className='tlist'; list.hidden=true;
+      b.appendChild(list); box.appendChild(b);
+      bits[k]={b:b,list:list,n:n};
+      const api={close:function(){ if(!list.hidden){ list.hidden=true; b.classList.remove('open'); } }};
+      b.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(!list.hidden){ api.close(); return; }
+        pickClose(api);
+        const now=parts()[k==='h'?0:1];
+        let h='';
+        for(let i=0;i<n;i++) h+='<button type="button" value="'+i+'"'+(i===now?' class="on"':'')+'>'+pad(i)+'</button>';
+        list.innerHTML=h; list.hidden=false; b.classList.add('open');
+        const on=list.querySelector('button.on');
+        /* snapped to whole rows: a list resting part way into one reads as a
+           misprint even when nothing is beside it to be out of step with */
+        if(on){
+          const rows=list.querySelectorAll('button');
+          const step=rows.length>1?(rows[1].offsetTop-rows[0].offsetTop):on.offsetHeight;
+          list.scrollTop=Math.max(0,Math.round((on.offsetTop-list.clientHeight/2)/step)*step);
+        }
+      });
+      list.addEventListener('click',function(e){
+        e.stopPropagation();
+        const t=e.target.closest('button'); if(!t) return;
+        const p=parts();
+        el.value=pad(k==='h'?+t.value:p[0])+':'+pad(k==='m'?+t.value:p[1]);
+        paint(); api.close();
+        el.dispatchEvent(new Event('change',{bubbles:true}));
+      });
+      PICKS.push(api);
+    }
+    function paint(){
+      const p=parts();
+      bits.h.b.firstChild.nodeValue=pad(p[0]);
+      bits.m.b.firstChild.nodeValue=pad(p[1]);
+    }
+    bit('h',24);
+    box.insertBefore(Object.assign(document.createElement('span'),
+      {className:'tsep',textContent:':'}),bits.h.b.nextSibling);
+    bit('m',60);
+    /* the label text has to exist before paint() can rewrite it in place */
+    bits.h.b.insertBefore(document.createTextNode(''),bits.h.list);
+    bits.m.b.insertBefore(document.createTextNode(''),bits.m.list);
+    paint();
+  });
+}
+wireTimePicks();
+
+/* The whole date field is the button that opens the calendar.
+   A date input only reacts to a click on its 12px indicator glyph, so a click on
+   the number - which is most of the control, and where anyone aims - did
+   nothing. Three things have to be true for that to feel like a button: it
+   TOGGLES (showPicker has no close, so the second click blurs); no text select
+   (preventDefault on mousedown, focus given back deliberately); and the open
+   flag is honest, because the popup can close without us. */
+function wireDatePickers(root){
+  (root||document).querySelectorAll('input[type=date]').forEach(function(el){
+    if(el.dataset.picker) return;
+    el.dataset.picker='1';
+    let open=false;
+    const shut=function(){open=false;};
+    el.addEventListener('blur',shut);
+    el.addEventListener('change',shut);
+    document.addEventListener('mousedown',function(e){ if(e.target!==el) shut(); },true);
+    el.addEventListener('mousedown',function(e){
+      if(e.offsetX>=el.clientWidth-26) return;   /* the indicator toggles itself */
+      e.preventDefault();
+      if(open){ el.blur(); open=false; return; }
+      el.focus({preventScroll:true});
+      if(el.showPicker){ try{ el.showPicker(); open=true; }catch(_){} }
+    });
+    el.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ') return;
+      e.preventDefault();
+      if(open){ el.blur(); open=false; return; }
+      if(el.showPicker){ try{ el.showPicker(); open=true; }catch(_){} }
+    });
+  });
+}
+wireDatePickers();
+
+/* the window is part of the query, so moving either end re-reads it */
+['f-from-d','f-from-t','f-to-d','f-to-t'].forEach(function(id){
+  $(id).addEventListener('change',function(){ applyQuery(); });
+});
+
+/* ---------- clock ---------- */
+$('clk').textContent=fmtClock(nowT(),true);
+setInterval(function(){ $('clk').textContent=fmtClock(nowT(),true); },1000);
+$('refresh-sel').addEventListener('change',function(){
+  const off=this.value==='off';
+  $('livedot').style.animationPlayState=off?'paused':'running';
+  $('livedot').style.opacity=off?.35:1;
+  T(off?'Live refresh paused':'Live refresh · every '+(this.value/60)+' min');
+});
+/* the page opens on a closed historical window, so the live dot starts idle -
+   a pulsing "live" light over a chart of yesterday is a lie */
+$('livedot').style.animationPlayState='paused';
+$('livedot').style.opacity=.35;
+
+/* ---------- init ---------- */
+applyQuery();
+let fitRaf=0;
+const refit=()=>{cancelAnimationFrame(fitRaf);
+  fitRaf=requestAnimationFrame(()=>{ if(fitChart()) drawChart(); });};
+if(window.ResizeObserver) new ResizeObserver(refit).observe($('chartwrap'));
+window.addEventListener('resize',refit);
+})();
+</script>
+</body>
+</html>

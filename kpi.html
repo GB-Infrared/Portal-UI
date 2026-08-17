@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ENEROPS OS &middot; KPI</title>
+<link rel="icon" href="logo/favicon.png">
+<style>
+
+
+
+:root{
+  /* ---- LIGHT · UTILITY BLUE (default) · enterprise solar-portal palette ---- */
+  --bg:#f1f4f8;            /* page background            */
+  --panel:#ffffff;         /* card surface               */
+  --panel-2:#f5f8fb;       /* nested surface / inputs    */
+  --line:#dde4ec;          /* card borders               */
+  --line-soft:#e9eef4;     /* gridlines, dividers        */
+  --line-hi:#b5c2d1;       /* hover / active borders     */
+  --text:#152234;          /* primary text               */
+  --muted:#5a6b7f;         /* secondary text             */
+  --faint:#8494a6;         /* tertiary text              */
+  --dim:#aab6c4;           /* dead readouts (offline)    */
+  --elev:#ffffff;          /* tooltips, toasts           */
+  --sel:#e8f0fb;           /* selected card surface      */
+  --hover:rgba(11,99,206,.07);
+  --hover-soft:rgba(11,99,206,.045);
+  --grid-v:rgba(21,34,52,.05);
+  --shadow:rgba(19,38,63,.16);
+  --on-accent:#ffffff;     /* text on a filled accent    */
+  --topbar:var(--panel);
+  --topbar-fg:var(--text);
+  --topbar-fg-2:var(--muted);
+  --topbar-tab:var(--muted);
+  --topbar-hover:var(--hover);
+  --topbar-active:var(--green-soft);
+  --green:#12a150;         /* producing / healthy        */
+  --green-rgb:18,161,80;
+  --green-soft:rgba(18,161,80,.12);
+  --green-deep:#0b7a3c;
+  --blue:#1a73c8;
+  --blue-soft:rgba(26,115,200,.12);
+  --red:#d92d20;           /* offline / alarms           */
+  --red-soft:rgba(217,45,32,.1);
+  --amber:#dc7a06;         /* yield / deviations         */
+  --amber-soft:rgba(220,122,6,.12);
+  --brand:#a87b0f;         /* wordmark · gold            */
+
+  /* ---------- series palette ----------
+     Four slots, assigned to devices in fixed order and never cycled: a device
+     keeps its colour when another is switched off, so the eye can carry a
+     reading from the chart to the legend to the table.
+
+     Validated, not eyeballed - all-pairs, on this page's own card surface:
+     CVD separation, normal-vision separation, chroma and contrast all clear.
+     RED IS NOT IN THE SET. On this portal red means offline/alarm, and a
+     device that happened to land in slot 4 would be wearing a fault colour
+     while producing normally. Amber is likewise the deviation colour, so the
+     series ochre is pulled well off it in both lightness and hue. */
+  --s1:#1a73c8; --s2:#c47a00; --s3:#00806a; --s4:#c569a0;
+  /* BARS, not lines. The --s series is picked so a 2px stroke reads on white,
+     which makes it deep - and a deep tone spread over a 26px-wide filled bar
+     comes out muddy rather than legible. These are the same hues at the same
+     positions, so a plant keeps its identity across every page, lifted in
+     saturation for an area rather than a line. */
+  --k1:#2d7ff9; --k2:#f59e0b; --k3:#10b981;
+  --k4:#e0559f; --k5:#7c5cf0; --k6:#06b6d4;
+
+  --mono:ui-monospace,'SF Mono','Cascadia Code','Roboto Mono',Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
+  --r-lg:14px; --r-md:10px; --r-sm:8px;
+}
+/* ---- DARK · same hues on navy. Only the base tokens are redefined; the
+   header/brand tokens above reference them, so they follow automatically. ---- */
+:root[data-theme="dark"]{
+  --bg:#0a1017;
+  --panel:#151e2b;
+  --panel-2:#1d2836;
+  --line:#2c3a4c;
+  --line-soft:#232f3e;
+  --line-hi:#42556c;
+  --text:#eff4fa;
+  --muted:#a3b4c8;
+  --faint:#7a8ca1;
+  --dim:#4d5f74;
+  --elev:#1a2432;
+  --sel:#1e2c3d;
+  --hover:rgba(255,255,255,.07);
+  --hover-soft:rgba(255,255,255,.04);
+  --grid-v:rgba(255,255,255,.04);
+  --shadow:rgba(0,0,0,.65);
+  --on-accent:#04121f;
+  --green:#2fd07a;
+  --green-rgb:47,208,122;
+  --green-soft:rgba(47,208,122,.16);
+  --green-deep:#7ee2ab;
+  --blue:#5aa2f0;
+  --blue-soft:rgba(90,162,240,.16);
+  --red:#ff6b6b;
+  --red-soft:rgba(255,107,107,.15);
+  --amber:#f0b249;
+  --amber-soft:rgba(240,178,73,.16);
+  --brand:#e3b23c;
+  /* Series are LIFTED for navy, same four hue families - a device does not
+     change identity when the theme flips, only how brightly it is drawn.
+     Re-validated against the dark card, not flipped automatically. */
+  --s1:#5aa2f0; --s2:#cf9227; --s3:#0b8168; --s4:#e290bd;
+  /* lifted again for navy: a mid-tone that pops on white sinks into #151e2b */
+  --k1:#5aa9ff; --k2:#ffb527; --k3:#2ee0a8;
+  --k4:#ff8ac6; --k5:#a78bfa; --k6:#34d3e8;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scrollbar-color:var(--line-hi) transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.45;
+     -webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:20px;
+  height:58px;padding:0 22px;border-bottom:1px solid var(--line);
+  background:var(--topbar);color:var(--topbar-fg)}
+.brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.brand .logo{height:34px;width:auto;display:block;flex:none}
+.brand .btext{display:flex;flex-direction:column;justify-content:center;gap:1px}
+.brand .word{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--brand);
+  letter-spacing:.2px;line-height:1.05}
+.brand .sub{font-size:9px;letter-spacing:.16em;color:var(--topbar-fg-2);text-transform:uppercase;
+  font-weight:600;line-height:1}
+@media (max-width:820px){ .brand .sub{display:none} }
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;padding:8px 13px;border-radius:9px;color:var(--topbar-tab);font-size:13.5px;font-weight:500;white-space:nowrap}
+.tab:hover{color:var(--topbar-fg);background:var(--topbar-hover)}
+.tab.active{color:var(--green);background:var(--topbar-active);font-weight:600}
+.topbar .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.clock{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--topbar-fg);letter-spacing:.02em}
+.refresh{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--topbar-fg-2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(var(--green-rgb),.55);
+  animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(var(--green-rgb),.5)}70%{box-shadow:0 0 0 8px rgba(var(--green-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--green-rgb),0)}}
+select{appearance:none;background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%238d99a6" stroke-width="1.6" stroke-linecap="round"/></svg>') no-repeat right 10px center;
+  border:1px solid var(--line);color:var(--text);border-radius:var(--r-sm);
+  padding:8px 28px 8px 11px;font-size:13px;font-family:inherit;outline:none}
+select:hover{border-color:var(--line-hi);background-color:var(--hover)}
+select:focus{border-color:var(--line-hi);background-color:var(--hover)}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;
+  background:transparent;border:1px solid transparent;color:var(--muted)}
+.iconbtn:hover{color:var(--text);background:var(--hover);border-color:var(--line)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--panel-2);
+  display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--text);
+  border:1px solid var(--line)}
+
+/* ---------- page shell ----------
+   One column, no rail. Analysis is driven entirely by the bar above it, and a
+   rail would take width from a chart whose whole job is a long time axis. */
+.wrap{max-width:2400px;margin:0 auto;padding:14px clamp(14px,1.5vw,28px) 34px;
+  display:flex;flex-direction:column;gap:14px}
+.toprow{max-width:2400px;margin:0 auto;padding:16px clamp(14px,1.5vw,28px) 0}
+
+/* ---------- filter bar ---------- */
+.filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:9px;padding:0 2px 2px;min-width:0}
+.field{position:relative;display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.field select,.field .input,.field input{height:34px;min-width:116px}
+.field select{padding-top:0;padding-bottom:0}
+/* Y1 and Y2 are each a PAIR - the category narrows the list the value is
+   picked from - so they are ruled together and read as one control, not four.
+   Without this the bar is eight equal boxes and nothing says which value
+   belongs to which category. */
+.pair{display:flex;align-items:flex-end;gap:6px;padding:0 9px 0 0;border-right:1px solid var(--line);margin-right:3px}
+.pair:last-of-type{border-right:none}
+.axtag{display:inline-flex;align-items:center;gap:5px}
+.axtag i{width:14px;height:0;border-top-width:2px;border-top-color:var(--muted);display:inline-block}
+.axtag i.solid{border-top-style:solid}
+.axtag i.dash{border-top-style:dashed}
+
+/* ---------- dropdown panels (one idiom, four uses) ---------- */
+.msel{position:relative;display:flex}
+.mbtn{display:flex;align-items:center;width:100%;min-width:150px;height:34px;
+  padding:0 28px 0 11px;border-radius:var(--r-sm);border:1px solid var(--line);
+  color:var(--text);font-size:13px;font-weight:600;text-align:left;
+  background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%238d99a6" stroke-width="1.6" stroke-linecap="round"/></svg>') no-repeat right 10px center}
+.mbtn:hover,.msel.open .mbtn{border-color:var(--line-hi);background-color:var(--hover)}
+.mbtn .mlab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mbtn .mlab.any{color:var(--muted);font-weight:600}
+/* a value control that has nothing to offer yet says so instead of opening empty */
+.mbtn:disabled{opacity:.5;cursor:default}
+.mbtn:disabled:hover{border-color:var(--line);background-color:var(--panel-2)}
+.colpanel{position:absolute;top:calc(100% + 6px);left:0;z-index:80;width:236px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:8px;
+  max-height:min(60vh,460px);overflow-y:auto;scrollbar-width:thin}
+.colpanel[hidden]{display:none}
+.colhead{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);padding:4px 8px 8px}
+.colrow{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;
+  font-size:12.5px;font-weight:600;cursor:pointer;width:100%;background:transparent;
+  border:none;color:inherit;text-align:left}
+.colrow:hover{background:var(--hover)}
+.colrow input{width:14px;height:14px;accent-color:var(--green);flex:none}
+.colrow.locked{cursor:default;color:var(--muted)}
+.colrow.locked:hover{background:transparent}
+.colrow .req{margin-left:auto;font-size:8px;font-weight:800;letter-spacing:.09em;
+  color:var(--faint);background:var(--panel-2);border:1px solid var(--line);
+  padding:2px 6px;border-radius:5px}
+/* a device that does not report the chosen parameter is offered but marked -
+   ticking it is allowed, and the column it adds is honestly all dashes */
+.colrow .noda{margin-left:auto;font-size:8.5px;font-weight:800;letter-spacing:.08em;color:var(--faint)}
+.colrow .swatch{width:9px;height:9px;border-radius:3px;flex:none}
+.coldiv{height:1px;background:var(--line-soft);margin:6px 4px}
+.colfoot{display:flex;gap:6px;padding:8px 4px 2px;border-top:1px solid var(--line-soft);margin-top:6px}
+.colfoot button{flex:1;padding:6px 0;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font-size:11.5px;font-weight:700}
+.colfoot button:hover{border-color:var(--line-hi);color:var(--text);background:var(--hover)}
+.mpanel{width:214px;min-width:100%}
+/* The rows are <label>s inside a .field, so the filter bar's own label rule
+   reached them and set every option in tiny faint tracked-out caps - the voice
+   reserved for the name ABOVE a control, printed inside it. Stated back. */
+.mpanel .colrow{font-size:12.5px;font-weight:600;letter-spacing:0;
+  text-transform:none;color:var(--text)}
+.mpanel .colrow input{min-width:0}
+.unit{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--faint)}
+
+/* ---------- plant picker ---------- */
+.pplant{width:268px;padding:7px;display:flex;flex-direction:column;gap:5px;
+  max-height:min(60vh,320px);overflow-y:auto;scrollbar-width:thin}
+.pcard{display:flex;flex-direction:column;gap:3px;min-width:0;width:100%;
+  text-align:left;font-family:inherit;color:var(--text);
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:7px 10px}
+.pcard:hover{background:var(--hover);border-color:var(--line-hi)}
+.pcard.on{background:var(--sel);border-color:var(--line-hi)}
+.pcard .top,.pcard .row{display:flex;align-items:baseline;gap:6px;min-width:0}
+.pcard .nm{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--text);
+  line-height:1.15;white-space:nowrap}
+.pcard.on .nm::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
+  margin-left:6px;vertical-align:middle;background:var(--line-hi)}
+.pcard .ad{flex:1 1 0;min-width:0;text-align:right;font-size:9px;color:var(--faint);
+  line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard .cap{font-family:var(--mono);font-size:9.5px;font-weight:800;color:var(--text);white-space:nowrap}
+.pcard .dv{margin-left:auto;font-size:8.5px;font-weight:800;letter-spacing:.05em;
+  color:var(--faint);white-space:nowrap}
+
+/* ---------- card ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg)}
+.card .chead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:13px 16px 10px}
+.chead .title{font-size:14.5px;font-weight:700;white-space:nowrap;flex:none}
+.chead .tools{margin-left:auto;display:flex;align-items:center;gap:8px}
+/* The bucket switch, in the chart's head - the same control Monitoring puts
+   there for its range, at the same size and with the same green for the one in
+   force. A page's controls are read as one set across the app or not at all. */
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.seg button{padding:6px 11px;font-size:11.5px;font-weight:600;background:transparent;border:none;color:var(--muted);white-space:nowrap}
+.seg button:hover{color:var(--text);background:var(--hover)}
+.seg button.on{background:var(--green-soft);color:var(--green)}
+.seg button.on:hover{background:var(--green-soft)}
+.seg button:not(:last-child){border-right:1px solid var(--line)}
+
+/* ---------- legend ----------
+   Identity is never colour alone: every chip carries the device name, and the
+   axis it reads is carried by the LINE STYLE drawn in the chip - solid for Y1,
+   dashed for Y2 - which is the same mark the chart draws. */
+.legend{display:flex;gap:7px;flex-wrap:wrap;min-width:0}
+.lg{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel-2);font-size:12px;cursor:pointer;user-select:none;white-space:nowrap;flex:none}
+.lg:hover{border-color:var(--line-hi)}
+.lg.off{opacity:.38}
+.lg i{width:16px;height:0;border-top-width:2.5px;display:inline-block;flex:none}
+.lg i.solid{border-top-style:solid}
+.lg i.dash{border-top-style:dashed}
+.lg .n{color:var(--text);font-weight:700;font-family:var(--mono);font-size:11.5px}
+.lg .p{color:var(--muted);font-weight:600;font-size:11px}
+
+/* ---------- chart ---------- */
+.chartwrap{position:relative;padding:4px 10px 14px}
+.chartwrap svg{width:100%;height:auto;display:block}
+.gl{stroke:var(--line-soft);stroke-width:1}
+.gl.v{stroke:var(--grid-v)}
+.axt{fill:var(--faint);font-size:10.5px;font-family:var(--mono)}
+.axtitle{fill:var(--muted);font-size:10.5px;font-family:var(--sans);font-weight:700;letter-spacing:.06em}
+#xh{stroke:var(--text)}
+.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;background:var(--elev);
+  border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-width:150px;
+  box-shadow:0 10px 26px -8px var(--shadow);z-index:5}
+.tip .tt{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--muted);margin-bottom:5px}
+.tip .tr{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);padding:2px 0}
+.tip .tr i{width:13px;height:0;border-top-width:2.5px;flex:none}
+.tip .tr i.solid{border-top-style:solid}
+.tip .tr i.dash{border-top-style:dashed}
+.tip .tr b{margin-left:auto;font-family:var(--mono);color:var(--text);font-weight:700}
+/* the state before a query is complete - the plot keeps its frame and says what
+   is missing, rather than collapsing to a bare box */
+.chartnote{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;color:var(--faint);font-family:var(--mono);font-size:12.5px;text-align:center;padding:0 20px}
+
+/* ---------- table ---------- */
+/* Cells are CENTRED. Numbers in a column read fastest right-aligned - the
+   decimal points line up and magnitude is visible without reading a digit -
+   so that is what these tables did. Centred is the house style now; the
+   mono face keeps the digits on a common width, which is what stops a
+   centred column of numbers from going ragged. */
+.ttools{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.tbtn{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;
+  letter-spacing:.04em;background:transparent;border:1px solid var(--line);color:var(--muted)}
+.tbtn:hover{color:var(--text);border-color:var(--line-hi);background:var(--hover)}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:520px}
+thead th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  padding:9px 16px;border-bottom:1px solid var(--line-soft);text-align:center;white-space:nowrap}
+thead .grp th{border-bottom:none;padding-bottom:2px;font-size:11.5px;color:var(--text);letter-spacing:.06em}
+/* the device name spans its parameter columns, so the pairing is structural */
+thead .grp th.dev{text-align:center;border-bottom:1px solid var(--line-soft)}
+/* the header the table keeps when nothing is ticked - stated, but plainly not a
+   reading, so nobody mistakes the shape for content */
+thead th.ph{color:var(--faint);font-weight:600}
+tbody td{padding:9px 16px;font-family:var(--mono);font-size:12.5px;font-weight:600;text-align:center;
+  border-bottom:1px solid var(--line-soft);color:var(--text);white-space:nowrap}
+tbody td.ts{color:var(--muted);font-weight:600}
+tbody td.nil{color:var(--faint)}
+tbody tr:hover{background:var(--hover-soft)}
+/* the y2 half of a device's pair is ruled off from the y1 half, so a wide table
+   does not read as one undifferentiated block of numbers */
+thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
+.empty-note{display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:12.5px;font-family:var(--mono)}
+.empty-note.tall{min-height:170px}
+.colpick{position:relative;display:inline-flex}
+
+/* ---------- pager ---------- */
+.tfoot{display:flex;align-items:center;gap:16px;padding:11px 16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.tfoot .sp{margin-left:auto}
+.pgbtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--muted)}
+.pgbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi)}
+.pgbtn:disabled{opacity:.35;cursor:default}
+.tfoot .range{font-family:var(--mono)}
+
+/* ---------- toasts ---------- */
+#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
+.toast{background:var(--elev);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:9px;
+  padding:10px 14px;font-size:12.5px;color:var(--text);box-shadow:0 12px 30px -8px var(--shadow);
+  animation:tin .18s ease-out}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@media (max-width:820px){
+  .topbar{gap:12px;padding:0 14px}
+  .wrap{padding:12px 14px 30px}
+  .toprow{padding:12px 14px 0}
+  .clock{display:none}
+  .pair{border-right:none;padding-right:0;margin-right:0}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+
+/* ---------- month picker ---------- */
+.mpick{position:relative;display:inline-flex;flex-direction:column;justify-content:flex-end}
+.mpick .fl{position:absolute;top:-6px;left:9px;padding:0 4px;background:var(--panel);z-index:1;
+  font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.mpick-btn{display:flex;align-items:center;gap:10px;min-width:150px;background:var(--panel-2);
+  border:1px solid var(--line);color:var(--text);border-radius:var(--r-sm);padding:8px 10px;
+  font-size:12.5px;font-family:var(--mono);font-weight:600}
+.mpick-btn:hover{border-color:var(--line-hi);background-color:var(--hover)}
+.mpick-btn svg{margin-left:auto;color:var(--muted);flex:none}
+.mpick-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:80;width:250px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:12px}
+.mpick-panel[hidden]{display:none}
+.mpick-head{display:flex;align-items:center;gap:8px;padding:2px 4px 10px}
+.mpick-head .yr{flex:1;text-align:center;font-family:var(--mono);font-weight:800;font-size:14px}
+.mpick-head button{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font-size:13px;line-height:1}
+.mpick-head button:hover{color:var(--text);border-color:var(--line-hi);background:var(--hover)}
+.mpick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mpick-grid button{padding:9px 0;border-radius:8px;border:1px solid transparent;
+  background:transparent;color:var(--text);font-size:12.5px;font-weight:600}
+.mpick-grid button:hover{border-color:var(--line-hi);background:var(--hover)}
+/* selection is a surface, the same language the plant cards use */
+.mpick-grid button.on{background:var(--sel);border-color:var(--line-hi);color:var(--text);font-weight:800}
+
+/* the bucket switch is styled with .seg, up beside the card rules, because that
+   is where the control it copies from Monitoring is defined */
+
+/* ---------- the chart's own head ---------- */
+.chead .metric{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--muted)}
+.bench{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--faint);
+  display:inline-flex;align-items:center;gap:6px}
+.bench i{width:14px;height:0;border-top:2px dashed var(--faint);display:inline-block}
+
+/* bars, not lines: the legend and the tooltip carry a square swatch to match
+   what the chart actually draws */
+.lg i.sq{width:10px;height:10px;border-radius:3px;border-top:none}
+.tip .tr i.sq{width:9px;height:9px;border-radius:2px;border-top:none}
+</style>
+<script>/* stored theme applied before first paint, so there is no flash */
+try{var _t=localStorage.getItem('enerops-theme');if(_t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}
+</script>
+</head>
+<body>
+
+<!-- ======================= TOP BAR ======================= -->
+<header class="topbar">
+  <div class="brand"><img class="logo" src="logo/logo-mark.png" alt="EnerOps Data Systems Pvt Ltd"><span class="btext"><span class="word">ENEROPS OS</span><span class="sub">SITE OVERVIEW</span></span></div>
+  <nav class="tabs">
+    <a class="tab" href="home.html">Home</a>
+    <a class="tab" href="monitoring.html">Monitoring</a>
+    <a class="tab" href="alarms.html">Alarms</a>
+    <a class="tab" href="analysis.html">Analysis</a>
+    <a class="tab active" href="#">KPI</a>
+  </nav>
+  <div class="right">
+    <span class="clock" id="clk">12:10:03 PM</span>
+    <div class="refresh"><span class="dot" id="livedot"></span>
+      <span>Refresh</span>
+      <select id="refresh-sel" style="padding:5px 26px 5px 9px;font-size:12px">
+        <option value="off" selected>Off</option>
+        <option value="300">5 min</option>
+        <option value="600">10 min</option>
+        <option value="900">15 min</option>
+      </select>
+    </div>
+    <button class="iconbtn" id="themebtn" onclick="toggleTheme()" title="Switch to dark theme"></button>
+    <div class="avatar">V</div>
+  </div>
+</header>
+
+<!-- ======================= FILTER BAR =======================
+     No APPLY: every control re-reads on change, so the tiles, the chart and the
+     table always describe what the bar says. Refresh defaults to OFF - a KPI
+     over a month does not move while you read it.
+
+     ONE PLANT. The three bars in the chart are Actual, Simulated and Forecast -
+     the same reading measured, modelled and predicted - so the plant has to be
+     fixed for them to mean anything. Comparing sites is what the portfolio
+     tiles on Home are for; this page is one site examined closely. -->
+<div class="toprow">
+  <div class="filters">
+    <div class="field"><label>Plant</label><div class="msel" id="m-plant"></div>
+      <input type="hidden" id="pl-sel" value="Sangria"></div>
+
+    <div class="field"><label>KPI metric</label>
+      <div class="msel" id="met-pick"></div>
+      <input type="hidden" id="met-sel" value="PR">
+    </div>
+
+    <div class="field"><label>Period</label>
+      <div class="mpick" id="per-pick" style="min-width:0">
+        <button class="mpick-btn" type="button">
+          <span class="mpick-lab">August 2026</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
+        </button>
+        <div class="mpick-panel" hidden>
+          <div class="mpick-head"></div>
+          <div class="mpick-grid"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ======================= TREND =======================
+       The metric is chosen in the filter bar, not by a tile strip: the numbers
+       for the period live on Home, and this page is the one that answers how
+       they got there. -->
+  <div class="card">
+    <div class="chead">
+      <div class="title" id="ch-title">Performance Ratio</div>
+      <!-- Actual, Simulated, Forecast - measured, modelled, predicted. The
+           chips switch a series off, which is how you read one against one
+           without a second control. -->
+      <div class="legend" id="legend"></div>
+      <!-- Three buckets, three questions: DAY is "what happened this month",
+           WEEK smooths the weather out of it, MONTH is "how is the year going".
+           Nothing else changes - the same reading over a different bucket, so
+           it belongs with the legend on the chart it redraws, not in the filter
+           bar with the controls that choose WHICH data the page is about. -->
+      <div class="tools">
+        <div class="seg" id="gran">
+          <button type="button" class="on" data-g="day" onclick="setGran('day')">Daily</button><button type="button" data-g="week" onclick="setGran('week')">Weekly</button><button type="button" data-g="month" onclick="setGran('month')">Monthly</button>
+        </div>
+      </div>
+    </div>
+    <div class="chartwrap" id="chartwrap">
+      <svg id="chart" viewBox="0 0 1300 300" xmlns="http://www.w3.org/2000/svg">
+        <rect id="hl" x="0" y="0" width="0" height="0" fill="var(--hover)" opacity="0"/>
+        <g id="axes"></g>
+        <g id="bars"></g>
+      </svg>
+      <div class="tip" id="tip"></div>
+      <div class="chartnote" id="chartnote" hidden></div>
+    </div>
+  </div>
+
+  <!-- ======================= THE GRAPH'S DATA =======================
+       Exactly what the chart is drawing, one row per bucket - not a second
+       dataset that could disagree with it. The picker narrows the table and
+       the export together. -->
+  <div class="card">
+    <div class="chead"><div class="title" id="tb-title">KPI Data</div></div>
+    <div class="ttools">
+      <div class="colpick" id="colpick">
+        <button class="tbtn" id="colbtn" type="button" aria-expanded="false" onclick="colToggle(event)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 4.5v15M12 4.5v15M19 4.5v15"/></svg>COLUMNS</button>
+        <div class="colpanel" id="colpanel" hidden></div>
+      </div>
+      <button class="tbtn" type="button" onclick="exportCsv()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.2-4.2M12 15l4.2-4.2M4.5 20h15"/></svg>EXPORT CSV</button>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="tfoot">
+      <span>Rows per page</span>
+      <select id="per" style="padding:5px 26px 5px 9px;font-size:12px">
+        <option>25</option><option>50</option><option>75</option>
+        <option selected>100</option><option>150</option><option>200</option>
+      </select>
+      <span class="sp"></span>
+      <span class="range" id="range">0-0 of 0</span>
+      <button class="pgbtn" id="prev" type="button" onclick="pageBy(-1)">&lsaquo;</button>
+      <button class="pgbtn" id="next" type="button" onclick="pageBy(1)">&rsaquo;</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="toasts"></div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- toasts ---------- */
+window.T=function(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  $('toasts').appendChild(t);setTimeout(()=>t.remove(),2600);return false;
+};
+
+/* ---------- theme ---------- */
+const ICO_MOON='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>';
+const ICO_SUN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>';
+function applyTheme(t){
+  const root=document.documentElement, b=$('themebtn');
+  if(t==='dark') root.setAttribute('data-theme','dark'); else root.removeAttribute('data-theme');
+  if(b){ b.innerHTML=(t==='dark')?ICO_SUN:ICO_MOON;
+         b.title=(t==='dark')?'Switch to light theme':'Switch to dark theme'; }
+  try{localStorage.setItem('enerops-theme',t);}catch(e){}
+}
+window.toggleTheme=function(){
+  const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  applyTheme(next);
+  /* series colours are theme tokens read at draw time, so the plot has to be
+     redrawn for a series to keep its identity across the flip */
+  fitChart(true); drawChart();
+  T(next==='dark'?'Dark theme':'Light theme');
+};
+applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light');
+
+/* ---------- clock ---------- */
+const START_T=12+10/60+3/3600, t0=Date.now();
+const nowT=()=>START_T+(Date.now()-t0)/3600000;
+function fmtClock(t,withS){t=((t%24)+24)%24;let h=Math.floor(t),m=Math.floor((t-h)*60),s=Math.floor((t*3600)%60);
+  const ap=h<12?'AM':'PM';let hh=h%12;if(hh===0)hh=12;
+  return hh+':'+pad(m)+(withS?(':'+pad(s)):'')+' '+ap;}
+$('clk').textContent=fmtClock(nowT(),true);
+setInterval(function(){ $('clk').textContent=fmtClock(nowT(),true); },1000);
+$('refresh-sel').addEventListener('change',function(){
+  const off=this.value==='off';
+  $('livedot').style.animationPlayState=off?'paused':'running';
+  $('livedot').style.opacity=off?.35:1;
+  T(off?'Live refresh paused':'Live refresh on');
+});
+$('livedot').style.animationPlayState='paused'; $('livedot').style.opacity=.35;
+
+/* =======================================================================
+   PLANTS, PERIOD, METRICS
+   ======================================================================= */
+const PLANTS=[
+  {id:'Sangria', ac:2500, dc:2500},
+  {id:'Rioja',   ac:1800, dc:1885},
+  {id:'Mendoza', ac:3200, dc:3360}
+];
+const PIDX=id=>Math.max(0,PLANTS.map(p=>p.id).indexOf(id));
+const plant=()=>$('pl-sel').value;
+
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONL=['January','February','March','April','May','June','July',
+            'August','September','October','November','December'];
+const TODAY={y:2026,m:7,d:14};                 /* the demo's today */
+let PY=TODAY.y, PM=TODAY.m, GRAN='day';
+const dim=(y,m)=>new Date(y,m+1,0).getDate();
+/* is this bucket in the past, in progress, or still to come? */
+const cmpDay=(y,m,d)=> (y!==TODAY.y?y-TODAY.y : m!==TODAY.m?m-TODAY.m : d-TODAY.d);
+
+const METRICS=[
+  {k:'PR',     t:'Performance Ratio', u:'%',       f:x=>x.pr,     dec:1},
+  {k:'CUF',    t:'Capacity Factor',   u:'%',       f:x=>x.cuf,    dec:1},
+  {k:'AVAIL',  t:'Availability',      u:'%',       f:x=>x.avail,  dec:1},
+  {k:'YIELD',  t:'Specific Yield',    u:'kWh/kWp', f:x=>x.yield,  dec:2},
+  {k:'ENERGY', t:'Energy',            u:'kWh',     f:x=>x.energy, dec:0},
+  {k:'IRR',    t:'Irradiation',       u:'kWh/m²',  f:x=>x.irr,    dec:2}
+];
+const metOf=k=>METRICS.filter(m=>m.k===k)[0];
+const met=()=>metOf($('met-sel').value)||METRICS[0];
+
+/* =======================================================================
+   THE READINGS - measured, modelled, predicted
+
+   ACTUAL     what the plant did. Nothing after today has one.
+   SIMULATED  what the design model says the plant should have done in that
+              day's weather. This is the benchmark the page compares against,
+              and it is the reason the comparison is worth anything: a KPI
+              against last month cannot tell a dull month from a sick plant.
+   FORECAST   what it is expected to do. Only ahead of today - a forecast for
+              a day already measured is a number nobody would act on.
+
+   Everything is DERIVED from two facts per day: the sun it had, and how well
+   the plant converted it. Energy is never invented separately from irradiation,
+   so the table cannot show a plant making more than the weather allowed.
+   ======================================================================= */
+function rnd(seed){ let s=seed>>>0; return function(){ s=(s*1103515245+12345)&0x7fffffff; return s/0x7fffffff; }; }
+const seedOf=s=>String(s).split('').reduce((h,c)=>(h*31+c.charCodeAt(0))&0xffff,7);
+
+function reading(pid,y,m,d,kind){
+  const p=PLANTS[PIDX(pid)];
+  const r=rnd(seedOf(pid)*7919+y*1000+m*40+d+(kind==='sim'?101:kind==='fc'?202:0));
+  const doy=new Date(y,m,d).getTime()/86400000%365;
+  const season=5.9+1.5*Math.sin((doy-40)/365*2*Math.PI);
+  const monsoon=(m>=5&&m<=8)?0.74:1;
+
+  if(kind==='sim'){
+    /* the model gets the season and the monsoon but not that day's cloud: it is
+       what the site was SOLD as doing, not what the sky did */
+    const irr=Math.max(0.6,season*monsoon*0.95);
+    const pr=0.822-(m>=3&&m<=6?0.03:0);
+    const energy=irr*p.dc*pr;
+    return {irr:irr, pr:pr*100, avail:99.5, energy:energy, yield:energy/p.dc, cuf:energy/(p.ac*24)*100};
+  }
+  const cloud=0.72+0.28*Math.min(1,r()*1.35);
+  const irr=Math.max(0.6,season*monsoon*cloud);
+  const avail=kind==='fc'?99.0:Math.min(100,96.4+3.6*r());
+  const pr=Math.max(0.55,Math.min(0.87,0.815-(m>=3&&m<=6?0.035:0)-0.05*(1-cloud)+0.02*(r()-0.5)))*(avail/100);
+  const energy=irr*p.dc*pr;
+  return {irr:irr, pr:pr*100, avail:avail, energy:energy, yield:energy/p.dc, cuf:energy/(p.ac*24)*100};
+}
+/* A bucket bigger than a day is its days ROLLED UP, never a second simulation:
+   the daily view and the monthly view of the same month must agree to the last
+   kWh, or the page has two answers to one question. */
+function roll(pid,days,kind){
+  const p=PLANTS[PIDX(pid)];
+  let e=0,irr=0,av=0,prw=0,n=0;
+  days.forEach(function(dt){
+    const x=reading(pid,dt[0],dt[1],dt[2],kind);
+    e+=x.energy; irr+=x.irr; av+=x.avail; prw+=x.pr*x.irr; n++;
+  });
+  if(!n) return null;
+  return {
+    irr:irr, energy:e, avail:av/n,
+    /* PR over a period is weighted by the sun each day actually had - a plain
+       mean lets a bright day and an overcast one count equally */
+    pr:prw/irr, yield:e/p.dc, cuf:e/(p.ac*24*n)*100, days:n
+  };
+}
+
+/* ---------- the buckets of the chosen period ---------- */
+function buckets(){
+  const out=[];
+  if(GRAN==='day'){
+    const last=dim(PY,PM);
+    for(let d=1;d<=last;d++)
+      out.push({key:d, label:pad(d)+' '+MON[PM], stamp:pad(d)+'.'+pad(PM+1)+'.'+PY, days:[[PY,PM,d]]});
+  }else if(GRAN==='week'){
+    /* weeks of the chosen MONTH, so the period control still means one thing */
+    const last=dim(PY,PM);
+    let w=1;
+    for(let d=1;d<=last;d+=7){
+      const end=Math.min(last,d+6), days=[];
+      for(let i=d;i<=end;i++) days.push([PY,PM,i]);
+      /* the axis is labelled with the days the week COVERS, not W1..W5: a week
+         number is an index into the month, and nobody reads a chart to find out
+         which index a reading had */
+      out.push({key:w, label:pad(d)+'–'+pad(end), stamp:pad(d)+'-'+pad(end)+' '+MON[PM]+' '+PY, days:days});
+      w++;
+    }
+  }else{
+    for(let m=0;m<12;m++){
+      const last=dim(PY,m), days=[];
+      for(let i=1;i<=last;i++) days.push([PY,m,i]);
+      out.push({key:m, label:MON[m], stamp:MON[m]+' '+PY, days:days});
+    }
+  }
+  return out;
+}
+/* how much of a bucket is already measured */
+function split(b){
+  const past=b.days.filter(dt=>cmpDay(dt[0],dt[1],dt[2])<=0);
+  const future=b.days.filter(dt=>cmpDay(dt[0],dt[1],dt[2])>0);
+  return [past,future];
+}
+
+let ROWS=[];
+function buildRows(){
+  const pid=plant();
+  ROWS=buckets().map(function(b){
+    const parts=split(b);
+    return {
+      key:b.key, label:b.label, stamp:b.stamp,
+      /* a bucket only half elapsed reports what HAS happened - the rest of it
+         is the forecast's business, and mixing the two would be a number that
+         is neither */
+      actual:   parts[0].length?roll(pid,parts[0],'act'):null,
+      simulated:roll(pid,b.days,'sim'),
+      forecast: parts[1].length?roll(pid,parts[1],'fc'):null,
+      partial:  parts[0].length>0&&parts[1].length>0
+    };
+  });
+}
+
+/* =======================================================================
+   THE SERIES
+   ======================================================================= */
+const SERIES=[
+  {k:'actual',    t:'Actual',    col:'var(--green)'},
+  {k:'simulated', t:'Simulated', col:'var(--blue)'},
+  {k:'forecast',  t:'Forecast',  col:'var(--amber)'}
+];
+/* off, not on: a series switched off stays off while you change the metric */
+const OFF={actual:false,simulated:false,forecast:false};
+const live=()=>SERIES.filter(s=>!OFF[s.k]);
+const val=(row,sk)=>{ const r=row[sk]; return r?met().f(r):null; };
+
+function renderLegend(){
+  $('legend').innerHTML=SERIES.map(function(s){
+    return '<span class="lg'+(OFF[s.k]?' off':'')+'" data-s="'+s.k+'" title="Click to hide or show">'+
+      '<i class="sq" style="background:'+s.col+'"></i><span class="n">'+s.t+'</span></span>';
+  }).join('');
+  $('legend').querySelectorAll('.lg').forEach(function(el){
+    el.onclick=function(){
+      OFF[el.dataset.s]=!OFF[el.dataset.s];
+      /* the last visible series cannot be switched off - an empty plot is not
+         a view anybody asked for */
+      if(!live().length){ OFF[el.dataset.s]=false; T('At least one series stays on'); }
+      renderLegend(); drawChart();
+    };
+  });
+}
+
+/* =======================================================================
+   CHART
+   ======================================================================= */
+let W=1300,H=300;
+const ML=64,MR=18,MT=14,MB=38;
+let PW=W-ML-MR, PH=H-MT-MB, SLOT=0, TOP=1;
+/* Height tracks width but stays in a band, as on Monitoring - except that this
+   page has no side rail, so the card is the full width of the screen and the
+   same ratio buys a plot half a screen tall. A month is at most 31 bars; the
+   height only has to separate them, not fill the window. */
+function fitChart(force){
+  const box=$('chartwrap');
+  const cw=Math.max(320,Math.round(box.clientWidth-20));
+  const nh=Math.round(Math.min(330,Math.max(215,cw*0.20)));
+  if(!force&&cw===W&&nh===H) return false;
+  W=cw;H=nh;PW=W-ML-MR;PH=H-MT-MB;
+  $('chart').setAttribute('viewBox','0 0 '+W+' '+H);
+  return true;
+}
+const Y=v=>MT+PH-(v/TOP)*PH;
+function niceTop(v){
+  if(!(v>0)) return 1;
+  const p=Math.pow(10,Math.floor(Math.log10(v)));
+  return Math.ceil(v/p*1.08)*p;
+}
+const trim=(v,d)=>Number(v).toFixed(v>=1000?0:(d==null?1:d));
+
+function drawChart(){
+  const m=met(), ser=live();
+  $('ch-title').textContent=m.t;
+  $('tb-title').textContent=m.t+' · Data';
+  const vals=[];
+  ROWS.forEach(r=>ser.forEach(s=>{const v=val(r,s.k); if(v!=null&&isFinite(v)) vals.push(v);}));
+  const note=$('chartnote');
+  if(!ROWS.length||!vals.length){
+    $('axes').innerHTML=''; $('bars').innerHTML='';
+    note.hidden=false; note.textContent='Nothing to plot for this period';
+    return;
+  }
+  note.hidden=true;
+  TOP=niceTop(Math.max.apply(null,vals));
+  SLOT=PW/ROWS.length;
+  const bw=Math.max(3,Math.min(24,(SLOT-6)/ser.length));
+
+  let ax='';
+  for(let i=0;i<=5;i++){
+    const v=TOP/5*i, y=Y(v);
+    ax+='<line class="gl" x1="'+ML+'" y1="'+y.toFixed(1)+'" x2="'+(W-MR)+'" y2="'+y.toFixed(1)+'"/>'+
+        '<text class="axt" x="'+(ML-8)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end">'+trim(v,m.dec)+'</text>';
+  }
+  /* the y axis names what it measures and in what: PR read as 0.79 against PR
+     read as 79% is exactly the confusion worth 10px of label */
+  ax+='<g transform="translate(13,'+(MT+PH/2)+') rotate(-90)">'+
+      '<text class="axtitle" x="0" y="0" text-anchor="middle">'+esc(m.t.toUpperCase())+
+      (m.u?' &middot; '+esc(m.u):'')+'</text></g>';
+  const every=SLOT<26?Math.ceil(26/SLOT):1;
+  ROWS.forEach(function(b,i){
+    if(i%every) return;
+    ax+='<text class="axt" x="'+(ML+SLOT*i+SLOT/2).toFixed(1)+'" y="'+(MT+PH+16)+'" text-anchor="middle">'+
+        esc(b.label)+'</text>';
+  });
+  ax+='<text class="axt" x="'+(ML+PW/2)+'" y="'+(MT+PH+32)+'" text-anchor="middle" opacity=".75">'+
+      (GRAN==='month'?(PY+' · MONTH'):(MONL[PM]+' '+PY+' · '+(GRAN==='week'?'WEEK':'DAY')))+'</text>';
+  $('axes').innerHTML=ax;
+
+  let g='';
+  ROWS.forEach(function(b,i){
+    ser.forEach(function(s,j){
+      const v=val(b,s.k);
+      if(v==null||!isFinite(v)) return;
+      const x=ML+SLOT*i+(SLOT-bw*ser.length)/2+bw*j;
+      const y=Y(v), h=Math.max(1,MT+PH-y);
+      /* a forecast is drawn lighter than a measurement: one of these happened
+         and the other has not */
+      g+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+
+         '" rx="2" fill="'+s.col+'" opacity="'+(s.k==='forecast'?'.55':'.92')+'"/>';
+    });
+  });
+  $('bars').innerHTML=g;
+}
+
+/* ---------- hover: read every live series for the bucket under the pointer ---
+   The same rule Home's KPI chart uses - the whole slot highlights, and the tip
+   lists each series with its own swatch - so the two pages are read the same
+   way even though one is a summary and this one is the detail. */
+(function(){
+  const svg=$('chart'), tip=$('tip'), hl=$('hl'), wrap=$('chartwrap');
+  const hide=function(){ tip.style.opacity=0; hl.setAttribute('opacity','0'); };
+  const row=(c,n,v,dim)=>'<div class="tr"'+(dim?' style="opacity:.7"':'')+
+    '><i class="sq" style="background:'+c+'"></i>'+n+'<b>'+v+'</b></div>';
+  svg.addEventListener('mousemove',function(e){
+    if(!ROWS.length||!SLOT){ hide(); return; }
+    const r=svg.getBoundingClientRect();
+    const vx=(e.clientX-r.left)/r.width*W, vy=(e.clientY-r.top)/r.height*H;
+    if(vx<ML||vx>W-MR||vy<MT||vy>MT+PH){ hide(); return; }
+    let i=Math.floor((vx-ML)/SLOT); i=Math.max(0,Math.min(ROWS.length-1,i));
+    const b=ROWS[i], m=met(), cx=ML+(i+0.5)*SLOT;
+    hl.setAttribute('x',(ML+SLOT*i).toFixed(1)); hl.setAttribute('y',MT);
+    hl.setAttribute('width',SLOT.toFixed(1)); hl.setAttribute('height',PH.toFixed(1));
+    hl.setAttribute('opacity','1');
+    let rows='', peak=0;
+    live().forEach(function(s){
+      const v=val(b,s.k);
+      if(v==null) return;
+      peak=Math.max(peak,v);
+      rows+=row(s.col,s.t,trim(v,m.dec)+' '+m.u,s.k==='forecast');
+    });
+    if(!rows){ hide(); return; }
+    /* a half-elapsed bucket says so, rather than looking like a bad day */
+    tip.innerHTML='<div class="tt">'+esc(b.stamp)+(b.partial?' · in progress':'')+'</div>'+rows;
+    const wr=wrap.getBoundingClientRect(), ox=r.left-wr.left, oy=r.top-wr.top;
+    let lx=(cx/W)*r.width+ox+14; if(lx+180>wr.width) lx-=200;
+    tip.style.left=lx+'px';
+    tip.style.top=Math.max(4,(Y(peak)/H)*r.height+oy-10)+'px';
+    tip.style.opacity=1;
+  });
+  svg.addEventListener('mouseleave',hide);
+})();
+
+/* =======================================================================
+   TABLE - the graph's data, nothing else
+   ======================================================================= */
+const COLDEF=[
+  {k:'stamp', t:'Timestamp', cls:'ts', get:r=>r.stamp},
+  {k:'actual',    t:'Actual',    get:r=>cell(r,'actual')},
+  {k:'simulated', t:'Simulated', get:r=>cell(r,'simulated')},
+  {k:'forecast',  t:'Forecast',  get:r=>cell(r,'forecast')}
+];
+function cell(r,sk){ const v=val(r,sk); return v==null?'—':trim(v,met().dec); }
+const SORTV={stamp:r=>r.key, actual:r=>val(r,'actual'), simulated:r=>val(r,'simulated'),
+             forecast:r=>val(r,'forecast')};
+let SORT={k:'stamp',dir:1}, PAGE=0, PER=100;
+
+/* Timestamp is locked: a KPI row without the bucket it covers is not a reading.
+   The rest are the three series, so the picker and the legend narrow the same
+   dataset from two directions. */
+let COLS=['actual','simulated','forecast'];
+const shown=()=>COLDEF.filter(c=>c.k==='stamp'||COLS.indexOf(c.k)>=0);
+
+function renderColPanel(){
+  $('colpanel').innerHTML=
+    '<div class="colhead">Shown in the table and the export</div>'+
+    '<label class="colrow locked"><input type="checkbox" checked disabled>Timestamp'+
+      '<span class="req">REQUIRED</span></label>'+
+    '<div class="coldiv"></div>'+
+    SERIES.map(function(s){
+      return '<label class="colrow"><input type="checkbox"'+(COLS.indexOf(s.k)>=0?' checked':'')+
+        ' onchange="colSet(\''+s.k+'\',this.checked)">'+
+        '<span class="swatch" style="background:'+s.col+'"></span>'+s.t+'</label>';
+    }).join('')+
+    '<div class="colfoot">'+
+      '<button type="button" onclick="colAll(1)">All</button>'+
+      '<button type="button" onclick="colAll(0)">None</button></div>';
+}
+window.colToggle=function(ev){
+  ev.stopPropagation();
+  const p=$('colpanel'), open=p.hidden;
+  if(open) renderColPanel();
+  p.hidden=!open;
+  $('colbtn').setAttribute('aria-expanded',open?'true':'false');
+};
+function colClose(){ $('colpanel').hidden=true; $('colbtn').setAttribute('aria-expanded','false'); }
+window.colSet=function(k,on){
+  const i=COLS.indexOf(k);
+  if(on&&i<0) COLS.push(k); else if(!on&&i>=0) COLS.splice(i,1);
+  COLS.sort((a,b)=>SERIES.map(s=>s.k).indexOf(a)-SERIES.map(s=>s.k).indexOf(b));
+  if(!shown().some(c=>c.k===SORT.k)){ SORT.k='stamp'; SORT.dir=1; }
+  renderTable();
+};
+window.colAll=function(on){
+  COLS=on?SERIES.map(s=>s.k):[];
+  if(!shown().some(c=>c.k===SORT.k)){ SORT.k='stamp'; SORT.dir=1; }
+  renderColPanel(); renderTable();
+};
+document.addEventListener('click',function(e){ if(!$('colpick').contains(e.target)) colClose(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') colClose(); });
+
+function sorted(){
+  const f=SORTV[SORT.k], d=SORT.dir;
+  return ROWS.slice().sort(function(a,b){
+    const x=f(a), y=f(b);
+    /* a bucket with no reading sorts last either way - it is not a small value,
+       it is an absent one */
+    if(x==null&&y==null) return 0;
+    if(x==null) return 1;
+    if(y==null) return -1;
+    if(x<y) return -1*d; if(x>y) return 1*d; return 0;
+  });
+}
+const ARROW=d=>'<span class="ar">'+(d<0?'▼':'▲')+'</span>';
+function renderTable(){
+  const cols=shown(), rows=sorted();
+  /* Nothing ticked, or nothing to show: the table states its SHAPE and says so
+     plainly, which is what Analysis does. Timestamp is locked on, so with every
+     series unticked the alternative is a column of dates alone in a wide card -
+     a list wearing a table's clothes. The greyed header is the contract; the note
+     underneath is why it is empty. */
+  const blank=cols.length===1||!rows.length;
+  if(blank){
+    $('thead').innerHTML='<tr><th class="ts">Timestamp</th>'+
+      SERIES.map(s=>'<th class="ph">'+esc(s.t)+'</th>').join('')+'</tr>';
+    $('tbody').innerHTML='<tr><td colspan="'+(SERIES.length+1)+'"><div class="empty-note tall">'+
+      (!rows.length?'Nothing in this period':'No columns selected')+'</div></td></tr>';
+    $('range').textContent='0-0 of 0';
+    $('prev').disabled=true; $('next').disabled=true;
+    return;
+  }
+  const pages=Math.max(1,Math.ceil(rows.length/PER));
+  if(PAGE>=pages) PAGE=pages-1;
+  const from=PAGE*PER, slice=rows.slice(from,from+PER);
+  $('thead').innerHTML='<tr>'+cols.map(function(c){
+    const on=SORT.k===c.k;
+    return '<th class="so'+(c.cls?' '+c.cls:'')+(on?' on':'')+'" onclick="sortBy(\''+c.k+'\')" title="Sort by '+esc(c.t)+'">'+
+      esc(c.t)+(on?ARROW(SORT.dir):'')+'</th>';
+  }).join('')+'</tr>';
+  $('tbody').innerHTML=slice.map(r=>'<tr>'+
+    cols.map(c=>'<td'+(c.cls?' class="'+c.cls+'"':'')+'>'+esc(c.get(r))+'</td>').join('')+'</tr>').join('');
+  $('range').textContent=(from+1)+'-'+Math.min(from+PER,rows.length)+' of '+rows.length;
+  $('prev').disabled=PAGE<=0;
+  $('next').disabled=from+PER>=rows.length;
+}
+window.sortBy=function(k){
+  if(SORT.k===k) SORT.dir=-SORT.dir; else { SORT.k=k; SORT.dir=k==='stamp'?1:-1; }
+  PAGE=0; renderTable();
+};
+window.pageBy=function(d){ PAGE=Math.max(0,PAGE+d); renderTable(); };
+$('per').addEventListener('change',function(){ PER=parseInt(this.value,10); PAGE=0; renderTable(); });
+
+window.exportCsv=function(){
+  const cols=shown(), m=met();
+  const q=s=>/[",\r\n]/.test(String(s))?'"'+String(s).replace(/"/g,'""')+'"':String(s);
+  /* the header carries the metric and its unit: a column of numbers headed
+     "Actual" in a file opened next week says nothing about what was measured */
+  const head=cols.map(c=>q(c.k==='stamp'?c.t:c.t+' '+m.k+(m.u?' ('+m.u+')':''))).join(',');
+  const body=sorted().map(r=>cols.map(c=>q(c.get(r))).join(','));
+  const url=URL.createObjectURL(new Blob(['﻿'+[head].concat(body).join('\r\n')],
+    {type:'text/csv;charset=utf-8'}));
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='KPI_'+plant()+'_'+m.k+'_'+PY+(GRAN==='month'?'':'-'+pad(PM+1))+'.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),0);
+  T('Exported '+body.length+' rows');
+};
+
+/* =======================================================================
+   CONTROLS
+   ======================================================================= */
+const PICKS=[];
+function pickClose(except){ PICKS.forEach(function(p){ if(p!==except) p.close(); }); }
+document.addEventListener('click',function(){ pickClose(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') pickClose(); });
+
+function singleSelect(o){
+  const el=$(o.value), mount=$(o.mount);
+  const btn=document.createElement('button');
+  btn.type='button'; btn.className='mbtn'; btn.setAttribute('aria-expanded','false');
+  const lab=document.createElement('span'); lab.className='mlab'; btn.appendChild(lab);
+  const pan=document.createElement('div'); pan.className='colpanel mpanel'; pan.hidden=true;
+  mount.appendChild(btn); mount.appendChild(pan);
+  function paint(){ lab.textContent=o.render?o.render(el.value):el.value; }
+  function draw(){
+    pan.innerHTML='<div class="colhead">'+esc(o.head)+'</div>'+
+      o.options.map(function(v){
+        return '<label class="colrow"><input type="radio" name="'+o.value+'-r" value="'+esc(v)+'"'+
+          (v===el.value?' checked':'')+'>'+esc(o.render?o.render(v):v)+
+          (o.unit?'<span class="unit">'+esc(o.unit(v))+'</span>':'')+'</label>';
+      }).join('');
+  }
+  const api={close:function(){ if(!pan.hidden) open(false); }, repaint:paint};
+  function open(on){
+    if(on){ pickClose(api); draw(); }
+    pan.hidden=!on; mount.classList.toggle('open',on);
+    btn.setAttribute('aria-expanded',on?'true':'false');
+  }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); open(pan.hidden); });
+  pan.addEventListener('click',function(e){ e.stopPropagation(); });
+  pan.addEventListener('change',function(e){
+    const r=e.target; if(r.type!=='radio') return;
+    el.value=r.value; paint(); open(false);
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  PICKS.push(api); paint();
+  return api;
+}
+
+/* one KPI at a time: the three bars are one reading measured, modelled and
+   predicted, and a second metric on the same axis would be a different unit */
+singleSelect({mount:'met-pick',value:'met-sel',head:'KPI metric',
+  options:METRICS.map(m=>m.k), render:k=>metOf(k).t, unit:k=>metOf(k).u});
+$('met-sel').addEventListener('change',function(){ applyQuery(); T(met().t); });
+
+/* ---------- plant: one site, on its card ---------- */
+(function(){
+  const mount=$('m-plant'), el=$('pl-sel');
+  const btn=document.createElement('button');
+  btn.type='button'; btn.className='mbtn'; btn.setAttribute('aria-expanded','false');
+  const lab=document.createElement('span'); lab.className='mlab'; btn.appendChild(lab);
+  const pan=document.createElement('div'); pan.className='colpanel pplant'; pan.hidden=true;
+  mount.appendChild(btn); mount.appendChild(pan);
+  lab.textContent=el.value;
+
+  function draw(){
+    /* each card is costed before it is offered - the PR that site is running at
+       over the SAME period, so a plant is chosen on its state and not only on
+       its name */
+    pan.innerHTML=PLANTS.map(function(p){
+      const on=p.id===el.value;
+      const days=[]; const last=(PY===TODAY.y&&PM===TODAY.m)?TODAY.d:dim(PY,PM);
+      for(let d=1;d<=last;d++) days.push([PY,PM,d]);
+      const x=roll(p.id,days,'act');
+      return '<button type="button" class="pcard'+(on?' on':'')+'" value="'+p.id+'"'+
+        ' aria-current="'+(on?'true':'false')+'" title="'+esc(p.id+' · '+p.ac+' kW AC')+'">'+
+        '<span class="top"><span class="nm">'+esc(p.id)+'</span></span>'+
+        '<span class="row"><span class="cap">'+p.ac+' kW AC</span>'+
+          '<span class="alm '+(x&&x.pr>=80?'cold':'hot')+'">'+(x?'PR '+x.pr.toFixed(1)+'%':'NO DATA')+'</span></span>'+
+      '</button>';
+    }).join('');
+  }
+  const api={close:function(){ if(!pan.hidden) open(false); }};
+  function open(on){
+    if(on){ pickClose(api); draw(); }
+    pan.hidden=!on; mount.classList.toggle('open',on);
+    btn.setAttribute('aria-expanded',on?'true':'false');
+  }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); open(pan.hidden); });
+  pan.addEventListener('click',function(e){
+    e.stopPropagation();
+    const b=e.target.closest('.pcard'); if(!b) return;
+    el.value=b.value; lab.textContent=b.value;
+    open(false);                       /* one choice, so the panel is done */
+    applyQuery(); T(b.value);
+  });
+  PICKS.push(api);
+})();
+
+/* ---------- period ---------- */
+function initMonthPick(id,y,m,onPick){
+  const root=$(id), btn=root.querySelector('.mpick-btn'), pan=root.querySelector('.mpick-panel');
+  const head=root.querySelector('.mpick-head'), grid=root.querySelector('.mpick-grid');
+  const lab=btn.querySelector('.mpick-lab');
+  let vy=y, sy=y, sm=m, step='year';
+  const YSPAN=12;
+  let ypage=Math.floor(y/YSPAN)*YSPAN;
+  function paintBtn(){ lab.textContent=(GRAN==='month'?'':MONL[sm]+' ')+sy; }
+  function paint(){
+    if(step==='year'){
+      head.innerHTML='<button type="button" data-dir="-1" aria-label="Earlier years">&lsaquo;</button>'+
+        '<span class="yr">'+ypage+' – '+(ypage+YSPAN-1)+'</span>'+
+        '<button type="button" data-dir="1" aria-label="Later years">&rsaquo;</button>';
+      grid.innerHTML=Array.from({length:YSPAN},function(_,i){
+        const yy=ypage+i;
+        return '<button type="button" data-y="'+yy+'"'+(yy===sy?' class="on"':'')+'>'+yy+'</button>';
+      }).join('');
+      grid.querySelectorAll('button').forEach(function(b){
+        b.onclick=function(e){e.stopPropagation();vy=+b.dataset.y;
+          /* monthly buckets ARE the year, so the year is the whole answer */
+          if(GRAN==='month'){ sy=vy; paintBtn(); pan.hidden=true; if(onPick) onPick(sy,sm); return; }
+          step='month';paint();};
+      });
+      head.querySelectorAll('button').forEach(function(b){
+        b.onclick=function(e){e.stopPropagation();ypage+=(+b.dataset.dir)*YSPAN;paint();};
+      });
+    }else{
+      head.innerHTML='<button type="button" data-back="1" aria-label="Choose another year">&lsaquo;</button>'+
+        '<span class="yr">'+vy+'</span><span style="width:26px"></span>';
+      grid.innerHTML=MON.map(function(n,i){
+        return '<button type="button" data-m="'+i+'"'+((i===sm&&vy===sy)?' class="on"':'')+'>'+n+'</button>';
+      }).join('');
+      grid.querySelectorAll('button').forEach(function(b){
+        b.onclick=function(e){e.stopPropagation();sm=+b.dataset.m;sy=vy;paintBtn();pan.hidden=true;
+          if(onPick)onPick(sy,sm);};
+      });
+      head.querySelectorAll('button[data-back]').forEach(function(b){
+        b.onclick=function(e){e.stopPropagation();ypage=Math.floor(vy/YSPAN)*YSPAN;step='year';paint();};
+      });
+    }
+  }
+  btn.onclick=function(e){e.stopPropagation();
+    vy=sy;ypage=Math.floor(sy/YSPAN)*YSPAN;step='year';paint();pan.hidden=!pan.hidden;};
+  document.addEventListener('mousedown',function(e){if(!root.contains(e.target))pan.hidden=true;});
+  paintBtn();paint();
+  return {repaint:paintBtn};
+}
+const PERPICK=initMonthPick('per-pick',PY,PM,function(y,m){
+  PY=y; PM=m; applyQuery(); T((GRAN==='month'?'':MONL[m]+' ')+y);
+});
+
+window.setGran=function(g){
+  if(g===GRAN) return;
+  GRAN=g;
+  document.querySelectorAll('#gran button').forEach(function(b){
+    b.classList.toggle('on',b.dataset.g===g);
+  });
+  PERPICK.repaint();
+  applyQuery();
+  T(g==='day'?'Daily · '+MONL[PM]+' '+PY:g==='week'?'Weekly · '+MONL[PM]+' '+PY:'Monthly · '+PY);
+};
+
+/* =======================================================================
+   ONE PLACE THE PAGE IS REBUILT
+   A backend replaces buildRows with a fetch and nothing else here changes.
+   ======================================================================= */
+function applyQuery(){
+  buildRows();
+  renderLegend();
+  fitChart(true); drawChart();
+  PAGE=0; renderTable();
+}
+applyQuery();
+
+/* ---------- responsive ---------- */
+let raf=0;
+const refit=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(function(){ if(fitChart()) drawChart(); });};
+if(window.ResizeObserver) new ResizeObserver(refit).observe($('chartwrap'));
+/* BOTH, not one or the other: the observer sees the wrapper's WIDTH change, and
+   a window that only gets taller resizes nothing it can see. */
+window.addEventListener('resize',refit);
+})();
+</script>
+</body>
+</html>

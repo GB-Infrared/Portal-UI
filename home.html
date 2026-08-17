@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EnerOps OS - Site Overview</title>
+<link rel="icon" type="image/png" href="logo/favicon.png">
+<style>
+:root{
+  /* ---- LIGHT · UTILITY BLUE (default) · enterprise solar-portal palette ---- */
+  --bg:#f1f4f8;            /* page background            */
+  --panel:#ffffff;         /* card surface               */
+  --panel-2:#f5f8fb;       /* nested surface / inputs    */
+  --line:#dde4ec;          /* card borders               */
+  --line-soft:#e9eef4;     /* gridlines, dividers        */
+  --line-hi:#b5c2d1;       /* hover / active borders     */
+  --text:#152234;          /* primary text               */
+  --muted:#5a6b7f;         /* secondary text             */
+  --faint:#8494a6;         /* tertiary text              */
+  --dim:#aab6c4;           /* dead readouts (offline)    */
+  --elev:#ffffff;          /* tooltips, toasts           */
+  --sel:#e8f0fb;           /* selected card surface      */
+  --hover:rgba(11,99,206,.07);
+  --hover-soft:rgba(11,99,206,.045);
+  --grid-v:rgba(21,34,52,.05);
+  --shadow:rgba(19,38,63,.16);
+  --scrim:rgba(13,29,48,.42);
+  --on-accent:#ffffff;     /* text on a filled accent    */
+  /* header bar — same surface family as the cards */
+  --topbar:var(--panel);
+  --topbar-fg:var(--text);
+  --topbar-fg-2:var(--muted);
+  --topbar-tab:var(--muted);
+  --topbar-hover:var(--hover);
+  --topbar-active:var(--green-soft);
+  --green:#12a150;         /* producing / healthy        */
+  --green-rgb:18,161,80;   /* same green, for rgba() glows */
+  --green-soft:rgba(18,161,80,.12);
+  --green-deep:#0b7a3c;
+  --blue:#1a73c8;          /* series 2                   */
+  --blue-soft:rgba(26,115,200,.12);
+  --red:#d92d20;           /* offline / alarms           */
+  --red-soft:rgba(217,45,32,.1);
+  --amber:#dc7a06;         /* yield / deviations         */
+  --amber-soft:rgba(220,122,6,.12);
+  --brand:#a87b0f;         /* wordmark · gold            */
+  --brand-soft:rgba(168,123,15,.12);
+  --brand-line:rgba(168,123,15,.28);
+  --mono:ui-monospace,'SF Mono','Cascadia Code','Roboto Mono',Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
+  --r-lg:14px; --r-md:10px; --r-sm:8px;
+  /* One hue per inverter, spaced around the wheel and clear of the alarm red.
+     Tokens rather than literals in the script, because a colour that carries
+     on white does not carry on navy - the dark theme redefines these and the
+     chart follows without knowing a theme exists. */
+  --s1:#12a150; --s2:#1a73c8; --s3:#dc7a06; --s4:#8b5cf6;
+  --s5:#e11d74; --s6:#0e9aa7; --s7:#b45309; --s8:#4f46e5;
+  --s9:#0f766e; --s10:#a16207; --s11:#be185d; --s12:#0284c7;
+}
+/* ---- DARK · same hues on navy. Only the base tokens are redefined; the
+   header/brand tokens above reference them, so they follow automatically. ---- */
+:root[data-theme="dark"]{
+  /* deeper page + clearly lifted cards, so surfaces separate instead of merging */
+  --bg:#0a1017;
+  --panel:#151e2b;
+  --panel-2:#1d2836;
+  --line:#2c3a4c;
+  --line-soft:#232f3e;
+  --line-hi:#42556c;
+  --text:#eff4fa;
+  --muted:#a3b4c8;
+  --faint:#7a8ca1;
+  --dim:#4d5f74;
+  --elev:#1a2432;
+  --sel:#1e2c3d;
+  --hover:rgba(255,255,255,.07);
+  --hover-soft:rgba(255,255,255,.04);
+  --grid-v:rgba(255,255,255,.04);
+  --shadow:rgba(0,0,0,.65);
+  --scrim:rgba(3,8,14,.7);
+  --on-accent:#04121f;
+  /* Accents are LIFTED for navy, not copied from light.
+     They used to be identical in both themes on the theory that only the
+     surfaces changed - but a hue picked to carry on white is too dark to carry
+     on #151e2b, and the greens and reds sank into the card instead of reading
+     off it. These are the same hues moved up in lightness and eased back in
+     saturation, so the meaning is unchanged and the contrast is not.
+     The soft washes are correspondingly stronger: .12 of a dark ink over a dark
+     card is invisible, where over white it was a tint. */
+  --green:#2fd07a;
+  --green-rgb:47,208,122;
+  --green-soft:rgba(47,208,122,.16);
+  --green-deep:#7ee2ab;    /* headline numbers, needs to out-read the body */
+  --blue:#5aa2f0;
+  --blue-soft:rgba(90,162,240,.16);
+  --red:#ff6b6b;
+  --red-soft:rgba(255,107,107,.15);
+  --amber:#f0b249;
+  --amber-soft:rgba(240,178,73,.16);
+  --brand:#e3b23c;         /* wordmark · gold, lifted for navy */
+  --brand-soft:rgba(227,178,60,.15);
+  --brand-line:rgba(227,178,60,.30);
+  /* the same twelve hues, lifted the same way the accents above are */
+  --s1:#2fd07a; --s2:#5aa2f0; --s3:#f0b249; --s4:#a78bfa;
+  --s5:#f472b6; --s6:#22d3ee; --s7:#fbbf24; --s8:#818cf8;
+  --s9:#2dd4bf; --s10:#facc15; --s11:#fb7185; --s12:#38bdf8;
+}*{margin:0;padding:0;box-sizing:border-box}
+html{scrollbar-color:var(--line-hi) transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.45;
+     -webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+/* ---------- top bar (identical to Monitoring) ---------- */
+.topbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:20px;
+  height:58px;padding:0 22px;border-bottom:1px solid var(--line);
+  background:var(--topbar);color:var(--topbar-fg)}
+.brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
+/* the mark alone, not the full lockup - that artwork spells out "EnerOps Data
+   Systems Pvt ltd", which would print the company name twice beside the wordmark */
+.brand .logo{height:34px;width:auto;display:block;flex:none}
+/* wordmark over page label - the stack separates them, so no divider rule */
+.brand .btext{display:flex;flex-direction:column;justify-content:center;gap:1px}
+.brand .word{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--brand);
+  letter-spacing:.2px;line-height:1.05}
+.brand .sub{font-size:9px;letter-spacing:.16em;color:var(--topbar-fg-2);text-transform:uppercase;
+  font-weight:600;line-height:1}
+@media (max-width:820px){ .brand .sub{display:none} }
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 13px;border-radius:9px;color:var(--topbar-tab);font-size:13.5px;font-weight:500;white-space:nowrap}
+.tab:hover{color:var(--topbar-fg);background:var(--topbar-hover)}
+.tab.active{color:var(--green);background:var(--topbar-active);font-weight:600}
+.topbar .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.clock{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--topbar-fg)}
+.refresh{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--topbar-fg-2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(var(--green-rgb),.55);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(var(--green-rgb),.5)}70%{box-shadow:0 0 0 8px rgba(var(--green-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--green-rgb),0)}}
+select{appearance:none;background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%238d99a6" stroke-width="1.6" stroke-linecap="round"/></svg>') no-repeat right 10px center;
+  border:1px solid var(--line);color:var(--text);border-radius:var(--r-sm);
+  padding:7px 28px 7px 11px;font-size:12.5px;font-family:inherit;outline:none}
+/* Controls answer in NEUTRAL. Green on this portal means producing/healthy;
+   a pointer resting on a dropdown is neither, and a green wash there competes
+   with every reading that uses the colour to mean something. */
+select:hover{border-color:var(--line-hi);background-color:var(--hover)}
+select:focus{border-color:var(--line-hi);background-color:var(--hover)}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;
+  background:transparent;border:1px solid transparent;color:var(--muted)}
+.iconbtn:hover{color:var(--text);background:var(--hover);border-color:var(--line)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--panel-2);
+  display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--text);border:1px solid var(--line)}
+
+/* ---------- page ---------- */
+.page{max-width:2400px;margin:0 auto;padding:12px clamp(14px,1.5vw,28px) 16px;
+  display:flex;flex-direction:column;gap:clamp(10px,.8vw,13px)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg)}
+.chead{display:flex;flex-wrap:nowrap;align-items:center;gap:12px;padding:10px 16px 8px}
+.chead .title{font-size:14.5px;font-weight:700;white-space:nowrap;flex:none}
+/* date pickers - floating label above a native month/day input */
+.field{position:relative;display:inline-flex;flex-direction:column;justify-content:flex-end}
+.field .fl{position:absolute;top:-6px;left:9px;padding:0 4px;background:var(--panel);
+  font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.field input{appearance:none;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+  border-radius:var(--r-sm);padding:8px 10px;font-size:12.5px;font-family:var(--mono);font-weight:600;
+  outline:none;min-width:132px}
+.field input:hover{border-color:var(--line-hi);background-color:var(--hover)}
+.field input:focus{border-color:var(--line-hi);background-color:var(--hover)}
+.field input::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.55}
+.field input:hover::-webkit-calendar-picker-indicator{opacity:1}
+/* The field reads as a button, so it must not look like text to be dragged
+   over. user-select handles a real drag-selection, but the blue block on the
+   day is NOT that - it is the date input's own segment highlight, drawn inside
+   the control's shadow DOM, which user-select cannot reach. Each segment has to
+   be told separately not to paint it. */
+.field input[type=date]{user-select:none;-webkit-user-select:none;cursor:pointer}
+.field input[type=date]::selection{background:transparent}
+.field input[type=date]::-webkit-datetime-edit-day-field,
+.field input[type=date]::-webkit-datetime-edit-month-field,
+.field input[type=date]::-webkit-datetime-edit-year-field,
+.field input[type=date]::-webkit-datetime-edit-hour-field,
+.field input[type=date]::-webkit-datetime-edit-minute-field{
+  background:transparent;color:inherit;outline:none;padding:0}
+/* :focus wins over the rule above in the UA sheet, so it is repeated for it */
+.field input[type=date]::-webkit-datetime-edit-day-field:focus,
+.field input[type=date]::-webkit-datetime-edit-month-field:focus,
+.field input[type=date]::-webkit-datetime-edit-year-field:focus,
+.field input[type=date]::-webkit-datetime-edit-hour-field:focus,
+.field input[type=date]::-webkit-datetime-edit-minute-field:focus{
+  background:transparent;color:inherit;outline:none}
+
+:root[data-theme="dark"] .field input::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.6}
+.chead .tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+
+/* ---------- panel dropdown ----------
+   The same control the Monitoring bar and the Alarms bar open, so a severity
+   is chosen the same way everywhere in the portal. Several at once here: an
+   operator reading this panel wants "alarms and criticals" far more often than
+   any single band, and a one-of-five select made that two passes over the list
+   with nothing on screen able to show both. */
+.msel{position:relative;display:flex}
+.mbtn{display:flex;align-items:center;width:100%;min-width:126px;height:30px;
+  padding:0 26px 0 10px;border-radius:var(--r-sm);border:1px solid var(--line);
+  color:var(--text);font-size:12.5px;font-weight:600;text-align:left;
+  background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%238d99a6" stroke-width="1.6" stroke-linecap="round"/></svg>') no-repeat right 9px center}
+.mbtn:hover,.msel.open .mbtn{border-color:var(--line-hi);background-color:var(--hover)}
+.mbtn .mlab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* "nothing chosen" is a real state, not a value - said in the muted voice so a
+   set filter is legible without reading it */
+.mbtn .mlab.any{color:var(--muted);font-weight:600}
+/* anchored to the RIGHT: this panel sits at the right edge of a 300px card, and
+   a list hung from its left would leave the card */
+.mpanel{position:absolute;top:calc(100% + 6px);right:0;z-index:80;width:196px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:8px}
+.mpanel[hidden]{display:none}
+.mhead{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);padding:2px 8px 7px}
+.mrow{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;
+  font-size:12.5px;font-weight:600;cursor:pointer;width:100%;color:var(--text)}
+.mrow:hover{background:var(--hover)}
+.mrow input{width:14px;height:14px;accent-color:var(--green);flex:none}
+/* the severity dot, so the row is read by the same mark the list below uses */
+.mrow i{width:7px;height:7px;border-radius:50%;flex:none;margin-left:auto}
+.mrow i.critical{background:var(--red)}   .mrow i.alarm{background:var(--red)}
+.mrow i.warn{background:var(--amber)}     .mrow i.event{background:var(--faint)}
+.mfoot{display:flex;gap:6px;padding:8px 4px 2px;border-top:1px solid var(--line-soft);margin-top:6px}
+.mfoot button{flex:1;padding:5px 0;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font-size:11.5px;font-weight:700}
+.mfoot button:hover{border-color:var(--line-hi);color:var(--text);background:var(--hover)}
+
+/* ---------- the panel with nothing in it ----------
+   An empty list has to say WHICH kind of empty it is. "Nothing is wrong" and
+   "you are filtering it out" look identical as a blank card, and only one of
+   them is good news - so the first is stated positively and the second names
+   what is being hidden and offers the way back in one click. */
+.anone{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;min-height:150px;padding:20px 18px;text-align:center}
+.anone svg{color:var(--faint);opacity:.7}
+.anone .t{font-size:13px;font-weight:700;color:var(--text)}
+.anone .s{font-size:11.5px;color:var(--muted);max-width:250px;line-height:1.4}
+.anone .clr{margin-top:8px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);
+  background:transparent;color:var(--text);font-size:11.5px;font-weight:700}
+.anone .clr:hover{border-color:var(--line-hi);background:var(--hover)}
+/* all clear is the one empty state that is good news, so it is allowed the colour */
+.anone.ok svg{color:var(--green);opacity:1}
+
+/* ---------- plant header ---------- */
+/* The card is a block; the name/capacity line is the flex row inside it. The
+   expanding panel has to be a sibling of that row rather than a wrapped flex
+   line, because `gap` sets ROW gap too - a second line reserves 28px between
+   the lines whether or not the line has any height, which made the closed
+   header 28px taller than it had been. */
+.planthead{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:8px 15px}
+.phrow{display:flex;align-items:center;gap:clamp(16px,2vw,28px);flex-wrap:wrap}
+.pname{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pname .n{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:.2px;line-height:1.05;
+  display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.pname .addr{font-size:11.5px;color:var(--faint);letter-spacing:.01em}
+.pill{font-size:10px;font-weight:800;letter-spacing:.08em;padding:3px 9px;border-radius:20px;
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.pill.warn{color:var(--amber);background:var(--amber-soft);border:1px solid var(--amber-soft)}
+.pill.warn::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--amber)}
+.caps{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.cap{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:9px;
+  padding:6px 11px;min-width:108px}
+.cap .k{font-size:8.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--faint)}
+.cap .v{font-family:var(--mono);font-weight:800;font-size:15px;letter-spacing:-.3px;margin-top:2px}
+.cap .v .u{font-size:9.5px;color:var(--muted);margin-left:3px}
+
+/* ---------- KPI cards ---------- */
+/* left rail + main column, mirroring the Monitoring shell */
+/* the rail stretches to the main column instead of standing at its own height,
+   so the fleet list scrolls inside it and the page stops growing to fit a fleet */
+.shell{display:grid;grid-template-columns:clamp(212px,15vw,248px) minmax(0,1fr);
+  gap:clamp(12px,1vw,18px);align-items:stretch}
+/* Bounded to the viewport and sticky, the way the Monitoring rail is. Without a
+   ceiling the rail's natural height grows with the fleet, the grid row grows with
+   it, and the list never scrolls - a 16-inverter plant just made the page longer. */
+.rail{position:sticky;top:70px;align-self:start;display:flex;flex-direction:column;
+  max-height:calc(100vh - 84px);min-height:0}
+.rail>*{flex:none}
+.maincol{min-width:0;display:flex;flex-direction:column;gap:clamp(12px,1vw,16px)}
+.kpis{display:flex;flex-direction:column;gap:clamp(7px,.55vw,10px)}
+/* Every rail card is the same height, so the column reads as one stack — but
+   that height is set by the tallest content (label + value + sub) and no more.
+   At 94px the four cards with no sub-line were carrying ~27px of dead space. */
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:10px 12px;min-height:78px;display:flex;flex-direction:column;justify-content:center}
+.kpi{position:relative}
+/* every card gets the hero treatment; gold keeps the green PLANT POWER card leading */
+.kpi:not(.hero){background:linear-gradient(175deg,var(--brand-soft),var(--panel) 58%);
+  border-color:var(--brand-line)}
+/* one gold glyph per metric - brand colour, so it never competes with the
+   green/amber/red that carry status meaning elsewhere */
+.kpi .ico{position:absolute;top:9px;right:10px;width:23px;height:23px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--brand-soft);color:var(--brand);font-family:var(--mono);font-weight:800;font-size:12px}
+/* only the iconed cards need to keep clear of the glyph - the hero has none, and
+   was reserving the gap anyway, which is what made its label column look inset */
+.kpi:not(.hero) .lbl{padding-right:26px}
+.kpi .lbl{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+.kpi .val{font-family:var(--mono);font-weight:800;font-size:18px;letter-spacing:-.5px;margin-top:5px;line-height:1.1}
+.kpi .val .u{font-size:9.5px;color:var(--muted);font-weight:700;margin-left:4px;letter-spacing:0}
+/* --faint at this size sits near 3:1 on the card, which is under the readable
+   floor for 9px text - the sub-line reads in --muted instead */
+.kpi .sub{font-size:9.5px;font-weight:600;color:var(--muted);margin-top:5px;letter-spacing:.01em}
+/* a timestamp is a reading, not prose: mono and full contrast, so the eye lands
+   on it rather than on the "at" that introduces it */
+.kpi .sub b{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.kpi .sub.down{color:var(--red)} .kpi .sub.up{color:var(--green)} .kpi .sub.warn{color:var(--amber)}
+/* Compared at the SAME HOUR of yesterday, not against yesterday's whole day -
+   at noon a full day would always look like a collapse, and a card that reads
+   -60% every morning teaches people to ignore it. */
+.delta{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);
+  font-size:9.5px;font-weight:800;letter-spacing:-.2px}
+.delta::before{font-size:8px;line-height:1}
+/* Literal glyphs, not CSS escapes. Written through a tool that treats a
+   backslash-25 as an octal escape, the escaped form lands in the file as a
+   control byte followed by "B2" and renders as tofu - the same trap that
+   once put a NUL in this stylesheet. */
+.delta.up{color:var(--green)}   .delta.up::before{content:"▲"}
+.delta.down{color:var(--red)}   .delta.down::before{content:"▼"}
+.delta.flat{color:var(--muted)} .delta.flat::before{content:"–"}
+/* hero card — the one number the page leads with, echoing the fleet console */
+.kpi.hero{background:linear-gradient(175deg,var(--green-soft),var(--panel) 62%);
+  border-color:rgba(var(--green-rgb),.32);min-height:96px}
+.kpi.hero .val{font-size:26px;letter-spacing:-1px;color:var(--green-deep)}
+.kpi.hero .val .u{font-size:10px}
+.kpi.hero .meterbar{height:5px;margin-top:7px}
+.livechip{display:inline-flex;align-items:center;gap:5px;margin-left:7px;
+  font-size:8.5px;font-weight:800;letter-spacing:.12em;color:var(--green)}
+.ldot{width:5px;height:5px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 0 rgba(var(--green-rgb),.5);animation:pulse 2s infinite}
+/* sol arc — day progress, borrowed from the fleet console */
+.meterbar{height:4px;border-radius:3px;background:var(--panel-2);overflow:hidden;margin-top:7px}
+.meterbar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green-deep),var(--green));transition:width .5s}
+
+/* ---------- layout grids ---------- */
+/* The alarms column is capped rather than a share of the row: its rows are short,
+   fixed-length strings, so past ~400px it only gains empty middle. Everything the
+   cap frees goes to the chart, which is the one thing that reads better wide. */
+/* chart takes the whole row; the alarm panel is a sibling that slides in beside
+   it on hover, which narrows the chart rather than stacking under it */
+.g-main{display:flex;gap:12px;align-items:stretch}
+.g-main>.card:last-child{flex:1 1 auto;min-width:0}
+/* fixed width and first in the row, so it opens between the rail and the graph -
+   right beside the box that summoned it, the way Monitoring's device panel does */
+.apanel{flex:0 0 clamp(300px,24%,360px);max-width:360px;display:flex;flex-direction:column;
+  min-width:0;animation:apop .14s ease-out}
+@keyframes apop{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.apanel[hidden]{display:none}
+.g-half{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:12px}
+.g-main>*,.g-half>*{min-width:0}
+
+/* ---------- charts ---------- */
+/* same inset as the Monitoring chart, so the two pages' plots sit alike */
+.chartwrap{position:relative;padding:4px 10px 14px}
+.chartwrap svg{width:100%;height:auto;display:block}
+.gl{stroke:var(--line-soft);stroke-width:1}
+.gl.v{stroke:var(--grid-v)}
+.axt{fill:var(--faint);font-size:10.5px;font-family:var(--mono)}
+.axt.amber{fill:var(--amber)}
+/* chart SVG follows the tokens — CSS beats presentation attributes */
+#gpw stop{stop-color:var(--green)}
+#gpwb stop{stop-color:var(--blue)}
+#pw-line{stroke:var(--green)} #pw-ir{stroke:var(--amber)}
+#pw-now{stroke:var(--muted)} #pw-xh{stroke:var(--text)}
+#pw-dot circle{fill:var(--green)} #pw-dot circle:not(.pulse){stroke:var(--panel)}
+.legend{display:flex;gap:8px;flex-wrap:nowrap}
+.lg{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel-2);font-size:12px;white-space:nowrap;flex:none}
+.legend.compact{flex-wrap:wrap;min-width:0}
+.legend.compact .lg{padding:3px 8px;font-size:11px;gap:5px}
+.legend.compact .lg i{width:8px;height:8px}
+.lg i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.lg .n{color:var(--muted);font-weight:600}
+.lg .v{font-family:var(--mono);font-weight:700}
+/* the legend doubles as the series switch - a hidden series keeps its chip,
+   dimmed, so there is always a visible way back */
+.lg{cursor:pointer;user-select:none}
+.lg:hover{border-color:var(--line-hi)}
+.lg.off{opacity:.38}
+.lg.static{cursor:default}
+.lg.static:hover{border-color:var(--line)}
+.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;background:var(--elev);
+  border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-width:140px;
+  box-shadow:0 10px 26px -8px var(--shadow);z-index:5}
+.tip .tt{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--muted);margin-bottom:5px}
+.tip .tr{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);padding:2px 0}
+.tip .tr i{width:8px;height:8px;border-radius:2px}
+.tip .tr b{margin-left:auto;font-family:var(--mono);color:var(--text);font-weight:700}
+.pulse{animation:ping 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes ping{0%{opacity:.7;transform:scale(.6)}75%{opacity:0;transform:scale(3.2)}100%{opacity:0;transform:scale(3.2)}}
+.bar{transition:opacity .15s}
+.bar:hover{opacity:.75}
+
+/* ---------- alarms ---------- */
+/* grows to whatever height the chart beside it sets, so the footer sits on the
+   card's bottom edge instead of floating mid-card */
+.alist{display:flex;flex-direction:column;overflow-y:auto;flex:1 1 auto;min-height:0;
+  max-height:298px;scrollbar-width:none}
+/* The bar is hidden until the pointer is on the list — the same rule the
+   Monitoring device rail uses. A permanent scrollbar on a six-row panel reads as
+   chrome the page did not need. */
+.alist::-webkit-scrollbar{width:0}
+.alist:hover{scrollbar-width:thin;scrollbar-color:var(--line-hi) transparent}
+.alist:hover::-webkit-scrollbar{width:8px}
+.alist:hover::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:8px}
+.alist:hover::-webkit-scrollbar-track{background:transparent}
+.arow{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;
+  padding:8px 14px;border-top:1px solid var(--line-soft)}
+.arow:hover{background:var(--hover-soft)}
+.sev{width:3px;align-self:stretch;border-radius:3px;min-height:32px}
+/* four levels, ranked: critical outranks alarm, event is a log entry rather
+   than a fault. Critical is the deepest red so it separates from alarm at a
+   glance, and event is neutral - it is news, not a problem. */
+.sev.critical{background:#8c1109} .sev.alarm{background:var(--red)}
+.sev.warn{background:var(--amber)} .sev.event{background:var(--faint)}
+.amid{min-width:0;display:flex;flex-direction:column;gap:2px}
+.amid .msg{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.amid .meta{font-size:10.5px;color:var(--faint);font-family:var(--mono);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.amid .meta b{color:var(--muted);font-weight:700}
+.atag{font-size:9px;font-weight:800;letter-spacing:.1em;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.atag.critical{color:var(--on-accent);background:#8c1109;border:1px solid #8c1109}
+.atag.alarm{color:var(--red);background:var(--red-soft);border:1px solid var(--red-soft)}
+.atag.warn{color:var(--amber);background:var(--amber-soft);border:1px solid var(--amber-soft)}
+.atag.event{color:var(--muted);background:var(--panel-2);border:1px solid var(--line)}
+
+/* ---------- v2 · KPI strip ---------- */
+/* The rail is needed for the fleet, so the readouts run across instead. Eight
+   summary numbers read fine on one line and it buys the chart the full width.
+   The track floor is set from the widest reading a card has to hold ("101158.90
+   kWh" at 18px mono, plus padding) rather than a round number, so all eight stay
+   on one line down to a ~1250px window instead of dropping one card to a second
+   row - a wrap there would cost more height than the narrower cards save. */
+.kpistrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(146px,100%),1fr));
+  gap:clamp(6px,.45vw,9px)}
+.kpistrip .kpi{min-height:60px;padding:8px 10px}
+
+/* ---------- v2 · fleet rail ---------- */
+/* No overscroll containment: this list sits inside a page that scrolls on a
+   short screen, and containing it makes the rail a dead zone - the wheel reaches
+   the end of the list and the page never moves. Chaining is the default for a
+   reason. */
+/* the list owns the rail's leftover height and scrolls once the fleet outgrows it */
+.fleetstrip{display:flex;flex-direction:column;gap:5px;padding:1px;
+  flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none}
+.fleetstrip::-webkit-scrollbar{width:0}
+.fleetstrip:hover{scrollbar-width:thin;scrollbar-color:var(--line-hi) transparent}
+.fleetstrip:hover::-webkit-scrollbar{width:8px}
+.fleetstrip:hover::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:8px}
+/* one card per inverter, stacked - the same box the Monitoring rail uses */
+.fleetstrip .dev{background:var(--panel);border:1px solid var(--line);border-radius:9px;
+  padding:8px 10px 9px;gap:5px}
+/* reading and total share a line, so a card is two lines plus its bar */
+.fleetstrip .dev-line{display:flex;align-items:baseline;gap:8px}
+.fleetstrip .dev-meta{margin-left:auto;font-size:9.5px}
+.fleetstrip .dev:hover{border-color:var(--line-hi);background-color:var(--panel)}
+/* the selected card is ringed in the colour its line is drawn in, so the rail
+   and the chart name the same inverter the same way */
+.fleetstrip .dev.sel{border-color:var(--ring,var(--green));
+  box-shadow:inset 0 0 0 1px var(--ring,var(--green))}
+.fleetstrip .dev-val{font-size:14.5px;line-height:1}
+
+/* ---------- v2 · back to plant total ---------- */
+/* An arrow, not a cross. The chip does not dismiss anything - it goes somewhere,
+   back to the curve the page opens on, and the label names that destination. A
+   cross said "close this", which is the one thing the button does not do.
+
+   Neutral, not green: it sits a few pixels from the legend, whose whole job is
+   to map colour to series. A green pill there reads as another series. */
+.backchip{display:inline-flex;align-items:center;gap:6px;flex:none;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:20px;
+  padding:4px 12px 4px 9px;font-size:11px;font-weight:700;letter-spacing:.02em;
+  color:var(--muted);font-family:inherit;line-height:1.1;
+  transition:background-color .13s,border-color .13s,color .13s}
+.backchip:hover{background:var(--hover);border-color:var(--line-hi);color:var(--text)}
+.backchip:hover .bk{transform:translateX(-2px)}
+.backchip[hidden]{display:none}
+/* the arrow leans further back as you approach it - the only motion is the one
+   that says which way the button goes */
+.backchip .bk{flex:none;transition:transform .13s ease-out}
+
+/* ---------- v2 · alarm box ---------- */
+/* Counts are always on screen; only the list waits for a hover. */
+.alarmbox{margin-bottom:10px;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;padding:10px 11px;cursor:default;outline:none;
+  transition:border-color .15s,background-color .15s}
+.alarmbox:hover,.alarmbox:focus-visible{border-color:var(--line-hi);background:var(--hover-soft)}
+.alarmbox.hot{border-color:rgba(217,45,32,.4)}
+.ab-head{display:flex;align-items:baseline;gap:8px}
+.ab-head .t{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.ab-n{margin-left:auto;font-family:var(--mono);font-weight:800;font-size:17px;letter-spacing:-.4px;line-height:1}
+.ab-n.hot{color:var(--red)}
+.ab-bars{display:flex;gap:5px;margin-top:8px}
+.ab-seg{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;font-weight:800}
+.ab-seg i{width:7px;height:7px;border-radius:2px;display:inline-block}
+.ab-seg.critical{color:#8c1109} .ab-seg.critical i{background:#8c1109}
+.ab-seg.alarm{color:var(--red)} .ab-seg.alarm i{background:var(--red)}
+.ab-seg.event{color:var(--muted)} .ab-seg.event i{background:var(--faint)}
+.ab-seg.warn{color:var(--amber)} .ab-seg.warn i{background:var(--amber)}
+.ab-seg.none{color:var(--green)} .ab-seg.none i{background:var(--green)}
+.ab-hint{font-size:9px;color:var(--faint);margin-top:7px;letter-spacing:.02em}
+
+
+/* ---------- inverter fleet ---------- */
+/* The alarms list says five inverters stopped talking at 04:12; this strip is
+   where that becomes a picture of the plant — who is carrying the load, who is
+   dark, and how far off its rating each running unit is. */
+/* even inset on all four sides now that no header sits above the grid */
+.fleet{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(172px,100%),1fr));
+  gap:10px;padding:16px}
+.dev{display:flex;flex-direction:column;gap:7px;text-align:left;width:100%;
+  background:var(--panel-2);border:1px solid var(--line-soft);border-radius:11px;
+  padding:11px 12px 12px;color:inherit;transition:border-color .15s,background-color .15s}
+.dev:hover{border-color:var(--line-hi);background-color:var(--hover-soft)}
+.dev.sel{border-color:var(--green);background-color:var(--green-soft)}
+.dev.mute{opacity:.45}
+.dev-top{display:flex;align-items:center;gap:7px}
+.dev-dot{width:7px;height:7px;border-radius:50%;flex:none}
+.dev-dot.ok{background:var(--green)}
+.dev-dot.warn{background:var(--amber)}
+.dev-dot.down{background:var(--red)}
+.dev-id{font-family:var(--mono);font-size:12px;font-weight:800}
+.dev-st{margin-left:auto;font-size:8.5px;font-weight:800;letter-spacing:.09em;
+  padding:2px 6px;border-radius:5px;white-space:nowrap}
+.dev-st.ok{color:var(--green);background:var(--green-soft)}
+.dev-st.warn{color:var(--amber);background:var(--amber-soft)}
+.dev-st.down{color:var(--red);background:var(--red-soft)}
+.dev-val{display:block;font-family:var(--mono);font-weight:800;font-size:17px;
+  letter-spacing:-.4px;line-height:1}
+.dev-val.dim{color:var(--faint)}
+.dev-val .u{font-size:9.5px;color:var(--muted);font-weight:700;margin-left:3px;letter-spacing:0}
+.dev .meterbar{display:block;margin-top:0}
+.meterbar i.amber{background:linear-gradient(90deg,var(--amber),var(--amber))}
+.dev-meta{display:block;font-size:9.5px;color:var(--faint);font-family:var(--mono);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chead .hint{font-size:10.5px;color:var(--faint)}
+
+@media (max-width:1150px){ .g-main{flex-direction:column} .apanel{flex:none} }
+@media (max-width:980px){ .chead .hint{display:none} }
+@media (max-width:1100px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static}
+  .kpis{flex-direction:row;flex-wrap:wrap}
+  .kpis .kpi{flex:1 1 172px}
+}
+@media (max-width:820px){
+  .topbar{gap:12px;padding:0 14px}
+  .page{padding:12px 14px 30px}
+  .clock{display:none}
+  .caps{margin-left:0}
+  .g-half{grid-template-columns:1fr}
+  .chead{flex-wrap:wrap}
+  .chead .title{white-space:normal}
+  .legend{flex-wrap:wrap}
+  .chead .tools{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+
+/* ---------- plant switcher · the header opens downward ----------
+   The third pass at this, and the one that stops treating "switch plant" as a
+   menu problem.
+
+   Cycling could not show you what you were choosing between. The hover strip
+   could, but only a name and a rating - enough to identify a plant, not enough
+   to decide on one. Switching is rarely "take me to Rioja"; it is "which site
+   needs me right now", and neither of the first two could answer that.
+
+   So the header opens instead of a panel appearing. Clicking the name grows the
+   header card downward and lays out one card per plant carrying what the choice
+   actually turns on: what it is making right now against its rating, and how
+   many alarms are open on it. You pick a plant already knowing its state.
+
+   Because the panel is a ROW OF THE HEADER rather than a layer above it, it
+   pushes the page down instead of covering it - nothing is ever obscured, and
+   the space is real, so the cards can be as tall as they need to be. That is
+   the trade against the strip: this one costs height while it is open, and
+   buys room for readings the strip had nowhere to put. */
+.pswitch{align-self:flex-start}
+.pname-btn{display:inline-flex;align-items:center;gap:9px;
+  background:transparent;border:1px solid transparent;border-radius:9px;
+  padding:3px 10px;margin:-3px -10px;color:inherit;font-family:inherit}
+/* No caret. A chevron said "this is a dropdown", and it is not one - there is
+   no menu to drop, the header itself opens under the pointer. The hover tint is
+   the whole affordance, which is what the name-as-control was always meant to
+   be: a title that answers when you reach for it. */
+.pname-btn:hover,.pname-btn:focus-visible{background:var(--hover);border-color:var(--line-hi)}
+.pname-btn[aria-expanded="true"]{background:var(--sel);border-color:var(--line-hi)}
+
+/* max-height rather than display, so the header GROWS into place instead of
+   snapping - the page below it slides down at the same rate and the movement
+   reads as one thing opening, not two things jumping. The cost is real height
+   while it is open, which is the trade taken deliberately: the cards get room
+   to carry power, rating and alarms rather than just a name. */
+.pexpand{overflow:hidden;max-height:0;opacity:0;margin-top:0;
+  transition:max-height .22s ease,opacity .15s ease,margin-top .22s ease}
+.pexpand.open{max-height:210px;opacity:1;margin-top:8px}
+/* Two lines, not five. Each card was carrying its readings on a line of their
+   own - name, address, power, bar, alarms - which is a tile, and a portal with
+   twenty sites cannot spend a tile on each. Everything survives; it is packed
+   into a row of identity over a row of state, and the card comes out around
+   half as tall. */
+/* Tracks are CAPPED, not stretched. auto-fit with a 1fr max collapses the empty
+   tracks and hands their width to the cards that are there, so three plants got
+   a third of the header each. auto-fill keeps them, and a fixed max stops any
+   card growing past the width its own content needs - 232px, which is what the
+   state line measures at, not a round number.
+   THE LIST SCROLLS past two rows rather than the header growing without limit. */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,258px));
+  gap:6px;padding-top:9px;border-top:1px solid var(--line-soft);
+  max-height:174px;overflow-y:auto;scrollbar-width:none}
+.pgrid::-webkit-scrollbar{width:0}
+.pgrid:hover{scrollbar-width:thin;scrollbar-color:var(--line-hi) transparent}
+.pgrid:hover::-webkit-scrollbar{width:7px}
+.pgrid:hover::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:7px}
+.pcard{display:flex;flex-direction:column;gap:3px;min-width:0;
+  text-align:left;font-family:inherit;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:7px 10px}
+.pcard:hover{background:var(--hover);border-color:var(--line-hi)}
+/* the plant already on screen is marked by surface, not by colour - a green
+   "current" would read as a health light rather than as a selection */
+.pcard.on{background:var(--sel);border-color:var(--line-hi)}
+.pcard .top,.pcard .row{display:flex;align-items:baseline;gap:6px;min-width:0}
+.pcard .nm{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--text);
+  line-height:1.15;white-space:nowrap}
+/* a dot, not the word: at this size CURRENT would take a third of the line */
+.pcard.on .nm::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
+  margin-left:6px;vertical-align:middle;background:var(--line-hi)}
+/* flex:1 1 0 with min-width:0 is what actually lets it ellipsis - a flex item
+   will not shrink below its content width otherwise, and the address then just
+   pushed the card wider than its column */
+.pcard .ad{flex:1 1 0;min-width:0;text-align:right;font-size:9px;color:var(--faint);
+  line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard .pw{font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:-.4px;
+  color:var(--green-deep);line-height:1.1}
+.pcard .u{font-family:var(--mono);font-size:8px;font-weight:700;color:var(--muted);margin-left:-3px}
+.pcard .cap{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--faint);white-space:nowrap}
+.pcard .meterbar{height:3px;margin-top:1px}
+/* the alarm count is the other half of the decision, so it is stated on every
+   card - including the ones with nothing wrong, which is itself the answer */
+.pcard .alm{margin-left:auto;display:inline-flex;align-items:center;gap:4px;
+  font-size:8.5px;font-weight:800;letter-spacing:.05em;white-space:nowrap}
+.pcard .alm::before{content:"";width:5px;height:5px;border-radius:50%;flex:none}
+.pcard .alm.hot{color:var(--red)}    .pcard .alm.hot::before{background:var(--red)}
+.pcard .alm.cold{color:var(--faint)} .pcard .alm.cold::before{background:var(--green)}
+
+.pill.warn:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--amber)}
+/* ---------- month + year picker ---------- */
+/* year first, then a 3x4 grid of months - both charts it drives are whole-month
+   series, so a day grid would ask a question neither of them can answer */
+.mpick{position:relative;display:inline-flex;flex-direction:column;justify-content:flex-end}
+.mpick .fl{position:absolute;top:-6px;left:9px;padding:0 4px;background:var(--panel);z-index:1;
+  font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.mpick-btn{display:flex;align-items:center;gap:10px;min-width:150px;background:var(--panel-2);
+  border:1px solid var(--line);color:var(--text);border-radius:var(--r-sm);padding:8px 10px;
+  font-size:12.5px;font-family:var(--mono);font-weight:600}
+.mpick-btn:hover{border-color:var(--line-hi);background-color:var(--hover)}
+.mpick-btn svg{margin-left:auto;color:var(--muted);flex:none}
+.mpick-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:80;width:250px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:12px}
+.mpick-panel[hidden]{display:none}
+.mpick-head{display:flex;align-items:center;gap:8px;padding:2px 4px 10px}
+.mpick-head .yr{flex:1;text-align:center;font-family:var(--mono);font-weight:800;font-size:14px}
+.mpick-head button{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font-size:13px;line-height:1}
+.mpick-head button:hover{color:var(--text);border-color:var(--line-hi);background:var(--hover)}
+.mpick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mpick-grid button{padding:9px 0;border-radius:8px;border:1px solid transparent;
+  background:transparent;color:var(--text);font-size:12.5px;font-weight:600}
+.mpick-grid button:hover{border-color:var(--line-hi);background:var(--hover)}
+/* selection is a surface, the same language the plant cards use */
+.mpick-grid button.on{background:var(--sel);border-color:var(--line-hi);color:var(--text);font-weight:800}
+</style>
+<script>/* stored theme applied before first paint, so there is no flash */
+try{var _t=localStorage.getItem('enerops-theme');if(_t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}
+</script>
+</head>
+<body>
+
+
+
+<header class="topbar">
+  <div class="brand"><img class="logo" src="logo/logo-mark.png" alt="EnerOps Data Systems Pvt Ltd"><span class="btext"><span class="word">ENEROPS OS</span><span class="sub">SITE OVERVIEW</span></span></div>
+  <nav class="tabs">
+    <a class="tab active" href="#">Home</a>
+    <a class="tab" href="monitoring.html">Monitoring</a>
+    <a class="tab" href="alarms.html">Alarms</a>
+    <a class="tab" href="analysis.html">Analysis</a>
+    <a class="tab" href="kpi.html">KPI</a>
+  </nav>
+  <div class="right">
+    <span class="clock" id="clk">12:10:03 PM</span>
+    <div class="refresh"><span class="dot" id="livedot"></span><span>Refresh</span>
+      <select id="refresh-sel"><option value="off">Off</option>
+        <option value="300" selected>5 min</option>
+        <option value="600">10 min</option>
+        <option value="900">15 min</option></select>
+    </div>
+    <button class="iconbtn" id="themebtn" onclick="toggleTheme()" title="Switch to dark theme"></button>
+    <div class="avatar">V</div>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ===== PLANT HEADER ===== -->
+  <section class="planthead">
+   <div class="phrow">
+    <div class="pname">
+      <!-- click the name to open the header and see every plant's state -->
+      <div class="pswitch">
+        <button class="pname-btn" type="button" id="p-btn" aria-expanded="false"
+                aria-controls="p-exp" onclick="togglePlants()" title="Switch plant">
+          <span class="n" id="p-name">Sangria</span>
+        </button>
+      </div>
+      <div class="addr" id="p-addr">2 DLP, Kikarwali Road Nathwana Sangria</div>
+    </div>
+    <div class="caps">
+      <div class="cap"><div class="k">AC capacity</div><div class="v"><span id="p-ac">2500.00</span><span class="u">kW</span></div></div>
+      <div class="cap"><div class="k">DC capacity</div><div class="v"><span id="p-dc">2500.00</span><span class="u">kWp</span></div></div>
+    </div>
+   </div>
+    <!-- a row of the header, not a layer over the page: opening it makes the
+         card taller and pushes what follows down, so nothing is ever covered -->
+    <div class="pexpand" id="p-exp"><div class="pgrid" id="p-grid"></div></div>
+  </section>
+
+  <!-- ===== KPI ROW ===== -->
+  <div class="kpistrip">
+      <div class="kpi hero">
+        <div class="lbl">Plant power <span class="livechip"><span class="ldot"></span>LIVE</span></div>
+        <div class="val"><span id="k-pw">376.8</span><span class="u">kW</span></div>
+        <div class="meterbar"><i id="k-pw-bar" style="width:15%"></i></div>
+        <div class="sub warn"><span id="k-pw-pct">15</span>% of <span id="k-cap">2500</span> kW capacity</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Peak power today</div>
+        <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.6 9 11l3.6 3.6L21 6"/><path d="M15.6 6H21v5.4"/></svg></span>
+        <div class="val"><span id="k-peak">0.0</span><span class="u">kW</span></div>
+        <div class="sub">at <b id="k-peak-t">—</b></div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Energy today</div>
+        <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg></span>
+        <div class="val"><span id="k-eday">1604.80</span><span class="u">kWh</span></div>
+        <!-- a number on its own says nothing about whether the day is going
+             well; against yesterday at the same hour, it does -->
+        <div class="sub"><span class="delta" id="k-eday-d">—</span> vs yesterday</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Plant energy</div>
+        <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.5H11L9.8 22 19 10h-6.6L13 2Z"/></svg></span>
+        <div class="val"><span id="k-etot">101158.90</span><span class="u">kWh</span></div>
+        <div class="sub">Lifetime</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Performance ratio</div>
+        <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4.2-4.6"/></svg></span>
+        <div class="val"><span id="k-pr">0.0</span><span class="u">%</span></div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Irradiance</div>
+        <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/></svg></span>
+        <div class="val"><span id="k-irr">0</span><span class="u">W/m2</span></div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Revenue generated</div>
+        <span class="ico">₹</span>
+        <div class="val"><span class="u" style="margin:0 3px 0 0">₹</span><span id="k-rev">287291.28</span></div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">CO₂ avoided</div>
+        <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M20 4c0 8-5 12-11 12H5c0-8 5-12 11-12h4Z"/><path d="M5 20c2.5-4 5.5-6.5 9-8"/></svg></span>
+        <div class="val"><span id="k-co2">71823.82</span><span class="u">kg</span></div>
+      </div>
+  </div>
+
+  <div class="shell">
+    <aside class="rail">
+      <!-- Alarms stay STATED at all times - the counts are never hidden. Only the
+           list is on hover, because a panel you have to go looking for is the
+           wrong place for the one thing that means something is wrong. -->
+      <div class="alarmbox" id="alarmbox" tabindex="0">
+        <div class="ab-head"><span class="t">Active alarms</span><span class="ab-n" id="ab-n">0</span></div>
+        <div class="ab-bars" id="ab-bars"></div>
+      </div>
+
+      <!-- the fleet is the chart's selector; the cards label themselves, so the
+           heading above them was a line of chrome the rail did not need -->
+      <div class="fleetstrip" id="fleet"></div>
+
+    </aside>
+
+    <main class="maincol">
+    <!-- ===== POWER vs IRRADIANCE + ALARMS ===== -->
+    <div class="g-main" id="g-main">
+      <!-- opens on hovering the rail's alarm box; it is a flex sibling of the
+           chart, so showing it narrows the graph and the chart's ResizeObserver
+           re-fits the plot - exactly how the Monitoring device panel behaves -->
+      <aside class="card apanel" id="apanel" hidden>
+        <div class="chead">
+          <div class="title">Active alarms</div>
+          <div class="tools"><div class="msel" id="a-sev"></div></div>
+        </div>
+        <div class="alist" id="alist"></div>
+      </aside>
+      <div class="card">
+        <div class="chead">
+          <!-- the per-inverter view is reached from the fleet strip below, so the
+               title is a label again rather than a second switch for the same thing -->
+          <div class="title" id="pw-title-t">Plant Power vs Irradiance</div>
+          <!-- Deselecting inverters one by one is the long way back to the plant
+               total. This is the short one, and it only exists while it applies. -->
+          <button class="backchip" id="pw-back" type="button" hidden
+                  onclick="clearFleet()" title="Back to the plant total"><svg class="bk" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"/></svg>Plant total</button>
+          <!-- built by pwLegend(), which is what wires the click-to-hide;
+               a hand-written copy here would go stale the moment it drifted -->
+          <div class="legend"></div>
+          <div class="tools">
+            <label class="field">
+              <span class="fl">Day</span>
+              <input type="date" id="pw-date" value="2026-07-27"
+                     onchange="T('Showing '+this.value+' (demo data is fixed to 27 Jul 2026)')">
+            </label>
+          </div>
+        </div>
+        <div class="chartwrap" id="pw-wrap">
+          <svg id="pw-chart" viewBox="0 0 1000 396" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gpw" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-opacity=".34"/><stop offset="1" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="gpwb" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-opacity=".30"/><stop offset="1" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g id="pw-axes"></g>
+            <path id="pw-area" fill="url(#gpw)"/>
+            <g id="pw-multi"></g>
+            <path id="pw-ir" fill="none" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="5 3" opacity=".85"/>
+            <path id="pw-line" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            <line id="pw-now" y1="16" y2="358" stroke-width="1" stroke-dasharray="3 4" opacity=".55"/>
+            <g id="pw-dot"><circle class="pulse" r="5" opacity=".6"/><circle r="3.6" stroke-width="1.4"/></g>
+            <line id="pw-xh" y1="16" y2="358" stroke-width="1" opacity="0"/>
+          </svg>
+          <div class="tip" id="pw-tip"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== MONTHLY ENERGY + CUF ===== -->
+    <div class="g-half">
+      <div class="card">
+        <div class="chead">
+          <div class="title">Plant Energy Generation</div>
+          <div class="tools">
+            <div class="mpick" id="en-pick">
+              <span class="fl">Month &amp; year</span>
+              <button class="mpick-btn" type="button">
+                <span class="mpick-lab">July 2026</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 10h17M8 2.8V6.6M16 2.8V6.6"/></svg>
+              </button>
+              <div class="mpick-panel" hidden>
+                <!-- head and grid are both rebuilt per step, year then month -->
+                <div class="mpick-head"></div>
+                <div class="mpick-grid"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chartwrap" id="en-wrap">
+          <svg id="en-chart" viewBox="0 0 1000 330" xmlns="http://www.w3.org/2000/svg">
+            <g id="en-axes"></g>
+            <rect id="en-hl" fill="var(--hover-soft)" rx="3" opacity="0"/>
+            <g id="en-bars"></g>
+          </svg>
+          <div class="tip" id="en-tip"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="chead">
+          <div class="title">Plant KPI</div>
+          <div class="legend compact" id="cuf-legend">
+            <span class="lg" data-k="actual" onclick="cufToggle('actual')" title="Click to hide or show"><i style="background:var(--green)"></i><span class="n">Actual</span></span>
+            <span class="lg" data-k="simulated" onclick="cufToggle('simulated')" title="Click to hide or show"><i style="background:var(--blue)"></i><span class="n">Simulated</span></span>
+          </div>
+          <div class="tools">
+            <select id="kpi-metric"><option>CUF</option><option>PR</option><option>Availability</option></select>
+            <div class="mpick" id="kpi-pick">
+              <span class="fl">Month &amp; year</span>
+              <button class="mpick-btn" type="button">
+                <span class="mpick-lab">July 2026</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 10h17M8 2.8V6.6M16 2.8V6.6"/></svg>
+              </button>
+              <div class="mpick-panel" hidden>
+                <!-- head and grid are both rebuilt per step, year then month -->
+                <div class="mpick-head"></div>
+                <div class="mpick-grid"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chartwrap" id="cuf-wrap">
+          <svg id="cuf-chart" viewBox="0 0 1000 330" xmlns="http://www.w3.org/2000/svg">
+            <g id="cuf-axes"></g>
+            <rect id="cuf-hl" fill="var(--hover-soft)" rx="3" opacity="0"/>
+            <g id="cuf-bars"></g>
+          </svg>
+          <div class="tip" id="cuf-tip"></div>
+        </div>
+      </div>
+    </div>
+    </main>
+  </div>
+
+</div>
+<div id="toasts" style="position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:100"></div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+/* ---------- theme toggle ---------- */
+const ICO_MOON='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>';
+const ICO_SUN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>';
+function applyTheme(t){
+  const root=document.documentElement, b=$('themebtn');
+  if(t==='dark') root.setAttribute('data-theme','dark'); else root.removeAttribute('data-theme');
+  if(b){ b.innerHTML=(t==='dark')?ICO_SUN:ICO_MOON;
+         b.title=(t==='dark')?'Switch to light theme':'Switch to dark theme'; }
+  try{localStorage.setItem('enerops-theme',t);}catch(e){}
+}
+window.toggleTheme=function(){
+  const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  applyTheme(next);
+  if(typeof fitCharts==='function') fitCharts();      /* bars/axes are painted, so repaint them */
+  T(next==='dark'?'Dark theme':'Light theme');
+};
+applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light');
+
+/* ---------- month + year picker ---------- */
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+/* Year FIRST, then month.
+   The stepper asked for the month while the year sat behind two arrows, so
+   reaching March 2024 meant guessing how many times to press a chevron with the
+   months of the wrong year on screen the whole time. Opening on a grid of years
+   asks the coarse question first and the fine one second, which is the order
+   the answer is actually known in. Picking a year moves to the months of that
+   year; the head then names it and steps back. */
+function initMonthPick(id,y,m,onPick){
+  const root=$(id), btn=root.querySelector('.mpick-btn'), pan=root.querySelector('.mpick-panel');
+  const head=root.querySelector('.mpick-head'), grid=root.querySelector('.mpick-grid');
+  const lab=btn.querySelector('.mpick-lab');
+  let vy=y, sy=y, sm=m, step='year';
+  const YSPAN=12;                        /* one page of years, 3 x 4 like the months */
+  let ypage=Math.floor(y/YSPAN)*YSPAN;
+
+  function paintBtn(){lab.textContent=MONL[sm]+' '+sy;}
+  function paint(){
+    if(step==='year'){
+      head.innerHTML='<button type="button" data-dir="-1" aria-label="Earlier years">&lsaquo;</button>'+
+        '<span class="yr">'+ypage+' – '+(ypage+YSPAN-1)+'</span>'+
+        '<button type="button" data-dir="1" aria-label="Later years">&rsaquo;</button>';
+      grid.innerHTML=Array.from({length:YSPAN},function(_,i){
+        const yy=ypage+i;
+        return '<button type="button" data-y="'+yy+'"'+(yy===sy?' class="on"':'')+'>'+yy+'</button>';
+      }).join('');
+      grid.querySelectorAll('button').forEach(function(b){
+        b.onclick=function(e){e.stopPropagation();vy=+b.dataset.y;step='month';paint();};
+      });
+      head.querySelectorAll('button').forEach(function(b){
+        b.onclick=function(e){e.stopPropagation();ypage+=(+b.dataset.dir)*YSPAN;paint();};
+      });
+    }else{
+      /* the head becomes the way back, so the year is never a dead end */
+      head.innerHTML='<button type="button" data-back="1" aria-label="Choose another year">&lsaquo;</button>'+
+        '<span class="yr">'+vy+'</span><span style="width:26px"></span>';
+      grid.innerHTML=MON.map(function(n,i){
+        return '<button type="button" data-m="'+i+'"'+((i===sm&&vy===sy)?' class="on"':'')+'>'+n+'</button>';
+      }).join('');
+      grid.querySelectorAll('button').forEach(function(b){
+        b.onclick=function(e){e.stopPropagation();
+          sm=+b.dataset.m;sy=vy;paintBtn();pan.hidden=true;
+          if(onPick)onPick(sy,sm);};
+      });
+      head.querySelectorAll('button[data-back]').forEach(function(b){
+        b.onclick=function(e){e.stopPropagation();ypage=Math.floor(vy/YSPAN)*YSPAN;step='year';paint();};
+      });
+    }
+  }
+  btn.onclick=function(e){e.stopPropagation();
+    vy=sy;ypage=Math.floor(sy/YSPAN)*YSPAN;step='year';paint();pan.hidden=!pan.hidden;};
+  document.addEventListener('mousedown',function(e){if(!root.contains(e.target))pan.hidden=true;});
+  paintBtn();paint();
+}
+
+window.T=function(msg){
+  const t=document.createElement('div');
+  t.style.cssText='background:var(--elev);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:9px;padding:10px 14px;font-size:12.5px;color:var(--text);box-shadow:0 12px 30px -8px var(--shadow)';
+  t.textContent=msg;$('toasts').appendChild(t);setTimeout(()=>t.remove(),2600);return false;
+};
+
+/* ---------- demo clock: 27 Jul 2026, 12:10:03 PM ---------- */
+const START_T=12+10/60+3/3600, t0=Date.now();
+const nowT=()=>START_T+(Date.now()-t0)/3600000;
+const pad=n=>String(n).padStart(2,'0');
+function fmtT(t,s){t=((t%24)+24)%24;let h=Math.floor(t),m=Math.floor((t-h)*60),sec=Math.floor((t*3600)%60);
+  const ap=h<12?'AM':'PM';let hh=h%12||12;return hh+':'+pad(m)+(s?':'+pad(sec):'')+' '+ap;}
+const axf=h=>{const hh=h%24,ap=hh<12?'AM':'PM';return (hh%12||12)+ap;};
+/* Ungrouped digits — no thousands separator, so the number reads as one solid run. */
+const inr=v=>v.toFixed(2);
+const num=(v,d)=>v.toFixed(d===undefined?1:d);
+
+/* ---------- plant model ---------- */
+/* Capacity and the power scale belong to the selected plant, not the file, so
+   switching plant moves every reading that depends on them. PK scales the power
+   curve: size against Sangria's 2500 kW, times how well the site runs. CAP stays
+   the nameplate, so a plant that is larger but lazier reads a lower CUF. */
+let CAP=2500, PK=1;
+const SUNRISE=6.2, SUNSET=19.35, SPAN=SUNSET-SUNRISE;
+const rnd=i=>{const s=Math.sin(i*12.9898)*43758.5453;return s-Math.floor(s)-.5;};
+const bell=t=>(t<=SUNRISE||t>=SUNSET)?0:Math.sin(Math.PI*(t-SUNRISE)/SPAN);
+/* Weather and the day's shape belong to the SITE, not to its size. PK scales a
+   plant's output by how big it is; these three say the sites are hundreds of
+   kilometres apart - a different sky over each, its cloud at a different hour,
+   its afternoon derate at a different minute. Without them, switching plant
+   left irradiance and the time of peak reading identically on all three, which
+   is the one thing a portfolio view must never do. */
+let IRRK=1;          /* local sky, 1.0 is the reference site      */
+let DIP=9.05;        /* when the mid-morning cloud crosses        */
+let PDROP=10.567;    /* when INV07 drops to its afternoon plateau */
+const cloud=t=>(t>DIP&&t<DIP+.45)?(.86+.07*Math.sin((t-DIP)*22)):1;
+const irr=t=>{const v=bell(t)*948*IRRK*cloud(t);return v<=0?0:Math.max(0,v+rnd(Math.round(t*60)+31)*12);};
+/* irradiance is weather, not plant size, so it alone does not take PK */
+const p06=t=>{const v=bell(t)*248*cloud(t)*PK;return v<=0?0:Math.max(0,v+rnd(Math.round(t*60))*3.2*PK);};
+const p07=t=>{let v=bell(t)*243*cloud(t)*PK;if(v<=0)return 0;
+  if(t>=PDROP)v*=.556+.012*Math.sin((t-PDROP)*7);
+  return Math.max(0,v+rnd(Math.round(t*60)+877)*2.6*PK);};
+/* the plant is the sum of what is actually running, so a site with more of its
+   fleet up genuinely reads higher - and taking one down visibly costs output */
+const plantP=t=>DEV.reduce((s,d)=>s+(d.on?d.fn(t):0),0);
+
+/* Every inverter has a curve. WHICH of them are running is a condition of the
+   plant, not a property of the hardware, so it is re-seated on every switch -
+   and the alarm list is built from it, which is what stops the rail claiming
+   six alarms while the fleet beside it shows a healthy site. */
+const SHARE=[.16,.15,.17,.14,.16];      /* 01-05 carry smaller string counts */
+const DEV=[
+  {id:'INV01',on:0,seen:'04:12 AM',fn:t=>p06(t)*SHARE[0]},
+  {id:'INV02',on:0,seen:'04:12 AM',fn:t=>p06(t)*SHARE[1]},
+  {id:'INV03',on:0,seen:'04:12 AM',fn:t=>p06(t)*SHARE[2]},
+  {id:'INV04',on:0,seen:'04:12 AM',fn:t=>p06(t)*SHARE[3]},
+  {id:'INV05',on:0,seen:'04:12 AM',fn:t=>p06(t)*SHARE[4]},
+  {id:'INV06',on:1,fn:p06},{id:'INV07',on:1,fn:p07,warn:1}
+];
+/* ?devices=N grows the fleet, so the rail's scroll behaviour can be reviewed -
+   the demo plant only has seven inverters and they all fit */
+(function(){
+  const N=parseInt(new URLSearchParams(location.search).get('devices')||'0',10);
+  for(let k=8;k<=N;k++){
+    const f=0.72+((k*37)%23)/100;
+    DEV.push({id:'INV'+String(k).padStart(2,'0'),on:1,fn:function(t){return p06(t)*f;}});
+  }
+})();
+
+let eTotal=101158.90;
+
+/* ---------- the day's energy ----------
+   Each inverter carries its own kWh-since-sunrise, seeded by walking its own
+   curve the same way the day's peak is, so a card never sits at zero waiting
+   for a tick to fill it. The strip's Energy today is SUMMED from those cards
+   rather than kept as its own running total: one number with one source, so
+   the rail and the strip cannot drift apart. An offline inverter contributes
+   nothing, which is what makes the total fall when one drops out. */
+const DSTEP=1/60;
+function walkDay(fn,upto){let e=0;for(let t=SUNRISE;t<=upto;t+=DSTEP)e+=fn(t)*DSTEP;return e;}
+function seedDay(){const end=Math.min(nowT(),SUNSET);
+  DEV.forEach(function(d){d.day=d.on?walkDay(d.fn,end):0;});}
+function sumDay(){return DEV.reduce(function(s,d){return s+(d.day||0);},0);}
+seedDay();
+
+/* ---------- chart 1 · power vs irradiance (dual axis) ---------- */
+/* Chart geometry is measured, not fixed: the viewBox is re-cut to the
+   container so 1 unit == 1 CSS px. Height follows width inside a readable band. */
+let W1=1000,H1=396,PW1,PH1;
+/* Monitoring's margins (46/16/14/34); the right inset stays wide here because
+   this chart carries a second axis for irradiance, which that one does not. */
+const L1=46,R1=58,T1=14,B1=34;
+PW1=W1-L1-R1;PH1=H1-T1-B1;
+let PMAX=600, PSTEP=100; const IMAX=1000;
+/* The power axis is cut to the day's own peak rather than a fixed ceiling, so
+   the curve fills the plot and its shape can be read against irradiance. Both
+   views use this same rule - that is what keeps the two comparable. A pinned
+   600 kW left the plant line sitting low and looking unrelated to the sun. */
+function niceMax(peak){
+  const p=Math.max(1,peak)*1.08;                /* headroom, so the peak is off the frame */
+  const steps=[10,20,25,50,100,150,200,250,500,1000,2000];
+  for(let i=0;i<steps.length;i++){
+    const n=Math.ceil(p/steps[i]);
+    if(n<=5) return {max:steps[i]*n, step:steps[i]};   /* at most 5 bands, so it stays readable */
+  }
+  return {max:Math.ceil(p/2000)*2000, step:2000};
+}
+/* the peak of whatever is actually on show - hidden series do not hold the axis open */
+function powerPeak(){
+  let m=0,t;
+  if(pwMode==='plant'){
+    if(pwOff.power) return 0;
+    for(t=SUNRISE;t<=SUNSET;t+=1/12) m=Math.max(m,plantP(t));
+  }else{
+    DEV.forEach(function(d){
+      if(!d.on||pwOff[d.id]) return;
+      for(t=SUNRISE;t<=SUNSET;t+=1/12) m=Math.max(m,d.fn(t));
+    });
+  }
+  return m;
+}
+function rescalePower(){
+  const p=powerPeak();
+  if(!p) return;                                /* nothing showing - keep the current frame */
+  const s=niceMax(p); PMAX=s.max; PSTEP=s.step;
+}
+/* The frame is cut to the daylight window plus an hour of margin either side,
+   not midnight to midnight. A third of a 24 h axis is dark every day of the year,
+   and that third was showing as empty plot — the curve now fills the card. */
+const DAY0=Math.floor(SUNRISE)-1, DAY1=Math.ceil(SUNSET)+1, DAYSPAN=DAY1-DAY0;
+const X1=t=>L1+(t-DAY0)/DAYSPAN*PW1, Y1=v=>T1+(1-v/PMAX)*PH1, Y1i=v=>T1+(1-v/IMAX)*PH1;
+function buildAxes1(){let s='';
+  for(let v=0;v<=PMAX;v+=PSTEP){const y=Y1(v);
+    s+='<line class="gl" x1="'+L1+'" y1="'+y+'" x2="'+(W1-R1)+'" y2="'+y+'"/>'+
+       '<text class="axt" x="'+(L1-8)+'" y="'+(y+3.5)+'" text-anchor="end">'+v+'</text>';}
+  for(let v=0;v<=IMAX;v+=200){const y=Y1i(v);
+    s+='<text class="axt amber" x="'+(W1-R1+8)+'" y="'+(y+3.5)+'" text-anchor="start">'+v+'</text>';}
+  /* labelled ticks start one hour inside the frame, so no label sits on the edge */
+  /* thin the hour labels when narrow, the way the Monitoring chart does */
+  const hStep=PW1<560?4:2;
+  for(let h=DAY0+1;h<=DAY1-1;h+=hStep){const x=X1(h);
+    s+='<line class="gl v" x1="'+x+'" y1="'+T1+'" x2="'+x+'" y2="'+(T1+PH1)+'"/>'+
+       '<text class="axt" x="'+x+'" y="'+(H1-14)+'" text-anchor="middle">'+axf(h)+'</text>';}
+  s+='<text class="axt" transform="translate(13,'+(T1+PH1/2)+') rotate(-90)" text-anchor="middle" style="letter-spacing:.13em">ACTIVE POWER · kW</text>';
+  s+='<text class="axt amber" transform="translate('+(W1-11)+','+(T1+PH1/2)+') rotate(90)" text-anchor="middle" style="letter-spacing:.13em">IRRADIANCE · W/m²</text>';
+  s+='<text class="axt" x="'+(W1/2)+'" y="'+(H1-1)+'" text-anchor="middle" style="letter-spacing:.08em">27 JULY 2026</text>';
+  $('pw-axes').innerHTML=s;}
+
+let P1={t:[],p:[],i:[]};
+let pwMode='plant';                       /* 'plant' aggregate | 'inverter' per device */
+/* The ids the fleet strip has selected. Empty means the plant total; one or more
+   means those inverters charted against irradiance. Title, legend and the tile
+   states all read from this one list rather than each re-deriving the selection
+   from pwOff, which is what let them drift apart. Kept in DEV order, not click
+   order, so the legend does not reshuffle as tiles are added. */
+let pwSel=[];
+/* INV06 and INV07 keep the colours they carry elsewhere; dark devices are drawn
+   flat and dimmed so the whole fleet is still represented */
+/* One colour per inverter, fixed by its position in the fleet, so a line, its
+   legend chip and its tooltip row always agree.
+
+   Colour used to carry STATUS - green for healthy, blue for warning - and on
+   a chart showing five healthy inverters that made five identical green lines
+   with a legend that could not tell them apart. Status is not lost: it is on
+   the rail card, where a dot and a word say it better than a hue could.
+
+   The hues live in the stylesheet as --s1..--s12 so the dark theme can lift
+   them; a mid-tone picked for white sinks into navy. */
+const SERIES=['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)','var(--s6)',
+              'var(--s7)','var(--s8)','var(--s9)','var(--s10)','var(--s11)','var(--s12)'];
+const devColor=d=>d.on?SERIES[Math.max(0,DEV.indexOf(d))%SERIES.length]:'var(--dim)';
+function drawPw(){
+  const nt=Math.min(nowT(),SUNSET);P1={t:[],p:[],i:[]};
+  for(let t=SUNRISE;t<nt;t+=1/12){P1.t.push(t);P1.p.push(plantP(t));P1.i.push(irr(t));}
+  P1.t.push(nt);P1.p.push(plantP(nt));P1.i.push(irr(nt));
+  const ln=(a,f)=>a.map((v,i)=>(i?'L':'M')+X1(P1.t[i]).toFixed(1)+' '+f(v).toFixed(1)).join(' ');
+  $('pw-ir').setAttribute('d',ln(P1.i,Y1i));           /* irradiance shows in both views */
+  const plant=pwMode==='plant', xe=X1(nt);
+  const showP=plant&&!pwOff.power;
+  $('pw-line').style.display=showP?'':'none';
+  $('pw-area').style.display=showP?'':'none';
+  $('pw-dot').style.display=showP?'':'none';
+  $('pw-multi').style.display=plant?'none':'';
+  $('pw-ir').style.display=pwOff.irradiance?'none':'';
+  if(plant){
+    $('pw-line').setAttribute('d',ln(P1.p,Y1));
+    $('pw-area').setAttribute('d',ln(P1.p,Y1)+' L'+xe.toFixed(1)+' '+Y1(0).toFixed(1)+' L'+X1(SUNRISE).toFixed(1)+' '+Y1(0).toFixed(1)+' Z');
+    $('pw-dot').setAttribute('transform','translate('+xe+' '+Y1(P1.p[P1.p.length-1])+')');
+  }else{
+    /* areas first, then lines, then dots - so no device's fill covers another's line */
+    let areas='',lines='',dots='';
+    const floor=Y1(0).toFixed(1), x0=X1(SUNRISE).toFixed(1), x1=xe.toFixed(1);
+    DEV.forEach(function(d){
+      if(pwOff[d.id]) return;
+      const pts=P1.t.map(function(t,k){return (k?'L':'M')+X1(t).toFixed(1)+' '+Y1(d.on?d.fn(t):0).toFixed(1);}).join(' ');
+      if(d.on){
+        areas+='<path d="'+pts+' L'+x1+' '+floor+' L'+x0+' '+floor+' Z" fill="url(#'+(d.warn?'gpwb':'gpw')+')"/>';
+        dots +='<circle cx="'+x1+'" cy="'+Y1(d.fn(nt)).toFixed(1)+'" r="3.6" fill="'+devColor(d)+'"'+
+               ' stroke="var(--panel)" stroke-width="1.4"/>';
+      }
+      lines+='<path d="'+pts+'" fill="none" stroke="'+devColor(d)+'" stroke-width="'+(d.on?2:1.3)+'"'+
+             ' stroke-linejoin="round" stroke-linecap="round" opacity="'+(d.on?1:.55)+'"><title>'+d.id+'</title></path>';
+    });
+    $('pw-multi').innerHTML=areas+lines+dots;
+  }
+  $('pw-now').setAttribute('x1',xe);$('pw-now').setAttribute('x2',xe);
+}
+/* legend follows the view */
+/* which series are hidden - keyed 'power', 'irradiance', or a device id */
+const pwOff={};
+function lgChip(key,color,label){
+  return '<span class="lg'+(pwOff[key]?' off':'')+'" data-k="'+key+'"'+
+    ' onclick="pwToggle(\''+key+'\')" title="Click to hide or show">'+
+    '<i style="background:'+color+'"></i><span class="n">'+label+'</span></span>';
+}
+function pwLegend(){
+  const L=$('pw-wrap').closest('.card').querySelector('.legend');
+  if(pwMode==='plant'){
+    L.innerHTML=lgChip('power','var(--green)','Power')+
+                lgChip('irradiance','var(--amber)','Irradiance');
+  }else{
+    /* the fleet strip is the selector now, so the legend carries only the
+       inverters it put on show, read against irradiance - the whole-fleet roll
+       call belongs on the fleet cards, not repeated here */
+    L.innerHTML=pwSel.map(function(id){
+        const d=DEV.filter(function(x){return x.id===id;})[0];
+        return d?lgChip(d.id,devColor(d),d.id):'';
+      }).join('')+
+      lgChip('irradiance','var(--amber)','Irradiance');
+  }
+}
+/* One selected inverter is named; any more read as a plain "Inverter", since the
+   legend beside the title already lists exactly which ones are on the chart. */
+function setPwTitle(){
+  const back=$('pw-back'); if(back) back.hidden=!pwSel.length;
+  const who = !pwSel.length ? 'Plant' : pwSel.length===1 ? pwSel[0] : 'Inverter';
+  $('pw-title-t').textContent=who+' Power vs Irradiance';
+}
+window.pwToggle=function(k){ pwOff[k]=!pwOff[k]; rescalePower(); pwLegend(); buildAxes1(); drawPw(); renderFleet(); };
+(function(){const svg=$('pw-chart'),tip=$('pw-tip'),xh=$('pw-xh'),wrap=$('pw-wrap');
+  svg.addEventListener('mousemove',e=>{
+    const r=svg.getBoundingClientRect(),vx=(e.clientX-r.left)/r.width*W1;
+    const t=DAY0+(vx-L1)/PW1*DAYSPAN,nt=P1.t[P1.t.length-1];
+    if(t<SUNRISE||t>nt){tip.style.opacity=0;xh.style.opacity=0;return;}
+    let i=Math.round((t-SUNRISE)*12);i=Math.max(0,Math.min(P1.t.length-1,i));
+    const xt=X1(P1.t[i]);xh.setAttribute('x1',xt);xh.setAttribute('x2',xt);xh.style.opacity=.25;
+    /* the read-out follows the view and the switches: a hidden series is not
+       listed, and in the per-inverter view each inverter reads separately */
+    const trow=function(c,n,v){return '<div class="tr"><i style="background:'+c+'"></i>'+n+'<b>'+v+'</b></div>';};
+    let rows='';
+    if(pwMode==='plant'){
+      if(!pwOff.power) rows+=trow('var(--green)','Power',P1.p[i].toFixed(1)+' kW');
+    }else{
+      DEV.forEach(function(d){
+        if(!d.on||pwOff[d.id]) return;
+        rows+=trow(devColor(d),d.id,d.fn(P1.t[i]).toFixed(1)+' kW');
+      });
+    }
+    if(!pwOff.irradiance) rows+=trow('var(--amber)','Irradiance',Math.round(P1.i[i])+' W/m²');
+    if(!rows){tip.style.opacity=0;xh.style.opacity=0;return;}
+    tip.innerHTML='<div class="tt">'+fmtT(P1.t[i])+'</div>'+rows;
+    const wr=wrap.getBoundingClientRect(),ox=r.left-wr.left,oy=r.top-wr.top;
+    let lx=(xt/W1)*r.width+ox+14;if(lx+165>wr.width)lx-=193;
+    tip.style.left=lx+'px';tip.style.top=Math.max(4,(Y1i(P1.i[i])/H1)*r.height+oy-10)+'px';tip.style.opacity=1;
+  });
+  svg.addEventListener('mouseleave',()=>{tip.style.opacity=0;xh.style.opacity=0;});})();
+
+/* ---------- chart 2 · monthly energy ---------- */
+const DIM=31, TODAY=27;
+function dayE(d){
+  if(d>TODAY)return null;
+  /* A month of production, not a month with a cliff in it. This used to drop
+     every day from the 20th to 29% of normal, which drew a plant that collapsed
+     mid-month and never came back - while the live readings beside it showed a
+     healthy site. Two panels on one screen cannot disagree about whether the
+     plant is running. What varies now is weather: a slow seasonal drift with a
+     few overcast days, none of which reads as a fault. */
+  const base=11800*(0.94+0.06*Math.sin(d*1.7))*PK;
+  const weather=0.88+0.12*Math.sin(d*0.55+1.1)-0.16*Math.max(0,Math.sin(d*2.3+0.4)-0.86)*6;
+  let v=base*Math.max(0.42,weather);
+  /* today is still being made, so it is drawn short and at reduced opacity */
+  if(d===TODAY)v*=0.42;
+  return v;
+}
+let W2=1000,H2=330,PW2,PH2;
+/* L2 and L3 are deliberately equal: these two cards sit side by side, so their
+   plot areas have to start on the same x or the row reads as misaligned. 64 is
+   what the widest label here ("14000") needs clear of the rotated axis title. */
+const L2=64,R2=16,T2=14,B2=34;
+PW2=W2-L2-R2;PH2=H2-T2-B2;
+/* the energy axis follows the plant: four bands rounded to 500 kWh, so a smaller
+   site does not draw stubs against a ceiling built for a bigger one */
+let EMAX=14000, ESTEP=3500;
+function energyScale(){
+  ESTEP=Math.ceil(14000*PK/4/500)*500;
+  EMAX=ESTEP*4;
+}
+const Y2=v=>T2+(1-v/EMAX)*PH2; let SLOT=PW2/DIM;
+function buildAxes2(){let s='';
+  for(let v=0;v<=EMAX;v+=ESTEP){const y=Y2(v);
+    s+='<line class="gl" x1="'+L2+'" y1="'+y+'" x2="'+(W2-R2)+'" y2="'+y+'"/>'+
+       '<text class="axt" x="'+(L2-8)+'" y="'+(y+3.5)+'" text-anchor="end">'+num(v,0)+'</text>';}
+  /* Gridlines stay sparse; DATES are written as densely as the slot allows.
+     They were tied together on a fixed every-other-day rule, so half the month
+     had no date under it - you could not point at the 27th because the 27th was
+     not written. A label needs about 13px; below that the month is thinned, and
+     the 1st and the last day are always named so the span is unambiguous. */
+  const gStep=PW2<560?4:2;
+  const lStep=SLOT>=13?1:(SLOT>=8.5?2:4);
+  for(let d=1;d<=DIM;d++){
+    const x=L2+(d-.5)*SLOT;
+    if(d===1||d%gStep===0)
+      s+='<line class="gl v" x1="'+x+'" y1="'+T2+'" x2="'+x+'" y2="'+(T2+PH2)+'"/>';
+    if(d===1||d===DIM||d%lStep===0)
+      s+='<text class="axt" x="'+x+'" y="'+(H2-16)+'" text-anchor="middle" font-size="9.5">'+d+'</text>';}
+  s+='<text class="axt" transform="translate(15,'+(T2+PH2/2)+') rotate(-90)" text-anchor="middle" style="letter-spacing:.13em">ENERGY · kWh</text>';
+  s+='<text class="axt" x="'+(W2/2)+'" y="'+(H2-2)+'" text-anchor="middle" style="letter-spacing:.08em">JULY 2026 · DAY</text>';
+  $('en-axes').innerHTML=s;}
+function buildBars2(){let s='';
+  for(let d=1;d<=DIM;d++){const v=dayE(d);const x=L2+(d-.5)*SLOT-SLOT*.34;const w=SLOT*.68;
+    if(v===null){s+='<rect class="bar" x="'+x.toFixed(1)+'" y="'+(Y2(0)-3).toFixed(1)+'" width="'+w.toFixed(1)+'" height="3" rx="1.5" fill="var(--line-soft)"/>';continue;}
+    const col='var(--green)';
+    s+='<rect class="bar" data-d="'+d+'" data-v="'+v.toFixed(0)+'" x="'+x.toFixed(1)+'" y="'+Y2(v).toFixed(1)+'" width="'+w.toFixed(1)+
+       '" height="'+(Y2(0)-Y2(v)).toFixed(1)+'" rx="2.5" fill="'+col+'" opacity="'+(d===TODAY?'.62':'.9')+'"><title>'+d+' Jul · '+num(v,0)+' kWh</title></rect>';}
+  $('en-bars').innerHTML=s;}
+
+/* ---------- chart 3 · CUF ---------- */
+let W3=1000,H3=330,PW3,PH3;
+const L3=64,R3=16,T3=14,B3=34;
+PW3=W3-L3-R3;PH3=H3-T3-B3;
+const CMAX=25;
+const Y3=v=>T3+(1-v/CMAX)*PH3; let SLOT3=PW3/DIM;
+const cuf=d=>{const e=dayE(d);return e===null?null:e/(CAP*24)*100;};
+/* design-model expectation for each day */
+const cufSim=d=>19.6+Math.sin(d*0.9)*0.7;
+function buildAxes3(){let s='';
+  for(let v=0;v<=CMAX;v+=5){const y=Y3(v);
+    s+='<line class="gl" x1="'+L3+'" y1="'+y+'" x2="'+(W3-R3)+'" y2="'+y+'"/>'+
+       '<text class="axt" x="'+(L3-8)+'" y="'+(y+3.5)+'" text-anchor="end">'+v+'</text>';}
+  /* same rule as the energy chart, so the two read alike side by side */
+  const gStep=PW3<560?4:2;
+  const lStep=SLOT3>=13?1:(SLOT3>=8.5?2:4);
+  for(let d=1;d<=DIM;d++){
+    const x=L3+(d-.5)*SLOT3;
+    if(d===1||d%gStep===0)
+      s+='<line class="gl v" x1="'+x+'" y1="'+T3+'" x2="'+x+'" y2="'+(T3+PH3)+'"/>';
+    if(d===1||d===DIM||d%lStep===0)
+      s+='<text class="axt" x="'+x+'" y="'+(H3-16)+'" text-anchor="middle" font-size="9.5">'+d+'</text>';}
+  s+='<text class="axt" transform="translate(14,'+(T3+PH3/2)+') rotate(-90)" text-anchor="middle" style="letter-spacing:.13em">CUF · %</text>';
+  s+='<text class="axt" x="'+(W3/2)+'" y="'+(H3-2)+'" text-anchor="middle" style="letter-spacing:.08em">JULY 2026 · DAY</text>';
+  $('cuf-axes').innerHTML=s;}
+const cufOff={};
+window.cufToggle=function(k){
+  cufOff[k]=!cufOff[k];
+  const els=document.querySelectorAll('#cuf-legend .lg');
+  for(let i=0;i<els.length;i++) els[i].classList.toggle('off',!!cufOff[els[i].dataset.k]);
+  buildBars3();
+};
+function buildBars3(){
+  /* three bars per day: what happened, what the model said, what was forecast */
+  const SER=[
+    {key:'actual',    get:cuf,    col:'var(--green)', name:'Actual'},
+    {key:'simulated', get:cufSim, col:'var(--blue)',  name:'Simulated'}
+  ].filter(function(s){return !cufOff[s.key];});
+  /* one series left? give it the width of the pair, so the day still reads
+     as a single column rather than a thin bar floating off-centre */
+  const n=SER.length||1;
+  const bw=SLOT3*(n===1?0.5:0.34), gap=SLOT3*0.06, group=bw*n+gap*(n-1);
+  let s='';
+  for(let d=1;d<=DIM;d++){
+    const cx=L3+(d-.5)*SLOT3, x0=cx-group/2;
+    SER.forEach(function(se,k){
+      const v=se.get(d), x=x0+k*(bw+gap);
+      if(v===null||v===undefined){
+        s+='<rect x="'+x.toFixed(1)+'" y="'+(Y3(0)-3).toFixed(1)+'" width="'+bw.toFixed(1)+
+           '" height="3" rx="1.5" fill="var(--line-soft)"/>';
+        return;
+      }
+      s+='<rect class="bar" x="'+x.toFixed(1)+'" y="'+Y3(v).toFixed(1)+'" width="'+bw.toFixed(1)+
+         '" height="'+(Y3(0)-Y3(v)).toFixed(1)+'" rx="1.6" fill="'+se.col+
+         '" opacity="'+(d===TODAY?'.62':'.92')+'"><title>'+d+' Jul · '+se.name+' '+v.toFixed(1)+'%</title></rect>';
+    });
+  }
+  $('cuf-bars').innerHTML=s;
+}
+/* hover: daily energy for the day under the pointer */
+(function(){const svg=$('en-chart'),tip=$('en-tip'),hl=$('en-hl'),wrap=$('en-wrap');
+  const hide=function(){tip.style.opacity=0;hl.setAttribute('opacity','0');};
+  svg.addEventListener('mousemove',function(e){
+    const r=svg.getBoundingClientRect();
+    const vx=(e.clientX-r.left)/r.width*W2, vy=(e.clientY-r.top)/r.height*H2;
+    if(vx<L2||vx>W2-R2||vy<T2||vy>T2+PH2){hide();return;}
+    let d=Math.ceil((vx-L2)/SLOT); d=Math.max(1,Math.min(DIM,d));
+    const v=dayE(d), cx=L2+(d-.5)*SLOT;
+    hl.setAttribute('x',(cx-SLOT/2).toFixed(1));hl.setAttribute('y',T2);
+    hl.setAttribute('width',SLOT.toFixed(1));hl.setAttribute('height',PH2.toFixed(1));
+    hl.setAttribute('opacity','1');
+    tip.innerHTML='<div class="tt">'+d+' Jul 2026</div>'+
+      '<div class="tr"><i style="background:var(--green)"></i>Energy<b>'+
+      (v===null?'—':num(v,0)+' kWh')+'</b></div>';
+    const wr=wrap.getBoundingClientRect(), ox=r.left-wr.left, oy=r.top-wr.top;
+    let lx=(cx/W2)*r.width+ox+14; if(lx+165>wr.width) lx-=193;
+    tip.style.left=lx+'px';
+    tip.style.top=Math.max(4,(Y2(v===null?0:v)/H2)*r.height+oy-10)+'px';
+    tip.style.opacity=1;
+  });
+  svg.addEventListener('mouseleave',hide);})();
+/* hover: read all three series for the day under the pointer */
+(function(){const svg=$('cuf-chart'),tip=$('cuf-tip'),hl=$('cuf-hl'),wrap=$('cuf-wrap');
+  const hide=function(){tip.style.opacity=0;hl.setAttribute('opacity','0');};
+  const row=function(c,n,v){return '<div class="tr"><i style="background:'+c+'"></i>'+n+'<b>'+v+'</b></div>';};
+  svg.addEventListener('mousemove',function(e){
+    const r=svg.getBoundingClientRect();
+    const vx=(e.clientX-r.left)/r.width*W3, vy=(e.clientY-r.top)/r.height*H3;
+    if(vx<L3||vx>W3-R3||vy<T3||vy>T3+PH3){hide();return;}
+    let d=Math.ceil((vx-L3)/SLOT3); d=Math.max(1,Math.min(DIM,d));
+    const a=cuf(d), sm=cufSim(d);
+    const cx=L3+(d-.5)*SLOT3;
+    hl.setAttribute('x',(cx-SLOT3/2).toFixed(1));
+    hl.setAttribute('y',T3);
+    hl.setAttribute('width',SLOT3.toFixed(1));
+    hl.setAttribute('height',PH3.toFixed(1));
+    hl.setAttribute('opacity','1');
+    let rows='';
+    if(!cufOff.actual)    rows+=row('var(--green)','Actual',   a===null?'—':a.toFixed(1)+'%');
+    if(!cufOff.simulated) rows+=row('var(--blue)','Simulated', sm.toFixed(1)+'%');
+    if(!rows){hide();return;}
+    tip.innerHTML='<div class="tt">'+d+' Jul 2026</div>'+rows;
+    const wr=wrap.getBoundingClientRect(), ox=r.left-wr.left, oy=r.top-wr.top;
+    let lx=(cx/W3)*r.width+ox+14; if(lx+165>wr.width) lx-=193;
+    tip.style.left=lx+'px';
+    tip.style.top=Math.max(4,(Y3(Math.max(cufOff.actual||a===null?0:a,cufOff.simulated?0:sm))/H3)*r.height+oy-10)+'px';
+    tip.style.opacity=1;
+  });
+  svg.addEventListener('mouseleave',hide);})();
+$('kpi-metric').addEventListener('change',e=>T(e.target.value+' — sample data shown for CUF in this mockup'));
+
+/* ---------- alarms ----------
+   Built FROM the plant's fleet state, never listed separately. Two lists would
+   drift the moment one was edited, and a rail claiming six alarms above a fleet
+   showing seven healthy inverters is worse than no alarm surface at all: one
+   inverter down is one alarm, and the same switch produces both. */
+const DOWN_AT=['04:12:07','04:12:07','04:12:08','04:12:09','04:12:11','05:02:44','05:18:03'];
+function buildAlarms(p){
+  const out=[];
+  (p.crit||[]).forEach(function(id){
+    out.push({sev:'critical',msg:'DC Insulation Fault',dev:id,cat:'inverter',t:'06:41:52'});
+  });
+  (p.down||[]).forEach(function(id){
+    const i=DEV.map(d=>d.id).indexOf(id);
+    out.push({sev:'alarm',msg:'Communication Error',dev:id,cat:'inverter',
+              t:DOWN_AT[i]||'04:12:07'});
+  });
+  (p.warn||[]).forEach(function(id){
+    out.push({sev:'warn',msg:'Output below expected',dev:id,cat:'inverter',t:'10:34:22'});
+  });
+  /* events are not faults, so they never take a device offline or flag one -
+     they are the log of what the site DID, kept beside what went wrong */
+  (p.events||[]).forEach(function(e){
+    out.push({sev:'event',msg:e.msg,dev:e.dev,cat:'inverter',t:e.t});
+  });
+  return out;
+}
+/* seeded below, once PLANTS exists - this block runs above it */
+let AL=[];
+const SEVLBL={critical:'CRITICAL',alarm:'ALARM',warn:'WARNING',event:'EVENT'};
+/* the order the rail counts them in, worst first */
+const SEVRANK={critical:0,alarm:1,warn:2,event:3};
+/* empty = every severity, the same "no narrowing" this portal uses everywhere */
+let ASEV=[];
+window.renderAlarms=function(){
+  const rows=AL.filter(a=>!ASEV.length||ASEV.indexOf(a.sev)>=0)
+    .slice().sort((x,y)=>SEVRANK[x.sev]-SEVRANK[y.sev]);
+  $('alist').innerHTML=rows.length?rows.map(a=>
+    '<div class="arow"><span class="sev '+a.sev+'"></span>'+
+    '<span class="amid"><span class="msg">'+a.msg+'</span>'+
+    '<span class="meta"><b>'+a.dev+'</b> · '+a.cat+' · 27.07.2026 '+a.t+'</span></span>'+
+    '<span class="atag '+a.sev+'">'+SEVLBL[a.sev]+'</span></div>').join('')
+    : emptyAlarms();
+};
+
+const SEVNICE={critical:'Critical',alarm:'Alarm',warn:'Warning',event:'Event'};
+const ICO_OK='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.2 12.4l2.6 2.6 5-5.4"/></svg>';
+const ICO_FIL='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5h17l-6.6 7.6v5.3l-3.8 2.1v-7.4Z"/></svg>';
+function emptyAlarms(){
+  /* nothing is filtered and there is nothing to show: that is the good case */
+  if(!ASEV.length){
+    return '<div class="anone ok">'+ICO_OK+
+      '<span class="t">All clear</span>'+
+      '<span class="s">Nothing is open on '+plantSel.id+' right now.</span></div>';
+  }
+  /* filtered to nothing, so say what is being hidden rather than just "none" */
+  const names=ASEV.map(function(k){ return SEVNICE[k]; }).join(' or ');
+  const n=AL.length;
+  return '<div class="anone">'+ICO_FIL+
+    '<span class="t">No '+names.toLowerCase()+' alarms</span>'+
+    '<span class="s">'+(n?n+(n===1?' alarm is':' alarms are')+' open at other severities.'
+                        :'Nothing is open on this plant right now.')+'</span>'+
+    (n?'<button class="clr" type="button" onclick="asevClear()">Show all severities</button>':'')+
+  '</div>';
+}
+
+/* ---------- severity picker ----------
+   Lives INSIDE #apanel, which matters: the alarms panel closes when the pointer
+   leaves it, and a list hung anywhere else in the document would be outside the
+   thing it belongs to - so opening the filter would close the panel under it. */
+(function(){
+  const mount=$('a-sev');
+  const OPTS=[{v:'critical',t:'Critical'},{v:'alarm',t:'Alarm'},
+              {v:'warn',t:'Warning'},{v:'event',t:'Event'}];
+  const btn=document.createElement('button');
+  btn.type='button'; btn.className='mbtn'; btn.setAttribute('aria-expanded','false');
+  const lab=document.createElement('span'); lab.className='mlab any'; btn.appendChild(lab);
+  const pan=document.createElement('div'); pan.className='mpanel'; pan.hidden=true;
+  mount.appendChild(btn); mount.appendChild(pan);
+
+  function label(){
+    lab.className='mlab'+(ASEV.length?'':' any');
+    lab.textContent=!ASEV.length?'All severities'
+      :ASEV.length===1?(OPTS.filter(o=>o.v===ASEV[0])[0]||{t:ASEV[0]}).t
+      :ASEV.length+' selected';
+  }
+  function draw(){
+    /* each row states how many of that band are open, so the filter is also a
+       count - the panel answers "is there anything critical" before it is used */
+    pan.innerHTML='<div class="mhead">Severity</div>'+
+      OPTS.map(function(o){
+        const n=AL.filter(function(a){ return a.sev===o.v; }).length;
+        return '<label class="mrow"><input type="checkbox" value="'+o.v+'"'+
+          (ASEV.indexOf(o.v)>=0?' checked':'')+'>'+o.t+
+          (n?' <span style="color:var(--faint);font-weight:700">'+n+'</span>':'')+
+          '<i class="'+o.v+'"></i></label>';
+      }).join('')+
+      '<div class="mfoot"><button type="button" value="all">All</button>'+
+      '<button type="button" value="none">None</button></div>';
+  }
+  function open(on){
+    if(on) draw();
+    pan.hidden=!on; mount.classList.toggle('open',on);
+    btn.setAttribute('aria-expanded',on?'true':'false');
+  }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); open(pan.hidden); });
+  pan.addEventListener('click',function(e){
+    e.stopPropagation();
+    const f=e.target.closest('.mfoot button'); if(!f) return;
+    ASEV=f.value==='all'?OPTS.map(function(o){ return o.v; }):[];
+    draw(); label(); renderAlarms();
+  });
+  pan.addEventListener('change',function(e){
+    const cb=e.target; if(cb.type!=='checkbox') return;
+    const i=ASEV.indexOf(cb.value);
+    if(cb.checked&&i<0) ASEV.push(cb.value); else if(!cb.checked&&i>=0) ASEV.splice(i,1);
+    ASEV.sort(function(a,b){ return SEVRANK[a]-SEVRANK[b]; });   /* worst first, as the list is */
+    label(); renderAlarms();
+  });
+  document.addEventListener('click',function(){ open(false); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') open(false); });
+  /* the empty state's way back: one click, no hunting for the control that
+     caused it */
+  window.asevClear=function(){ ASEV=[]; if(!pan.hidden) draw(); label(); renderAlarms(); };
+  label();
+})();
+
+/* Yesterday AT THE SAME HOUR, not yesterday's whole day: at noon a full day
+   would always look like a collapse, and a card that reads -60% every morning
+   is one people learn to ignore. dayE gives the day's total, so it is scaled by
+   how much of the daylight window has passed. */
+function setDelta(){
+  const el=$('k-eday-d'); if(!el) return;
+  const y=dayE(TODAY-1);
+  if(y==null||!(y>0)){ el.textContent='—'; el.className='delta flat'; return; }
+  const t=Math.min(1,Math.max(0,(Math.min(nowT(),SUNSET)-SUNRISE)/SPAN));
+  const soFar=y*t;
+  if(!(soFar>0)){ el.textContent='—'; el.className='delta flat'; return; }
+  const pct=(sumDay()-soFar)/soFar*100;
+  el.textContent=(pct>=0?'+':'')+pct.toFixed(1)+'%';
+  el.className='delta '+(pct>0.5?'up':pct<-0.5?'down':'flat');
+}
+
+/* The rail box states the counts at all times. Hiding a count behind a hover is
+   the one thing an alarm surface must not do - you would have to go looking to
+   learn something is wrong. Only the detail waits for the pointer. */
+function renderAlarmBox(){
+  const c=k=>AL.filter(x=>x.sev===k).length;
+  const cr=c('critical'), a=c('alarm'), w=c('warn'), e=c('event');
+  /* The headline counts FAULTS. An event is a log entry - a restart, a firmware
+     push - and counting it as an active alarm would put a number on a site with
+     nothing wrong, which is how alarm surfaces get ignored. Events are still
+     listed and still get their own segment; they just do not raise the count. */
+  const faults=cr+a+w, loud=cr+a;
+  $('ab-n').textContent=faults;
+  $('ab-n').className='ab-n'+(loud?' hot':'');
+  $('alarmbox').classList.toggle('hot',loud>0);
+  $('ab-bars').innerHTML = faults
+    ? (cr?'<span class="ab-seg critical"><i></i>'+cr+' CRITICAL</span>':'')+
+      (a?'<span class="ab-seg alarm"><i></i>'+a+' ALARM</span>':'')+
+      (w?'<span class="ab-seg warn"><i></i>'+w+' WARNING</span>':'')+
+      (e?'<span class="ab-seg event"><i></i>'+e+' EVENT</span>':'')
+    : '<span class="ab-seg none"><i></i>ALL CLEAR</span>'+
+      (e?'<span class="ab-seg event"><i></i>'+e+' EVENT</span>':'');
+}
+
+/* Same rule as the Monitoring device panel: it stays while the pointer is on the
+   box or on the panel, and closes 150 ms after it leaves both, so the gap between
+   them can be crossed. */
+let aHideT=0;
+/* the chart height in force while the panel is open; 0 means "size to width" */
+let pwLockH=0;
+function openAlarms(){
+  clearTimeout(aHideT);
+  const pan=$('apanel');
+  if(pan.hidden){
+    /* cap to the chart's height, measured while hidden, so opening never
+       stretches the row - a long list scrolls instead */
+    const host=$('pw-wrap').closest('.card');
+    if(host) pan.style.maxHeight=host.offsetHeight+'px';
+    /* and hold that chart height, so the narrower card does not shorten the
+       plot and drag the month charts up the page with it */
+    pwLockH=H1;
+  }
+  pan.hidden=false;
+}
+function closeAlarms(){
+  clearTimeout(aHideT);
+  $('apanel').hidden=true;
+  if(pwLockH){ pwLockH=0; fitCharts(); }   /* full width again, so size to it */
+}
+const armAlarmClose=()=>{clearTimeout(aHideT);aHideT=setTimeout(closeAlarms,150);};
+$('alarmbox').addEventListener('mouseenter',openAlarms);
+$('alarmbox').addEventListener('focus',openAlarms);
+document.addEventListener('mouseover',function(e){
+  if($('apanel').hidden) return;
+  const t=e.target;
+  const inside=t.closest&&(t.closest('#alarmbox')||t.closest('#apanel'));
+  if(inside) clearTimeout(aHideT); else armAlarmClose();
+});
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAlarms(); });
+
+
+/* ---------- inverter fleet ---------- */
+/* Each unit is read against an equal share of the plant's AC rating - the model
+   has no per-inverter nameplate, and an even split is what the site's own
+   2500 kW / 7 units implies. */
+let DEVCAP=CAP/DEV.length;
+const devState=d=>!d.on?'down':(d.warn?'warn':'ok');
+const DEVLBL={ok:'RUNNING',warn:'LOW OUTPUT',down:'OFFLINE'};
+function renderFleet(){
+  const nt=nowT();
+  $('fleet').innerHTML=DEV.map(function(d){
+    const st=devState(d), p=d.on?d.fn(nt):0, sel=pwSel.indexOf(d.id)>=0;
+    return '<button type="button" class="dev'+(sel?' sel':'')+(pwSel.length&&!sel?' mute':'')+'"'+
+      ' style="--ring:'+devColor(d)+'"'+
+      ' aria-pressed="'+(sel?'true':'false')+'"'+
+      ' onclick="devFocus(\''+d.id+'\')"'+
+      ' title="'+(sel?'Remove '+d.id+' from the chart':'Add '+d.id+' to the chart')+'">'+
+      /* two lines in a rail this narrow: identity and state on one, the live
+         reading and the day's energy on the next, with the share bar between.
+         The day's figure is spelled "kWh today" - it sits beside a kW reading,
+         and without the word the two numbers are just units apart. */
+      '<span class="dev-top"><span class="dev-dot '+st+'"></span>'+
+        '<span class="dev-id">'+d.id+'</span>'+
+        '<span class="dev-st '+st+'">'+DEVLBL[st]+'</span></span>'+
+      '<span class="dev-line">'+
+        '<span class="dev-val'+(d.on?'':' dim')+'"><span id="dv-'+d.id+'">'+(d.on?num(p):'—')+'</span>'+
+          '<span class="u">kW</span></span>'+
+        (d.on?'<span class="dev-meta"><span id="dg-'+d.id+'">'+num(d.day,1)+'</span> kWh today</span>':'')+
+      '</span>'+
+      '<span class="meterbar"><i id="db-'+d.id+'"'+(st==='warn'?' class="amber"':'')+
+        ' style="width:'+(d.on?Math.min(100,p/DEVCAP*100).toFixed(1):0)+'%"></i></span>'+
+    '</button>';
+  }).join('');
+}
+/* The tiles are the only way in and out of the per-inverter view now that the
+   chart title is no longer a switch. Selection is multiple: each click adds or
+   removes that inverter, and emptying the selection returns the plant total —
+   so comparing two units is one click more than looking at one, and there is
+   no separate control to learn. */
+/* one click back to the plant curve, however many inverters are on the chart */
+window.clearFleet=function(){
+  pwSel.length=0; pwMode='plant';
+  DEV.forEach(function(d){ pwOff[d.id]=false; });
+  setPwTitle(); rescalePower(); pwLegend(); buildAxes1(); drawPw(); renderFleet();
+  T('Plant total');
+};
+window.devFocus=function(id){
+  const i=pwSel.indexOf(id);
+  if(i>=0) pwSel.splice(i,1); else pwSel.push(id);
+  /* hold DEV order, so adding a tile never reorders the ones already chosen */
+  const order=DEV.map(function(d){return d.id;});
+  pwSel.sort(function(a,b){return order.indexOf(a)-order.indexOf(b);});
+
+  pwMode = pwSel.length ? 'inverter' : 'plant';
+  DEV.forEach(function(d){ pwOff[d.id] = pwSel.length ? pwSel.indexOf(d.id)<0 : false; });
+
+  T(!pwSel.length      ? 'Plant total'
+    : pwSel.length===1 ? pwSel[0]+' vs irradiance'
+    : pwSel.length+' inverters vs irradiance');
+  setPwTitle(); rescalePower(); pwLegend(); buildAxes1(); drawPw(); renderFleet();
+};
+
+/* ---------- plant switcher ---------- */
+/* `perf` is how well the site runs, separate from how big it is: it moves power
+   without moving the nameplate, which is what makes CUF and performance ratio
+   differ between plants instead of scaling away with capacity. */
+const PLANTS=[
+  {id:'Sangria', addr:'2 DLP, Kikarwali Road Nathwana Sangria',
+   ac:2500, dc:2500, perf:1.00, etot:101158.90, irrK:1.00, dip:9.05,  drop:10.567,
+   down:['INV01','INV02','INV03','INV04','INV05'], warn:['INV07'], crit:[],
+   events:[{dev:'INV06',msg:'Grid Reconnected',t:'05:12:40'}]},
+  {id:'Rioja',   addr:'Plot 14, Bikaner Road, Bikaner',
+   ac:1800, dc:1885, perf:0.93, etot:74320.40,  irrK:1.04, dip:8.40,  drop:10.180,
+   down:[], warn:[], crit:[],
+   events:[{dev:'INV02',msg:'Firmware Updated',t:'03:20:11'},
+           {dev:'INV06',msg:'Grid Reconnected',t:'05:08:02'}]},
+  {id:'Mendoza', addr:'NH-52, Pokhran Road, Jaisalmer',
+   ac:3200, dc:3360, perf:1.05, etot:132845.60, irrK:0.96, dip:10.30, drop:11.240,
+   down:['INV03'], warn:['INV05'], crit:['INV01'],
+   events:[{dev:'INV07',msg:'Inverter Restarted',t:'07:44:19'}]}
+];
+/* ?plants=N grows the portfolio, so the picker's scrolling can be reviewed -
+   the demo has three and they fit on one row */
+(function(){
+  const N=parseInt(new URLSearchParams(location.search).get('plants')||'0',10);
+  const TOWN=['Bikaner','Jaisalmer','Jodhpur','Barmer','Pokhran','Nagaur','Churu','Sikar','Alwar','Kota'];
+  for(let k=4;k<=N;k++){
+    const ac=1500+((k*370)%2200);
+    PLANTS.push({id:'Site '+String(k).padStart(2,'0'),
+      addr:'NH-'+(10+k)+', '+TOWN[k%TOWN.length],
+      ac:ac, dc:Math.round(ac*1.05), perf:0.9+((k*7)%20)/100,
+      etot:60000+k*4100,
+      irrK:0.88+((k*11)%22)/100, dip:8.2+((k*5)%14)/6, drop:10.1+((k*3)%13)/9,
+      down:(k%3===0?['INV0'+(1+k%5)]:[]), warn:(k%4===0?['INV07']:[]),
+      crit:(k%7===0?['INV02']:[]), events:[]});
+  }
+})();
+let plantSel=PLANTS[0];
+/* the fleet literal above already carries Sangria's state, so this only puts
+   the alarm list in step with it */
+AL=buildAlarms(plantSel);
+
+/* ---------- the plant picker ----------
+   Clicking the name opens the header downward onto one card per plant. The card
+   carries what the decision actually turns on - power now against the rating,
+   and open alarms - so a plant is chosen on its state rather than on its name.
+
+   p06 and p07 are both linear in PK, so a plant's output right now is this
+   plant's curve rescaled: no second model to keep in step with the first. */
+function powerNow(p){
+  const base=plantP(nowT())/PK;          /* PK is never 0 - every plant has a rating */
+  return base*((p.ac/2500)*p.perf);
+}
+function renderPlants(){
+  const t=nowT();
+  $('p-grid').innerHTML=PLANTS.map(function(p){
+    const on=p.id===plantSel.id, pw=powerNow(p);
+    /* counted off the plant's own fleet state, the same source the rail box and
+       the alarm panel read - so the card cannot promise a number they contradict */
+    const n=(p.down||[]).length+(p.warn||[]).length;
+    return '<button type="button" class="pcard'+(on?' on':'')+'" data-plant="'+p.id+'"'+
+      ' aria-current="'+(on?'true':'false')+'" title="'+p.id+' · '+p.addr+'">'+
+      /* identity on the first line, state on the second */
+      '<span class="top"><span class="nm">'+p.id+'</span>'+
+        '<span class="ad">'+p.addr+'</span></span>'+
+      '<span class="row"><span class="pw">'+num(pw)+'</span><span class="u">kW</span>'+
+        '<span class="cap">of '+p.ac+' kW</span>'+
+        '<span class="alm '+(n?'hot':'cold')+'">'+(n?n+' ALARM'+(n===1?'':'S'):'ALL CLEAR')+'</span></span>'+
+      '<span class="meterbar"><i style="width:'+Math.min(100,pw/p.ac*100).toFixed(1)+'%"></i></span>'+
+    '</button>';
+  }).join('');
+}
+window.togglePlants=function(){
+  $('p-exp').classList.contains('open')?closePlants():openPlants();
+};
+let pHideT=0;
+function openPlants(){
+  clearTimeout(pHideT);
+  renderPlants();                        /* readings are live, so rebuild on open */
+  $('p-exp').classList.add('open');
+  $('p-btn').setAttribute('aria-expanded','true');
+}
+function closePlants(){
+  clearTimeout(pHideT);
+  $('p-exp').classList.remove('open');
+  $('p-btn').setAttribute('aria-expanded','false');
+}
+/* Hover opens it, the same rule the alarms box uses: it stays while the pointer
+   is on the name or on the panel, and closes 150 ms after it leaves both. The
+   address line sits between the two, so the grace period is what lets the
+   pointer cross it. A click still toggles, for touch. */
+$('p-btn').addEventListener('mouseenter',openPlants);
+$('p-btn').addEventListener('focus',openPlants);
+const armPlantClose=()=>{clearTimeout(pHideT);pHideT=setTimeout(closePlants,150);};
+document.addEventListener('mouseover',function(e){
+  if(!$('p-exp').classList.contains('open')) return;
+  const t=e.target;
+  const inside=t.closest&&(t.closest('.pswitch')||t.closest('#p-exp'));
+  if(inside) clearTimeout(pHideT); else armPlantClose();
+});
+/* Opening the picker MOVES the main column without resizing it, so no
+   ResizeObserver fires and the charts never learn they have less room. The
+   panel grows on a transition, so the new height is only true once it ends -
+   fitting on transitionend is what makes the month charts give way in step
+   with it rather than a frame too early. */
+$('p-exp').addEventListener('transitionend',function(e){
+  if(e.propertyName==='max-height') fitCharts();
+});
+/* read the id on the way down: picking a plant repaints most of the page, and a
+   capture-phase handler cannot be outrun by a rebuild that detaches the card the
+   click started on - the drawer this replaced was bitten by exactly that */
+$('p-grid').addEventListener('click',function(e){
+  const card=e.target.closest('.pcard'); if(!card) return;
+  const id=card.dataset.plant;
+  closePlants();
+  if(id!==plantSel.id) pickPlant(id);
+},true);
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closePlants(); });
+/* clicking anywhere else puts the header back: an open header costs real height,
+   so it should not stay open because the pointer wandered off */
+document.addEventListener('click',function(e){
+  if(!$('p-btn').contains(e.target)&&!$('p-exp').contains(e.target)) closePlants();
+});
+
+/* Switching plant re-seats the whole model, then repaints everything that reads
+   from it — header, rail, both month charts, the fleet and the power curve. */
+window.pickPlant=function(id){
+  const p=PLANTS.filter(x=>x.id===id)[0]; if(!p) return;
+  plantSel=p;
+  CAP=p.ac; PK=(p.ac/2500)*p.perf; DEVCAP=CAP/DEV.length;
+  /* the site's own sky and day shape, so irradiance and the time of peak move
+     with the plant instead of reading the same on all three */
+  IRRK=p.irrK; DIP=p.dip; PDROP=p.drop;
+  /* and its own fleet state, which the alarm list is then built from - the two
+     cannot disagree because there is only one of them */
+  DEV.forEach(function(d){
+    d.on=(p.down||[]).indexOf(d.id)<0?1:0;
+    d.warn=(p.warn||[]).indexOf(d.id)>=0?1:0;
+  });
+  AL=buildAlarms(p);
+  energyScale();
+
+  /* the day belongs to this plant's curves, so walk them again */
+  eTotal=p.etot; seedDay();
+
+  $('p-name').textContent=p.id;
+  $('p-addr').textContent=p.addr;
+  $('p-ac').textContent=num(p.ac,2);
+  $('p-dc').textContent=num(p.dc,2);
+  $('k-cap').textContent=p.ac;
+
+  /* the day's peak belongs to this plant's curve, so walk it again */
+  peakP=0; peakT=SUNRISE;
+  const end=Math.min(nowT(),SUNSET);
+  for(let t=SUNRISE;t<=end;t+=1/60){const v=plantP(t); if(v>peakP){peakP=v;peakT=t;}}
+
+  /* a selection made on the old plant means nothing on the new one */
+  pwSel.length=0; pwMode='plant';
+  DEV.forEach(function(d){ pwOff[d.id]=false; });
+
+  setPwTitle(); rescalePower(); pwLegend();
+  buildAxes2(); buildBars2(); buildAxes3(); buildBars3();
+  fitCharts(); renderFleet(); renderAlarms(); renderAlarmBox(); tick();
+  T(p.id+' · '+p.ac+' kW');
+};
+
+/* ---------- day peak ---------- */
+/* Seeded by walking the day's curve up to now, so the card is not stuck at zero
+   until a new high happens to land on a tick. */
+let peakP=0,peakT=SUNRISE;
+(function(){const end=Math.min(nowT(),SUNSET);
+  for(let t=SUNRISE;t<=end;t+=1/60){const v=plantP(t);if(v>peakP){peakP=v;peakT=t;}}})();
+
+/* ---------- live tick ---------- */
+let TICK=2500,timer=null;
+function tick(){
+  const nt=nowT();
+  const a=Math.max(0,p06(nt)+(Math.random()-.5)*1.4);
+  const b=Math.max(0,p07(nt)+(Math.random()-.5)*1.1);
+  const ir=irr(nt);
+
+  /* fleet tiles are patched in place, not re-rendered - a rebuild every 2.5 s
+     would drop hover and focus out from under the pointer. This pass is also
+     where the day accumulates, per inverter, AND where plant power is summed:
+     the plant is whatever its running inverters add up to, so a site with more
+     of its fleet up reads higher without a second model saying so. */
+  const live={INV06:a,INV07:b};
+  let tp=0;
+  DEV.forEach(function(d){
+    if(!d.on) return;
+    const v=live[d.id]!==undefined?live[d.id]:d.fn(nt);
+    tp+=v;
+    d.day+=v*TICK/3600000;
+    const ev=$('dv-'+d.id); if(ev) ev.textContent=num(v);
+    const eb=$('db-'+d.id); if(eb) eb.style.width=Math.min(100,v/DEVCAP*100).toFixed(1)+'%';
+    const eg=$('dg-'+d.id); if(eg) eg.textContent=num(d.day,1);
+  });
+  eTotal+=tp*TICK/3600000;
+  if(tp>peakP){peakP=tp;peakT=nt;}
+
+  $('k-pw').textContent=num(tp);
+  const pct=tp/CAP*100;
+  $('k-pw-bar').style.width=Math.min(100,pct)+'%';$('k-pw-pct').textContent=pct.toFixed(0);
+  $('k-peak').textContent=num(peakP);
+  $('k-peak-t').textContent=fmtT(peakT);
+  $('k-eday').textContent=inr(sumDay());
+  setDelta();
+  $('k-etot').textContent=inr(eTotal);
+  $('k-rev').textContent=inr(eTotal*2.84);$('k-co2').textContent=inr(eTotal*0.71);
+  $('k-irr').textContent=Math.round(ir);
+  /* PR: how much of the irradiance-implied output the plant is actually making */
+  $('k-pr').textContent=(ir>0 ? (tp/CAP)/(ir/1000)*100 : 0).toFixed(1);
+  $('clk').textContent=fmtT(nt,true);
+  drawPw();
+}
+function setTimer(){
+  if(timer)clearInterval(timer);timer=null;
+  const v=$('refresh-sel').value;
+  $('livedot').style.animationPlayState=(v==='off')?'paused':'running';
+  $('livedot').style.opacity=(v==='off')?.35:1;
+  if(v!=='off')timer=setInterval(tick,TICK);
+}
+$('refresh-sel').addEventListener('change',()=>{setTimer();
+  T($('refresh-sel').value==='off'?'Live refresh paused':'Live refresh on');});
+setInterval(()=>{$('clk').textContent=fmtT(nowT(),true);},1000);
+
+/* The whole field is the button that opens the calendar.
+
+   A date input only reacts to a click on its 12px indicator glyph, so a click on
+   the number - which is most of the control, and where anyone aims - did
+   nothing. Three things have to be true for that to feel like a button:
+
+     it TOGGLES      showPicker has no close, so the second click blurs instead,
+                     which is what actually dismisses the native popup;
+     no text select  preventDefault on mousedown stops the segment highlight, and
+                     focus is then given back deliberately so typing still works;
+     the flag is honest
+                     the popup can close without us - a pick, an Escape, a click
+                     elsewhere - so every one of those resets it, or the next
+                     click would blur a picker that had already gone. */
+function wireDatePickers(root){
+  (root||document).querySelectorAll('input[type=date]').forEach(function(el){
+    if(el.dataset.picker) return;
+    el.dataset.picker='1';
+    let open=false;
+    const shut=function(){open=false;};
+    el.addEventListener('blur',shut);
+    el.addEventListener('change',shut);
+    document.addEventListener('mousedown',function(e){ if(e.target!==el) shut(); },true);
+
+    el.addEventListener('mousedown',function(e){
+      /* the indicator already toggles itself; taking it over would fight it */
+      if(e.offsetX>=el.clientWidth-26) return;
+      e.preventDefault();                       /* no caret, no segment highlight */
+      if(open){ el.blur(); open=false; return; }
+      el.focus({preventScroll:true});
+      if(el.showPicker){ try{ el.showPicker(); open=true; }catch(_){} }
+    });
+    el.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ') return;
+      e.preventDefault();
+      if(open){ el.blur(); open=false; return; }
+      if(el.showPicker){ try{ el.showPicker(); open=true; }catch(_){} }
+    });
+  });
+}
+wireDatePickers();
+
+/* ---------- responsive: re-cut each chart to its container ---------- */
+function fitOne(wrapId,svgId,lo,hi,ratio,apply,forceH){
+  const box=$(wrapId); if(!box) return false;
+  const cw=Math.max(280,Math.round(box.clientWidth-20));
+  const nh=forceH||Math.round(Math.min(hi,Math.max(lo,cw*ratio)));
+  const svg=$(svgId), cur=svg.getAttribute('viewBox');
+  const next='0 0 '+cw+' '+nh;
+  if(cur===next) return false;
+  svg.setAttribute('viewBox',next);
+  apply(cw,nh);
+  return true;
+}
+/* The power chart shares its grid row with the alarms card, and a row is as tall
+   as its tallest item. The alarms list is the taller one and its height is data -
+   six alarms today, forty after a bad night - so a chart sized on width alone was
+   left floating above 200px of empty card. This takes whichever is greater, the
+   width ratio or the height the row actually hands over, still inside the same
+   240-430 band the other charts use. Growing the chart cannot grow the row (the
+   alarms card sets it), so there is no feedback loop with the ResizeObserver. */
+/* The rail must never make the page taller than the content beside it. CSS can
+   cap it to the viewport but not to the main column, and a viewport cap is what
+   let a 16-inverter fleet push the page ~190px past its own content. The main
+   column's height does not depend on the rail, so measuring it cannot loop. */
+function fitRail(){
+  const rail=document.querySelector('.rail'), main=document.querySelector('.maincol');
+  if(!rail||!main) return;
+  /* NOT main.offsetHeight. The shell stretches both columns to the row height,
+     and the row is as tall as its TALLEST item - so the box we would measure
+     already contains the rail's own height. The rail was being capped to
+     itself: seven fleet cards made the row 541px tall, the charts only needed
+     464, and the extra 77px went to the page as scroll that no amount of chart
+     shrinking could reach. Summing the column's children gives its true content
+     height, which cannot contain the rail. */
+  const gap=parseFloat(getComputedStyle(main).rowGap)||14;
+  const kids=[...main.children];
+  const h=kids.reduce((t,c)=>t+c.getBoundingClientRect().height,0)+gap*Math.max(0,kids.length-1);
+  if(h>0) rail.style.maxHeight=Math.round(h)+'px';
+}
+/* ---------- the page is fitted to the viewport, not to its own width ----------
+   Both chart rows are sized from the height actually left below the KPI strip,
+   split between them. Sizing on width alone meant the page was wrong in both
+   directions at once: 97px of scroll on a 768-high laptop and 151px of bare
+   page on a 1080p monitor. One budget fixes both, because the thing that varies
+   is the screen, not the chart.
+
+   This cannot loop even though the ResizeObserver watches .maincol. The budget
+   is derived from where .g-main STARTS and from the viewport, and neither
+   depends on how tall the charts end up; a second pass computes the same
+   numbers, fitOne sees unchanged viewBoxes and stops. That is the difference
+   from the ratcheting bug this pattern replaced, where the input was measured
+   from a box that already contained the output. */
+let budgetCache=null;
+function chartBudget(){
+  /* Frozen while the alarms panel is open. The line card's chrome is measured
+     from a live box, and narrowing it moves that measurement by a fraction of a
+     pixel - enough to push the floored split one pixel the other way and twitch
+     both month charts. Opening an alarm list should change no height at all, so
+     the whole budget is held, not just the chart that gives up the width. */
+  if(!$('apanel').hidden&&budgetCache) return budgetCache;
+  const gm=document.querySelector('.g-main'), mc=document.querySelector('.maincol');
+  const page=document.querySelector('.page'), half=document.querySelector('.g-half');
+  const lineCard=$('pw-wrap')&&$('pw-wrap').closest('.card');
+  const monthCard=half&&half.querySelector('.card');
+  if(!gm||!mc||!page||!lineCard||!monthCard) return null;
+
+  /* The picker sits above this row, so opening it genuinely takes ~85px away.
+     Measuring as if it were shut kept every chart still - and handed the page a
+     scrollbar for as long as the pointer rested on the plant name. The height
+     has to come from somewhere, so it comes from the MONTH charts below, which
+     are furthest from the pointer; the day curve, which is the thing being read
+     while you choose, is held at the size it had before the picker opened. */
+  const exp=$('p-exp');
+  const picking=!!(exp&&exp.classList.contains('open'));
+  const top=gm.getBoundingClientRect().top+window.scrollY;
+  const colGap=parseFloat(getComputedStyle(mc).rowGap)||14;
+  const padBottom=parseFloat(getComputedStyle(page).paddingBottom)||16;
+  /* everything in a card that is not the plot: heading, padding, borders */
+  const lineChrome=lineCard.offsetHeight-$('pw-chart').getBoundingClientRect().height;
+  const monthChrome=monthCard.offsetHeight-$('en-chart').getBoundingClientRect().height;
+
+  const budget=document.documentElement.clientHeight-top-padBottom-colGap-lineChrome-monthChrome;
+  if(!(budget>0)) return null;
+  /* the day curve gets the larger share - it is the one plot that is read for
+     shape rather than for one bar at a time - but it is capped, because past
+     ~320px it is only taller, not clearer. */
+  /* floor, not round: the two shares have to sum to AT MOST the budget, and
+     rounding each of them up put the page one pixel over and gave it a
+     scrollbar for nothing */
+  /* Floors here are a LAST RESORT, not a preferred size. Held at 215 they
+     stopped being a floor for the chart and became a floor for the page: the
+     budget could not be met, so the overflow went to the scrollbar instead of
+     to the charts. Below these the plot stops being readable at all; between
+     here and the ceiling the split does the work, so on a tall screen the
+     charts are large and on a short one they give way rather than the page. */
+  const line=picking&&budgetCache
+    ? budgetCache.line                      /* held while the picker is open */
+    : Math.floor(Math.min(320,Math.max(150,budget*.52)));
+  const month=Math.floor(Math.min(430,Math.max(picking?110:140,budget-line)));
+  if(!picking) budgetCache={line:line,month:month};
+  return {line:line,month:month};
+}
+function applyCharts(B,trim){
+  let line=B?B.line:0, month=B?B.month-(trim||0):0;
+  /* While the picker is open the floors go lower still. It is a transient state
+     under the user's own pointer, and a chart briefly at its minimum is a
+     smaller price than the page starting to scroll while they choose. */
+  const picking=$('p-exp').classList.contains('open');
+  const mFloor=picking?110:120, lFloor=picking?140:150;
+  /* the month charts absorb first - they are furthest from the pointer - but
+     once they are on the floor the day curve has to give way as well, or the
+     page takes the difference and that is the scrollbar again */
+  if(B&&month<mFloor){ line=Math.max(lFloor,line-(mFloor-month)); month=mFloor; }
+  let ch=false;
+  /* Height is HELD while the alarms panel is open, and the budget sets it
+     otherwise. Sized from its own width, opening the panel narrowed the card
+     and shortened the chart - and both month charts below it jumped up 62px to
+     follow. The panel takes width from the chart, never its height. */
+  ch=fitOne('pw-wrap','pw-chart',150,360,.19,(w,h)=>{
+    W1=w;H1=h;PW1=W1-L1-R1;PH1=H1-T1-B1;
+    $('pw-now').setAttribute('y2',T1+PH1);$('pw-xh').setAttribute('y2',T1+PH1);
+    buildAxes1();drawPw();
+  },pwLockH||line)||ch;
+  ch=fitOne('en-wrap','en-chart',140,430,.20,(w,h)=>{
+    W2=w;H2=h;PW2=W2-L2-R2;PH2=H2-T2-B2;SLOT=PW2/DIM;
+    buildAxes2();buildBars2();
+  },month)||ch;
+  ch=fitOne('cuf-wrap','cuf-chart',140,430,.20,(w,h)=>{
+    W3=w;H3=h;PW3=W3-L3-R3;PH3=H3-T3-B3;SLOT3=PW3/DIM;
+    buildAxes3();buildBars3();
+  },month)||ch;
+  return ch;
+}
+function fitCharts(){
+  applyCharts(chartBudget(),0);
+  /* The budget can be a few pixels out - card chrome is measured from live
+     boxes, and those move under the picker's transition. Rather than trust the
+     arithmetic, ask the page: if it still overflows, take the difference off
+     the month charts and try again. Each pass only ever shrinks, and stops at
+     the floor, so this converges instead of oscillating. */
+  let trim=0;
+  for(let k=0;k<3;k++){
+    const over=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+    if(over<=0) break;
+    trim+=over;
+    if(!applyCharts(chartBudget(),trim)) break;
+  }
+  /* last: the main column's height is only settled once its charts are sized */
+  fitRail();
+}
+rescalePower();buildAxes1();buildAxes2();buildBars2();buildAxes3();buildBars3();
+fitCharts();
+initMonthPick('en-pick',2026,6,function(y,m){T('Showing '+MONL[m]+' '+y+' (demo data is fixed to July 2026)');});
+initMonthPick('kpi-pick',2026,6,function(y,m){T('Showing '+MONL[m]+' '+y+' (demo data is fixed to July 2026)');});
+pwLegend();drawPw();renderFleet();renderAlarms();renderAlarmBox();tick();setTimer();
+/* BOTH, not one or the other.
+
+   The observer only reports elements changing SIZE, and every box it watches is
+   sized by the column's width. The budget, though, is taken from the viewport's
+   HEIGHT - so a window that gets taller without getting wider (maximising, F11,
+   docking DevTools, the taskbar appearing, some zoom steps) resizes nothing the
+   observer can see. The charts then keep the height they were fitted at, and the
+   page ends in a strip of blank with the rail capped to the short column beside
+   it. Registered as an `else` branch, the resize listener could never run in any
+   browser that has ResizeObserver, which is all of them - the fallback was for a
+   browser that no longer exists, and the real gap was left uncovered.
+
+   Re-fitting twice for one change costs nothing: fitCharts is idempotent, and
+   both paths are already coalesced into the same animation frame. */
+let fitRaf=0;
+const refit=()=>{cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame(fitCharts);};
+if(window.ResizeObserver){
+  const ro=new ResizeObserver(refit);
+  ['pw-wrap','en-wrap','cuf-wrap'].forEach(id=>ro.observe($(id)));
+  const mc=document.querySelector('.maincol'); if(mc) ro.observe(mc);
+}
+window.addEventListener('resize',refit);
+$('k-rev').textContent=inr(eTotal*2.84);$('k-co2').textContent=inr(eTotal*0.71);
+})();
+</script>
+</body>
+</html>
