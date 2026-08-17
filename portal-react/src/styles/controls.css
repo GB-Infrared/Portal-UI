@@ -136,3 +136,37 @@
   font-family:var(--mono);font-size:12.5px;font-weight:600}
 .tlist button:hover{background:var(--hover)}
 .tlist button.on{background:var(--sel);border-color:var(--line-hi)}
+
+/* ---------- month + year picker ----------
+   A SHARED control, so it lives here unscoped like the dropdown above it. It was
+   scoped to .page-home while Home was its only caller; the KPI page then rendered
+   it with no styling at all - a bare browser button with its floating label
+   dropped inline beside it. A component in components/ cannot have its
+   appearance kept in one page's sheet, or the second page to use it is broken by
+   the act of using it.
+
+   Year first, then a 3x4 grid of months: both charts it drives are whole-month
+   series, so a day grid would ask a question neither of them can answer. */
+.mpick{position:relative;display:inline-flex;flex-direction:column;justify-content:flex-end}
+.mpick .fl{position:absolute;top:-6px;left:9px;padding:0 4px;background:var(--panel);z-index:1;
+  font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.mpick-btn{display:flex;align-items:center;gap:10px;min-width:150px;background:var(--panel-2);
+  border:1px solid var(--line);color:var(--text);border-radius:var(--r-sm);padding:8px 10px;
+  font-size:12.5px;font-family:var(--mono);font-weight:600}
+.mpick-btn:hover{border-color:var(--line-hi);background-color:var(--hover)}
+.mpick-btn svg{margin-left:auto;color:var(--muted);flex:none}
+.mpick-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:80;width:250px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:12px}
+.mpick-panel[hidden]{display:none}
+.mpick-head{display:flex;align-items:center;gap:8px;padding:2px 4px 10px}
+.mpick-head .yr{flex:1;text-align:center;font-family:var(--mono);font-weight:800;font-size:14px}
+.mpick-head button{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font-size:13px;line-height:1}
+.mpick-head button:hover{color:var(--text);border-color:var(--line-hi);background:var(--hover)}
+.mpick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mpick-grid button{padding:9px 0;border-radius:8px;border:1px solid transparent;
+  background:transparent;color:var(--text);font-size:12.5px;font-weight:600}
+.mpick-grid button:hover{border-color:var(--line-hi);background:var(--hover)}
+/* selection is a surface, the same language the plant cards use */
+.mpick-grid button.on{background:var(--sel);border-color:var(--line-hi);color:var(--text);font-weight:800}

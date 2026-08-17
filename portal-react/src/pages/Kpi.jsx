@@ -65,7 +65,9 @@ export default function Kpi() {
           </div>
 
           <div className="field"><label>Period</label>
-            <MonthPicker year={query.year} month={query.month}
+            {/* label={null}: the field's own PERIOD label is the one the reader
+                needs, and the picker's floating one would repeat it */}
+            <MonthPicker year={query.year} month={query.month} label={null}
                          onPick={(y, m) => setQuery({ year: y, month: m, kpiPage: 1 })} />
           </div>
         </div>

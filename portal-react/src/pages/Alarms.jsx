@@ -124,12 +124,16 @@ export default function Alarms() {
         {/* ===================== SUMMARY ===================== */}
         {/* counted off the SAME rows the table is showing, so the tiles and the
             list can never disagree about how many alarms there are */}
+        {/* A count and what it is counting, nothing else. The caption under each
+            number restated the tile's own label — "Needs action now" under Alarm,
+            "Watch" under Warning — a line of type per tile saying nothing the
+            heading had not already said. */}
         <div className="sumbar">
-          <Tile k="Active alarms" v={active.length} s={deviceNote(active)} cls={active.length ? 'alarm' : 'ok'} />
-          <Tile k="Alarm" v={bandCount('critical') + bandCount('alarm')} s="Needs action now"
+          <Tile k="Active alarms" v={active.length} cls={active.length ? 'alarm' : 'ok'} />
+          <Tile k="Alarm" v={bandCount('critical') + bandCount('alarm')}
                 cls={bandCount('critical') + bandCount('alarm') ? 'alarm' : 'ok'} />
-          <Tile k="Warning" v={bandCount('warn')} s="Watch" cls={bandCount('warn') ? 'warn' : 'ok'} />
-          <Tile k="Resolved" v={rows.length - active.length} s="In this window" cls="ok" />
+          <Tile k="Warning" v={bandCount('warn')} cls={bandCount('warn') ? 'warn' : 'ok'} />
+          <Tile k="Resolved" v={rows.length - active.length} cls="ok" />
         </div>
 
         {/* ===================== TABLE ===================== */}
@@ -206,15 +210,10 @@ export default function Alarms() {
   );
 }
 
-function Tile({ k, v, s, cls }) {
+function Tile({ k, v, cls }) {
   return (
     <div className={'sum ' + cls}>
-      <div className="k">{k}</div><div className="v">{v}</div><div className="s">{s}</div>
+      <div className="k">{k}</div><div className="v">{v}</div>
     </div>
   );
-}
-
-function deviceNote(active) {
-  const n = new Set(active.map(a => a.device).filter(Boolean)).size;
-  return n ? n + (n === 1 ? ' device' : ' devices') : 'Nothing open';
 }

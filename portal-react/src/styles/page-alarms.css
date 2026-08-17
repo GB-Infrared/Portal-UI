@@ -29,7 +29,6 @@
 .page-alarms .sum+.sum{border-left:1px solid var(--line-soft)}
 .page-alarms .sum .k{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
 .page-alarms .sum .v{font-family:var(--mono);font-weight:800;font-size:20px;letter-spacing:-.7px;line-height:1.05}
-.page-alarms .sum .s{font-size:9.5px;font-weight:600;color:var(--muted)}
 .page-alarms .sum.alarm .v{color:var(--red)}
 .page-alarms .sum.warn .v{color:var(--amber)}
 .page-alarms .sum.ok .v{color:var(--green)}

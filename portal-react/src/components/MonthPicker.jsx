@@ -48,7 +48,10 @@ export function MonthPicker({ year, month, onPick, label = 'Month & year' }) {
 
   return (
     <div className="mpick" ref={root}>
-      <span className="fl">{label}</span>
+      {/* the floating label is for a picker standing on its own, as on Home. In a
+          filter bar the field above it is already labelled, and two labels for one
+          control read as two controls - so `label={null}` drops it. */}
+      {label && <span className="fl">{label}</span>}
       <button className="mpick-btn" type="button" aria-expanded={open}
               onClick={stop(() => setOpen(o => !o))}>
         <span className="mpick-lab">{MONTHS_LONG[month]} {year}</span>
