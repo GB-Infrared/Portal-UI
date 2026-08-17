@@ -231,6 +231,100 @@
  * @property {number} [page]              1-based
  * @property {number} [pageSize]
  *
+ * ======================================================================
+ * KPI PAGE
+ * ======================================================================
+ * One plant, one metric, one period, bucketed by day, week or month. Three
+ * readings per bucket: what the plant DID, what the design model says it should
+ * have done in that weather, and — for buckets not yet elapsed — what it is
+ * expected to do. The page compares the first against the second; that is the
+ * whole point of it, and a KPI held only against its own history cannot tell a
+ * dull month from an underperforming plant.
+ *
+ * @typedef {Object} KpiMetric
+ * @property {string} value               'PR' | 'CUF' | …  — what the query carries
+ * @property {string} label               'Performance Ratio'
+ * @property {string} [unit]              '%', 'kWh', 'kWh/kWp'
+ * @property {number} [decimals]          how precisely it is worth stating
+ *
+ * @typedef {Object} KpiBucket
+ * @property {string|number} key          stable identity for the row
+ * @property {string} label               what goes under the bar. A DAY is '01
+ *                                        Aug'; a WEEK is the days it covers —
+ *                                        '01–07', never 'W1'. A week number is an
+ *                                        index into the month, and nobody reads a
+ *                                        chart to find out which index a reading
+ *                                        had. A MONTH is 'Aug'.
+ * @property {string} [stamp]             the bucket spelled out for the tooltip
+ *                                        and the table: '01-07 Aug 2026'
+ * @property {boolean} [partial]          bucket only half elapsed — the tooltip
+ *                                        says "in progress" rather than letting a
+ *                                        running total read as a bad week
+ * @property {number|null} [actual]       measured. Absent for a bucket entirely
+ *                                        in the future — null, never 0: nothing
+ *                                        measured and zero measured are different
+ *                                        facts, and a bar drawn for the second
+ *                                        when the first is true is a lie.
+ * @property {number|null} [simulated]    the design model over the WHOLE bucket
+ * @property {number|null} [forecast]     expected, for what has not happened yet
+ *
+ * @typedef {Object} KpiData
+ * @property {string} [metric]            which metric these buckets are of
+ * @property {string} [label]             'Performance Ratio' — the card's title
+ * @property {string} [unit]              '%'
+ * @property {number} [decimals]
+ * @property {string} [periodLabel]       printed under the x-axis: 'August 2026 · WEEK'
+ * @property {number} [max]               axis top. Omit and the UI cuts one to
+ *                                        the data, which is what keeps a PR chart
+ *                                        of 79-83% readable.
+ * @property {KpiBucket[]} buckets
+ * @property {number} [total]             buckets available on the server, for the
+ *                                        table's pager
+ *
+ * ======================================================================
+ * ANALYSIS PAGE
+ * ======================================================================
+ * Any parameter of any device against any other, over an arbitrary window. Two
+ * scales: Y1 down the left, Y2 down the right, drawn dashed so the axis a line
+ * reads is never left to be worked out.
+ *
+ * @typedef {Object} ParamCategory
+ * @property {string} value               'AC Power' | 'Irradiance' | …
+ * @property {Array<{value:string,unit?:string}>} values
+ *                                        the parameters in it: P_AC (kW), …
+ *
+ * @typedef {Object} AnalysisRow
+ * @property {number} t                   epoch ms — this page spans arbitrary
+ *                                        windows, so it carries real timestamps
+ *                                        rather than the decimal hours the
+ *                                        single-day charts use
+ * @property {Object<string,number|null>} v1   Y1 reading per device id
+ * @property {Object<string,number|null>} v2   Y2 reading per device id
+ *
+ * @typedef {Object} AnalysisData
+ * @property {string[]} [devices]         the device selector's options — this
+ *                                        plant's fleet, not a list the app keeps
+ * @property {Object<string,string[]>} [reports]
+ *                                        WHICH PARAMETERS EACH DEVICE REPORTS,
+ *                                        e.g. { INV06: ['P_AC','V_DC'],
+ *                                               WMS01: ['GHI','POA'] }.
+ *                                        The page pairs a device with a parameter
+ *                                        only if it appears here: an inverter has
+ *                                        no irradiance channel, so 'INV06 POA' is
+ *                                        not a series that is switched off — it is
+ *                                        not a series, and it earns neither a
+ *                                        legend chip nor a table column. Omit this
+ *                                        map and every device is assumed to report
+ *                                        everything.
+ * @property {AnalysisRow[]} rows         already at the resolution the window
+ *                                        deserves — the server thins, because the
+ *                                        browser cannot ask for less than it was
+ *                                        sent
+ * @property {number} [total]             rows on the server, for the pager
+ * @property {{from:number,to:number}} [window]
+ *                                        epoch ms. Defaults to the query's own
+ *                                        window when absent.
+ *
  * @typedef {Object} PortalData
  * @property {Plant[]}  plants            populates every plant selector
  * @property {string[]} deviceTypes       the Device type selector. A property of
@@ -255,6 +349,16 @@
  * @property {DailyEnergyData|null} dailyEnergy      home · Plant Energy Generation
  * @property {DailyKpiData|null} dailyKpi            home · Plant KPI
  * @property {HistoryData|null} history              monitoring · table
+ * @property {KpiMetric[]} kpiMetrics                the KPI page's metric selector
+ * @property {KpiData|null} kpi                      kpi · chart + table
+ * @property {ParamCategory[]} paramCategories       analysis · the Y1/Y2 category
+ *                                                   and value selectors, in the
+ *                                                   order the site's own HMI
+ *                                                   groups its tags: an engineer
+ *                                                   who reads the panel on site
+ *                                                   should find them in the same
+ *                                                   sequence here
+ * @property {AnalysisData|null} analysis            analysis · chart + table
  */
 
 export {};

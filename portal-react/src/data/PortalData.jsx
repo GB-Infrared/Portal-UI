@@ -29,7 +29,11 @@ export const EMPTY_DATA = Object.freeze({
   powerIrradiance: null,
   dailyEnergy: null,
   dailyKpi: null,
-  history: null
+  history: null,
+  kpiMetrics: [],
+  kpi: null,
+  paramCategories: [],
+  analysis: null
 });
 
 const p2 = n => String(n).padStart(2, '0');
@@ -38,13 +42,17 @@ const isoTime = d => p2(d.getHours()) + ':' + p2(d.getMinutes());
 
 function todayISO() { return isoDate(new Date()); }
 
-/** The alarms window: the last 24 hours, in the VIEWER's local time. */
-function defaultWindow() {
+/**
+ * A window of the last 24 hours, in the VIEWER's local time, named for the page
+ * that owns it. Relative, computed at load: anything written as a literal date
+ * here would be a fact about a demo, and would still be on screen a year from now.
+ */
+function defaultWindow(prefix = 'alarm') {
   const to = new Date();
   const from = new Date(to.getTime() - 24 * 3600 * 1000);
   return {
-    alarmFromDate: isoDate(from), alarmFromTime: isoTime(from),
-    alarmToDate: isoDate(to), alarmToTime: isoTime(to)
+    [prefix + 'FromDate']: isoDate(from), [prefix + 'FromTime']: isoTime(from),
+    [prefix + 'ToDate']: isoDate(to), [prefix + 'ToTime']: isoTime(to)
   };
 }
 
@@ -69,6 +77,31 @@ export function PortalDataProvider({ fetchData, children }) {
     kpiMetric: 'CUF',             // home · Plant KPI series
     page: 1,                      // monitoring · history table
     pageSize: 100,
+
+    /* ---- kpi page ----
+       One plant, one metric, one period. The metric is chosen from what the
+       backend offers, like every other selector here; the bucket is a UI enum,
+       because "by day, by week, by month" is a question about how to READ a
+       period rather than a fact about the site. */
+    kpiPageMetric: null,
+    kpiBucket: 'Daily',           // Daily | Weekly | Monthly
+    kpiPage: 1,
+    kpiPageSize: 100,
+
+    /* ---- analysis page ----
+       Empty device list means the same as everywhere else on this portal: no
+       narrowing. The two axes open unset and are filled from the categories the
+       backend offers, so the page cannot ask for a parameter this site has never
+       published. Y2 unset is a real answer - most analysis is one parameter over
+       time, and a second scale nobody wanted should be switchable off. */
+    analysisDevices: [],
+    y1Category: null,
+    y1Value: null,
+    y2Category: null,
+    y2Value: null,
+    ...defaultWindow('analysis'),
+    analysisPage: 1,
+    analysisPageSize: 100,
 
     /* ---- alarms page ----
        Every list here is EMPTY, and empty means "no narrowing": all plants, all
@@ -150,10 +183,32 @@ export function PortalDataProvider({ fetchData, children }) {
     };
     pick('deviceType', data.deviceTypes);
     pick('dataPoint', data.dataPoints);
+    pick('kpiPageMetric', (data.kpiMetrics || []).map(m => m.value));
+    /* Analysis' two selectors are a PAIR: the category narrows, the value picks.
+       A value is only valid inside its own category, so when the category is
+       filled in - or changed by the user to one this value does not belong to -
+       the value follows it rather than being left pointing at a parameter the
+       category no longer offers. */
+    const cats = data.paramCategories || [];
+    pick('y1Category', cats.map(c => c.value));
+    const y1cat = cats.filter(c => c.value === (patch.y1Category || query.y1Category))[0];
+    const y1vals = y1cat ? y1cat.values.map(v => v.value) : [];
+    if (y1vals.length && (query.y1Value == null || !y1vals.includes(query.y1Value))) {
+      patch.y1Value = y1vals[0];
+    }
+    /* Y2 is left unset on purpose - "no second axis" is the honest default */
+    const y2cat = cats.filter(c => c.value === query.y2Category)[0];
+    const y2vals = y2cat ? y2cat.values.map(v => v.value) : [];
+    if (query.y2Category != null && y2vals.length &&
+        (query.y2Value == null || !y2vals.includes(query.y2Value))) {
+      patch.y2Value = y2vals[0];
+    }
     const ids = (data.plants || []).map(p => p.id);
     if (ids.length && (query.plantId == null || !ids.includes(query.plantId))) patch.plantId = ids[0];
     if (Object.keys(patch).length) setQuery(q => ({ ...q, ...patch }));
-  }, [data.deviceTypes, data.dataPoints, data.plants, query.deviceType, query.dataPoint, query.plantId]);
+  }, [data.deviceTypes, data.dataPoints, data.plants, data.kpiMetrics, data.paramCategories,
+      query.deviceType, query.dataPoint, query.plantId, query.kpiPageMetric,
+      query.y1Category, query.y1Value, query.y2Category, query.y2Value]);
 
   const value = useMemo(
     () => ({ ...data, query, setQuery: setQueryPart, refresh: load, status, error, live: data.live }),

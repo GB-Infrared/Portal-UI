@@ -14,6 +14,8 @@ import './styles/controls.css';
 import './styles/page-home.css';
 import './styles/page-monitoring.css';
 import './styles/page-alarms.css';
+import './styles/page-analysis.css';
+import './styles/page-kpi.css';
 import './styles/app.css';
 
 createRoot(document.getElementById('root')).render(

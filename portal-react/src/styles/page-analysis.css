@@ -1,0 +1,98 @@
+/* ---------- ANALYSIS ----------
+   Scoped like the other pages. One column, no rail: the plot is driven entirely
+   by the bar above it, and this page's whole job is to give two parameters as
+   much width as the screen has. */
+.page-analysis .wrap{max-width:2400px;margin:0 auto;padding:14px clamp(14px,1.5vw,28px) 34px;
+  display:flex;flex-direction:column;gap:14px}
+.page-analysis .toprow{max-width:2400px;margin:0 auto;padding:16px clamp(14px,1.5vw,28px) 0}
+
+.page-analysis .filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:9px;padding:0 2px 2px;min-width:0}
+.page-analysis .field{position:relative;display:flex;flex-direction:column;gap:5px}
+/* The Y1/Y2 labels carry the stroke that reads them — a solid rule for Y1, a
+   dashed one for Y2 — so the pairing between a control and a line is stated in
+   the bar as well as on the axis. */
+.page-analysis .field label{font-size:10px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint)}
+.page-analysis .dtwarn{font-size:10.5px;font-weight:700;color:var(--red);white-space:nowrap}
+
+/* ---------- card + chart head ---------- */
+.page-analysis .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg)}
+.page-analysis .chead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:13px 16px 10px}
+.page-analysis .chead .title{font-size:14.5px;font-weight:700;white-space:nowrap;flex:none}
+.page-analysis .chead .tools{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* ---------- legend ----------
+   Every chip carries its device AND its parameter, and the mark is the LINE STYLE
+   the chart draws — solid for Y1, dashed for Y2 — which is the one thing the
+   picture cannot tell you on a two-scale plot. */
+.page-analysis .legend{display:flex;gap:7px;flex-wrap:wrap;min-width:0}
+.page-analysis .lg{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:8px;
+  border:1px solid var(--line);background:var(--panel-2);font-size:12px;cursor:pointer;
+  user-select:none;white-space:nowrap;flex:none}
+.page-analysis .lg:hover{border-color:var(--line-hi)}
+.page-analysis .lg.off{opacity:.38}
+.page-analysis .lg i{width:16px;height:0;border-top-width:2.5px;display:inline-block;flex:none}
+.page-analysis .lg i.solid{border-top-style:solid}
+.page-analysis .lg i.dash{border-top-style:dashed}
+.page-analysis .lg .n{color:var(--text);font-weight:700;font-family:var(--mono);font-size:11.5px}
+.page-analysis .lg .p{color:var(--muted);font-family:var(--mono);font-size:11px;font-weight:600}
+
+/* ---------- chart ---------- */
+.page-analysis .chartwrap{position:relative;padding:4px 10px 14px}
+.page-analysis .chartwrap svg{width:100%;height:auto;display:block}
+.page-analysis .gl{stroke:var(--line-soft);stroke-width:1}
+.page-analysis .gl.v{stroke:var(--grid-v)}
+.page-analysis .axt{fill:var(--faint);font-size:10.5px;font-family:var(--mono)}
+.page-analysis .axt.amber{fill:var(--amber);opacity:.85}
+.page-analysis .xhair{stroke:var(--text)}
+.page-analysis .tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;
+  background:var(--elev);border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+  min-width:170px;box-shadow:0 14px 34px -10px var(--shadow);z-index:20}
+.page-analysis .tip .tt{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--muted);margin-bottom:5px}
+.page-analysis .tip .tr{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);padding:2px 0}
+.page-analysis .tip .tr i{width:9px;height:9px;border-radius:2px;flex:none}
+.page-analysis .tip .tr b{margin-left:auto;font-family:var(--mono);color:var(--text);font-weight:700}
+
+/* ---------- table ----------
+   The same shape as Monitoring's history table: device names across the top, the
+   parameter each one reports beneath, time stamps down the side. */
+.page-analysis .ttools{display:flex;align-items:center;gap:8px;padding:13px 16px;
+  border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.page-analysis .msel-inline{display:inline-flex}
+.page-analysis .msel-inline .mbtn{height:31px;min-width:118px;font-size:12px;font-weight:700;letter-spacing:.04em}
+.page-analysis .tbtn{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;
+  font-size:12px;font-weight:700;letter-spacing:.04em;background:transparent;
+  border:1px solid var(--line);color:var(--muted)}
+.page-analysis .tbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi);background:var(--hover)}
+.page-analysis .tbtn:disabled{opacity:.45;cursor:default}
+.page-analysis .tablewrap{overflow-x:auto}
+.page-analysis table{width:100%;border-collapse:collapse;min-width:640px}
+.page-analysis thead th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);padding:9px 16px;border-bottom:1px solid var(--line-soft);
+  text-align:center;white-space:nowrap}
+.page-analysis thead .grp th{border-bottom:none;padding-bottom:2px;font-size:11.5px;
+  color:var(--text);letter-spacing:.06em}
+/* the device name spans its parameter columns, so the pairing is structural */
+.page-analysis thead .grp th.dev{text-align:center;border-bottom:1px solid var(--line-soft)}
+.page-analysis thead th.ph{color:var(--faint);font-weight:600}
+.page-analysis tbody td{padding:9px 16px;font-family:var(--mono);font-size:12.5px;font-weight:600;
+  text-align:center;border-bottom:1px solid var(--line-soft);color:var(--text);white-space:nowrap}
+.page-analysis tbody td.ts{color:var(--muted)}
+.page-analysis tbody td.nil{color:var(--faint)}
+.page-analysis tbody tr:hover{background:var(--hover-soft)}
+/* one device's columns are ruled off from the next, so a wide table does not read
+   as one undifferentiated block of numbers */
+.page-analysis thead th.sep,.page-analysis tbody td.sep{border-left:1px solid var(--line-soft)}
+
+.page-analysis .tfoot{display:flex;align-items:center;gap:16px;padding:11px 16px;font-size:12px;color:var(--muted)}
+.page-analysis .tfoot .sp{margin-left:auto}
+.page-analysis .range{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.page-analysis .pgbtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted)}
+.page-analysis .pgbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi)}
+.page-analysis .pgbtn:disabled{opacity:.4;cursor:default}
+
+/* the whole field opens the native calendar — same rule as monitoring's date box */
+.page-analysis .dt{position:relative}
+.page-analysis .dt input[type="date"]::-webkit-calendar-picker-indicator{
+  position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:pointer}

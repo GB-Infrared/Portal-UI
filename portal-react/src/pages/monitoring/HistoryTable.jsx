@@ -80,8 +80,13 @@ export function HistoryTable({ data, pageSize, onPageSizeChange, page, onPageCha
 
   /* keep the source index: row.values is positional against the full column list */
   const shown = columns.map((c, i) => ({ c, i })).filter(({ c }) => !hidden.has(c.id));
-  /* nothing configured AND nothing recorded — draw the shape, not an empty frame */
-  const blank = !columns.length && !rows.length;
+  /* Nothing to show in either direction — no columns visible, or no rows — draws
+     the SHAPE and says which it is. Time Stamp cannot be unticked, so the
+     alternative when every device column is hidden is a lone stamp column
+     stretched across the card with its times floating in the middle of it: a list
+     wearing a table's clothes. The greyed header is the contract, the note
+     underneath is why it is empty. */
+  const blank = !shown.length || !rows.length;
   const ph = Array.from({ length: PLACEHOLDER_COLS }, (_, i) => i);
 
   const toggle = id => setHidden(s => {
@@ -182,7 +187,7 @@ export function HistoryTable({ data, pageSize, onPageSizeChange, page, onPageCha
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, i) => (
+            {!blank && rows.map((r, i) => (
               <tr key={r.time + i}>
                 <td className="ts">{stamp(r.time, day)}</td>
                 {shown.map(({ c, i: k }) => (
@@ -194,13 +199,13 @@ export function HistoryTable({ data, pageSize, onPageSizeChange, page, onPageCha
                 ))}
               </tr>
             ))}
-            {!rows.length && (
+            {blank && (
               <tr>
-                <td colSpan={(blank ? PLACEHOLDER_COLS : shown.length) + 1}>
-                  {/* nothing configured at all vs a query that came back empty are
-                      different facts, so they do not share a message */}
+                <td colSpan={PLACEHOLDER_COLS + 1}>
+                  {/* a query that came back empty and a table with every column
+                      unticked are different facts, so they do not share a message */}
                   <div className="empty-note tall">
-                    {blank ? 'No data' : 'No readings for this selection'}
+                    {!rows.length ? 'No data' : 'No columns selected'}
                   </div>
                 </td>
               </tr>

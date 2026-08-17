@@ -1,7 +1,7 @@
 # ENEROPS OS — React build
 
-The React port of the three prototype pages — `home.html`, `monitoring.html`
-and `alarms.html`.
+The React port of the five prototype pages — `home.html`, `monitoring.html`,
+`alarms.html`, `analysis.html` and `kpi.html`.
 
 This is the **presentation layer only**. It ships with no data of any kind: no
 sample plants, no fake inverters, no invented readings. Every page renders its
@@ -84,11 +84,14 @@ src/
   components/
     TopBar, Drawer, MonthPicker, Toasts, icons
     charts/          DevicePowerChart, PowerIrradianceChart,
-                     DailyBarChart, GroupedBarChart, Axes, ChartTip
+                     DailyBarChart, GroupedBarChart, KpiBarChart,
+                     AnalysisChart, Axes, ChartTip
   pages/
     Home.jsx         + home/PlantSwitch, KpiStrip, AlarmsBox, FleetStrip
     Monitoring.jsx   + monitoring/DeviceRail, DevicePanel, HistoryTable
     Alarms.jsx       (uses the shared controls above)
+    Analysis.jsx     + analysis/AnalysisTable, pairs.js
+    Kpi.jsx          + kpi/KpiTable
   styles/            see below
 ```
 
@@ -210,4 +213,11 @@ decision rather than a design one:
 - The alarms table sorts through the query (`alarmSort`), so the backend does
   the ordering; the monitoring table sorts what it was given.
 - Legend clicks hide a series locally; that is deliberate, it should not re-query.
-- The Analysis and KPI tabs are in the nav but have no route yet.
+- Analysis and KPI page BOTH pages: `analysis.rows` and `kpi.buckets` arrive
+  already at the resolution the window deserves. The server thins, because the
+  browser cannot ask for less than it was sent, and a month at five-minute
+  resolution is nine thousand points of ink for a question nobody asked.
+- `analysis.reports` — which parameters each device publishes — decides which
+  device/parameter pairs exist at all. Omit it and every device is assumed to
+  report everything, which puts 'INV06 POA' in the legend and a column of dashes
+  in the table. It is the one field on that page worth filling in first.

@@ -6,6 +6,8 @@ import { useTheme } from './lib/useTheme';
 import Home from './pages/Home';
 import Monitoring from './pages/Monitoring';
 import Alarms from './pages/Alarms';
+import Analysis from './pages/Analysis';
+import Kpi from './pages/Kpi';
 
 /**
  * Connect a backend by passing `fetchData` here:
@@ -29,8 +31,16 @@ export default function App({ fetchData }) {
   );
 }
 
-const PAGE_CLASS = { '/monitoring': 'page-monitoring', '/alarms': 'page-alarms' };
-const PAGE_SUBTITLE = { '/monitoring': 'SITE OVERVIEW', '/alarms': 'SITE OVERVIEW', '/': 'SITE OVERVIEW' };
+const PAGE_CLASS = {
+  '/monitoring': 'page-monitoring',
+  '/alarms': 'page-alarms',
+  '/analysis': 'page-analysis',
+  '/kpi': 'page-kpi'
+};
+const PAGE_SUBTITLE = {
+  '/monitoring': 'SITE OVERVIEW', '/alarms': 'SITE OVERVIEW',
+  '/analysis': 'SITE OVERVIEW', '/kpi': 'SITE OVERVIEW', '/': 'SITE OVERVIEW'
+};
 
 function Shell() {
   const { plants, query, setQuery } = usePortal();
@@ -63,6 +73,8 @@ function Shell() {
         <Route path="/" element={<Home />} />
         <Route path="/monitoring" element={<Monitoring />} />
         <Route path="/alarms" element={<Alarms />} />
+        <Route path="/analysis" element={<Analysis />} />
+        <Route path="/kpi" element={<Kpi />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

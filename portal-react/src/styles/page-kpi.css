@@ -1,0 +1,103 @@
+/* ---------- KPI ----------
+   Scoped like the other pages: .card, .field and .legend mean different things on
+   each, so each page's sheet stays behind its own class and they cannot collide.
+   Shared controls live in controls.css, unscoped, on purpose.
+
+   One column, no rail. This page is one site examined closely: the chart is
+   driven entirely by the bar above it, and every pixel a rail took would come
+   out of the plot. */
+.page-kpi .wrap{max-width:2400px;margin:0 auto;padding:14px clamp(14px,1.5vw,28px) 34px;
+  display:flex;flex-direction:column;gap:14px}
+.page-kpi .toprow{max-width:2400px;margin:0 auto;padding:16px clamp(14px,1.5vw,28px) 0}
+
+.page-kpi .filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:9px;padding:0 2px 2px;min-width:0}
+.page-kpi .field{position:relative;display:flex;flex-direction:column;gap:5px}
+.page-kpi .field label{font-size:10px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint)}
+
+/* ---------- card + chart head ---------- */
+.page-kpi .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg)}
+.page-kpi .chead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:13px 16px 10px}
+.page-kpi .chead .title{font-size:14.5px;font-weight:700;white-space:nowrap;flex:none}
+.page-kpi .chead .tools{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* The bucket switch, in the chart's head: the same control Monitoring puts there
+   for its range, at the same size and with the same green for the one in force.
+   A page's controls are read as one set across the app or not at all. */
+.page-kpi .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.page-kpi .seg button{padding:6px 11px;font-size:11.5px;font-weight:600;background:transparent;
+  border:none;color:var(--muted);white-space:nowrap}
+.page-kpi .seg button:hover{color:var(--text);background:var(--hover)}
+.page-kpi .seg button.on{background:var(--green-soft);color:var(--green)}
+.page-kpi .seg button.on:hover{background:var(--green-soft)}
+.page-kpi .seg button:not(:last-child){border-right:1px solid var(--line)}
+
+/* ---------- legend ----------
+   Identity is never colour alone: every chip carries the series name, and the
+   mark is a SQUARE because the chart draws bars. */
+.page-kpi .legend{display:flex;gap:7px;flex-wrap:wrap;min-width:0}
+.page-kpi .lg{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:8px;
+  border:1px solid var(--line);background:var(--panel-2);font-size:12px;cursor:pointer;
+  user-select:none;white-space:nowrap;flex:none}
+.page-kpi .lg:hover{border-color:var(--line-hi)}
+.page-kpi .lg.off{opacity:.38}
+.page-kpi .lg i.sq{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.page-kpi .lg .n{color:var(--text);font-weight:700;font-family:var(--mono);font-size:11.5px}
+
+/* ---------- chart ---------- */
+.page-kpi .chartwrap{position:relative;padding:4px 10px 14px}
+.page-kpi .chartwrap svg{width:100%;height:auto;display:block}
+.page-kpi .gl{stroke:var(--line-soft);stroke-width:1}
+.page-kpi .gl.v{stroke:var(--grid-v)}
+.page-kpi .axt{fill:var(--faint);font-size:10.5px;font-family:var(--mono)}
+.page-kpi .tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;
+  background:var(--elev);border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+  min-width:150px;box-shadow:0 14px 34px -10px var(--shadow);z-index:20}
+.page-kpi .tip .tt{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--muted);margin-bottom:5px}
+.page-kpi .tip .tr{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);padding:2px 0}
+.page-kpi .tip .tr i{width:9px;height:9px;border-radius:2px;flex:none}
+.page-kpi .tip .tr b{margin-left:auto;font-family:var(--mono);color:var(--text);font-weight:700}
+
+/* ---------- table ----------
+   Cells are CENTRED and set in the mono face, which keeps the digits on a common
+   width — that is what stops a centred column of numbers from going ragged. */
+.page-kpi .ttools{display:flex;align-items:center;gap:8px;padding:0 16px 13px;
+  border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.page-kpi .msel-inline{display:inline-flex}
+.page-kpi .msel-inline .mbtn{height:31px;min-width:118px;font-size:12px;font-weight:700;letter-spacing:.04em}
+.page-kpi .tbtn{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;
+  font-size:12px;font-weight:700;letter-spacing:.04em;background:transparent;
+  border:1px solid var(--line);color:var(--muted)}
+.page-kpi .tbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi);background:var(--hover)}
+.page-kpi .tbtn:disabled{opacity:.45;cursor:default}
+.page-kpi .tablewrap{overflow-x:auto}
+.page-kpi table{width:100%;border-collapse:collapse;min-width:520px}
+.page-kpi thead th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);padding:9px 16px;border-bottom:1px solid var(--line-soft);
+  text-align:center;white-space:nowrap}
+/* the header the table keeps when nothing is ticked — stated, but plainly not a
+   reading, so nobody mistakes the shape for content */
+.page-kpi thead th.ph{color:var(--faint);font-weight:600}
+.page-kpi tbody td{padding:9px 16px;font-family:var(--mono);font-size:12.5px;font-weight:600;
+  text-align:center;border-bottom:1px solid var(--line-soft);color:var(--text);white-space:nowrap}
+.page-kpi tbody td.ts{color:var(--muted)}
+.page-kpi tbody td.nil{color:var(--faint)}
+.page-kpi tbody tr:hover{background:var(--hover-soft)}
+
+.page-kpi .tfoot{display:flex;align-items:center;gap:16px;padding:11px 16px;font-size:12px;color:var(--muted)}
+.page-kpi .tfoot .sp{margin-left:auto}
+.page-kpi .range{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.page-kpi .pgbtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted)}
+.page-kpi .pgbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi)}
+.page-kpi .pgbtn:disabled{opacity:.4;cursor:default}
+
+/* the period the page is about, stated once under it: the bar can be scrolled off
+   on a laptop, and a KPI with no period is not a KPI */
+.page-kpi .pagenote{font-family:var(--mono);font-size:10.5px;font-weight:700;
+  letter-spacing:.06em;color:var(--faint);text-align:center;padding:2px 0 4px}
+
+@media (max-width:900px){
+  .page-kpi .chead{align-items:flex-start}
+  .page-kpi .chead .tools{margin-left:0}
+}
