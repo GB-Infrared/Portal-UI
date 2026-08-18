@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePortal } from '../data/PortalData';
 import { useToast } from '../components/Toasts';
 import { PanelSelect } from '../components/PanelSelect';
@@ -27,10 +27,13 @@ export default function Alarms() {
   const rows = (page && page.rows) || [];
   const total = page && page.total != null ? page.total : rows.length;
 
-  /* Which columns are shown — a view preference, so it lives here rather than
-     in the query: it changes nothing about what the backend is asked for. */
-  const [cols, setCols] = useState(() => ALARM_COLUMNS.filter(c => !c.locked).map(c => c.key));
-  const shown = ALARM_COLUMNS.filter(c => c.locked || cols.includes(c.key));
+  /* Every column, always. The prototype's alarm toolbar carries EXPORT CSV and
+     nothing else: an alarm log is read across the row - severity against device
+     against message against when it cleared - so a column hidden here is a fact
+     missing from the answer rather than clutter removed from it. Monitoring's
+     table is the one that needs a picker, because there the columns are DEVICES
+     and a fleet of forty will not fit on a screen. */
+  const shown = ALARM_COLUMNS;
 
   /* Devices and per-plant counts are the BACKEND's — the devices these plants
      actually have, and what each plant has open over this same window. An app
@@ -55,8 +58,8 @@ export default function Alarms() {
   }
 
   function exportCsv() {
-    /* exactly the chosen columns, in the table's order, for the rows on the
-       server's answer — a real file, so the choice can actually be checked */
+    /* exactly what the table shows, in its order, for the rows on the server's
+       answer — a real file, so what is on screen can be checked off screen */
     downloadCsv(
       `Alarms_${query.alarmFromDate}.csv`,
       shown.map(c => c.label),
@@ -141,15 +144,6 @@ export default function Alarms() {
           <div className="chead"><div className="title">Alarm Data</div></div>
 
           <div className="ttools">
-            {/* what is ticked here is what the table shows AND what the file
-                carries — the panel head says so, since the button cannot */}
-            <div className="msel-inline">
-              <PanelSelect multiple head="Shown in the table and the export" id="a-cols"
-                           fixedLabel="COLUMNS"
-                           options={ALARM_COLUMNS.filter(c => !c.locked)
-                             .map(c => ({ value: c.key, label: c.label }))}
-                           value={cols} onChange={setCols} />
-            </div>
             <button className="tbtn" type="button" onClick={exportCsv} disabled={!rows.length}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">

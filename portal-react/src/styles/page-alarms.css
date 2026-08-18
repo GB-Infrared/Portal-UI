@@ -39,8 +39,6 @@
 .page-alarms .chead .title{font-size:14.5px;font-weight:700;white-space:nowrap;flex:none}
 .page-alarms .ttools{display:flex;align-items:center;gap:8px;padding:0 16px 13px;
   border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
-.page-alarms .msel-inline{display:inline-flex}
-.page-alarms .msel-inline .mbtn{height:31px;min-width:118px;font-size:12px;font-weight:700;letter-spacing:.04em}
 .page-alarms .tbtn{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;
   font-size:12px;font-weight:700;letter-spacing:.04em;background:transparent;
   border:1px solid var(--line);color:var(--muted);cursor:pointer;font-family:inherit}
