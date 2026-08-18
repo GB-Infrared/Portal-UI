@@ -17,6 +17,7 @@ import { createContext, useContext, useCallback, useEffect, useMemo, useRef, use
 
 /** Everything empty. Pages must stay laid out correctly against exactly this. */
 export const EMPTY_DATA = Object.freeze({
+  user: null,
   plants: [],
   deviceTypes: [],
   dataPoints: [],

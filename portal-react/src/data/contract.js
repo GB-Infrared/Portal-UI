@@ -111,6 +111,21 @@
  * @property {string} [seriesId]          the series it belongs to; the marker
  *                                        hides when that series is switched off
  *
+ * @typedef {Object} User
+ * The signed-in operator. Every field is optional and every one of them is the
+ * BACKEND's to send: the Settings profile prints an em-dash where a field is
+ * missing rather than a plausible-looking placeholder, because a profile screen
+ * that invents a phone number is worse than one that admits it has none.
+ * @property {string} [name]        display name, e.g. 'Vikram Sethi'
+ * @property {string} [initial]     one letter for the avatar; falls back to name[0]
+ * @property {string} [firstName]
+ * @property {string} [lastName]
+ * @property {string} [role]        e.g. 'Site administrator'
+ * @property {string} [company]
+ * @property {string} [address]
+ * @property {string} [email]
+ * @property {string} [phone]
+ *
  * @typedef {Object} LineChartData
  * @property {Series[]} series
  * @property {string} [label]             what the chart is drawing, e.g. 'Active
@@ -350,6 +365,9 @@
  *                                        answer different questions and a page
  *                                        that showed one where the other belongs
  *                                        would be quietly wrong.
+ * @property {User|null} user                        settings · the profile, and
+ *                                                   the name behind the avatar
+ *                                                   in the top bar
  * @property {LineChartData|null} devicePower        monitoring · the chart, one
  *                                                   series per device of the
  *                                                   selected data point

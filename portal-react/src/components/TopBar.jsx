@@ -1,3 +1,4 @@
+import { AccountMenu } from './AccountMenu';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { fmtClock } from '../lib/format';
@@ -15,7 +16,7 @@ function useClock() {
 }
 
 export function TopBar({ subtitle, refreshSeconds, onRefreshChange,
-                         theme, onToggleTheme, user }) {
+                         theme, onToggleTheme, user, onSignOut }) {
   const now = useClock();
   const live = refreshSeconds !== 'off';
 
@@ -57,9 +58,7 @@ export function TopBar({ subtitle, refreshSeconds, onRefreshChange,
                 title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}>
           {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
         </button>
-        <div className="avatar" title={(user && user.name) || undefined}>
-          {(user && user.initial) || ''}
-        </div>
+        <AccountMenu user={user} onSignOut={onSignOut} />
       </div>
     </header>
   );

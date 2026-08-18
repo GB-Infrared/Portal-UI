@@ -1,0 +1,125 @@
+/* ==========================================================================
+   SETTINGS
+
+   Its own chrome, not the portal's. The five reading pages carry tabs, a clock
+   and a refresh control; nothing on this screen is a live reading, so a pulsing
+   dot and a "5 min" refresh would be the furniture claiming something the page
+   does not do. The mark goes back to the portal, which is the only navigation
+   this screen owes anybody.
+   ========================================================================== */
+.page-settings .topbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:20px;
+  height:58px;padding:0 22px;border-bottom:1px solid var(--line);
+  background:var(--topbar);color:var(--topbar-fg)}
+.page-settings .brand{display:flex;align-items:center;gap:10px;white-space:nowrap;
+  border-radius:9px;padding:3px 6px;margin-left:-6px}
+.page-settings .brand:hover{background:var(--hover)}
+.page-settings .brand .logo{height:34px;width:auto;display:block;flex:none}
+.page-settings .brand .btext{display:flex;flex-direction:column;justify-content:center;gap:1px}
+.page-settings .brand .word{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--brand);
+  letter-spacing:.2px;line-height:1.05}
+.page-settings .brand .sub{font-size:9px;letter-spacing:.16em;color:var(--topbar-fg-2);
+  text-transform:uppercase;font-weight:600;line-height:1}
+@media (max-width:820px){ .page-settings .brand .sub{display:none} }
+.page-settings .topbar .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+
+/* the way back, said in words as well as in the mark — an image that happens to
+   be a link is only a link to someone who has already tried clicking it */
+.page-settings .backlink{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;
+  font-size:12.5px;font-weight:600;color:var(--muted)}
+.page-settings .backlink:hover{color:var(--text);background:var(--hover)}
+@media (max-width:700px){ .page-settings .backlink span{display:none} }
+
+/* ---------- shell ---------- */
+.page-settings .shell{display:grid;grid-template-columns:250px 1fr;align-items:start;
+  min-height:calc(100vh - 58px)}
+
+/* ---------- sidebar ----------
+   Groups, not a flat list of eleven. Eleven links in a column is a wall a reader
+   has to scan every time; four headings is a question they can answer first. */
+.page-settings .side{position:sticky;top:58px;align-self:start;height:calc(100vh - 58px);
+  overflow-y:auto;border-right:1px solid var(--line);background:var(--panel);padding:0 0 24px}
+.page-settings .sidehead{display:flex;align-items:center;justify-content:center;gap:10px;
+  height:76px;border-bottom:1px solid var(--line-soft);color:var(--text)}
+.page-settings .sidehead .t{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.page-settings .sidehead svg{color:var(--blue)}
+
+.page-settings .grp{padding:6px 10px 0}
+.page-settings .grpbtn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;
+  border-radius:9px;border:none;background:transparent;color:var(--text);font-family:inherit;
+  font-size:13px;font-weight:600;text-align:left;cursor:pointer}
+.page-settings .grpbtn:hover{background:var(--hover)}
+.page-settings .grpbtn svg.gi{flex:none;color:var(--blue)}
+/* the chevron points at what the click will DO: down when the group is shut and
+   about to open, up when it is open and about to close */
+.page-settings .grpbtn .chev{margin-left:auto;flex:none;color:var(--faint);transition:transform .16s ease}
+.page-settings .grp.shut .chev{transform:rotate(180deg)}
+.page-settings .grpitems{display:flex;flex-direction:column;gap:1px;padding:2px 0 4px 12px}
+.page-settings .grp.shut .grpitems{display:none}
+
+.page-settings .item{display:block;padding:7px 12px;border-radius:8px;font-size:12.5px;font-weight:500;
+  color:var(--muted);width:100%;border:none;background:transparent;text-align:left;
+  font-family:inherit;cursor:pointer}
+.page-settings .item:hover{color:var(--text);background:var(--hover)}
+/* the current screen is stated by weight and a rule down its edge, not by colour
+   alone — this portal spends green on plant state, and a menu is not plant state */
+.page-settings .item.on{color:var(--text);font-weight:700;background:var(--sel);
+  box-shadow:inset 2px 0 0 var(--blue)}
+
+/* ---------- main ---------- */
+.page-settings .main{padding:22px clamp(16px,2vw,30px) 40px;min-width:0}
+.page-settings .pagehead{font-size:20px;font-weight:600;letter-spacing:-.01em;margin-bottom:16px}
+.page-settings .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg)}
+.page-settings .card .chead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;
+  padding:15px 20px 13px;border-bottom:1px solid var(--line-soft)}
+.page-settings .chead .title{font-size:14.5px;font-weight:700}
+.page-settings .chead .tools{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* ---------- the profile ---------- */
+.page-settings .who{display:flex;align-items:center;gap:18px;padding:24px 20px 22px}
+.page-settings .who .big{width:78px;height:78px;border-radius:50%;background:var(--panel-2);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:30px;font-weight:700;color:var(--muted);flex:none}
+.page-settings .who .nm{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.page-settings .who .ro{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* Two columns, filled in reading order. The legacy screen ran Email and Contact
+   down the left while the right column sat empty from Address onward, which put
+   a hole in the middle of the card and made the pairing look meaningful when it
+   was only what the grid did when it ran out. */
+.page-settings .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 32px;
+  padding:4px 20px 24px}
+@media (max-width:760px){ .page-settings .fields{grid-template-columns:1fr} }
+.page-settings .f .k{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:3px}
+.page-settings .f .v{font-size:13px;color:var(--muted);word-break:break-word}
+/* a field the backend has not sent is an em-dash, never a plausible-looking
+   placeholder — a profile that invents a phone number is worse than one that
+   admits it has none */
+.page-settings .f .v.none{color:var(--dim)}
+
+.page-settings .cfoot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:15px 20px;border-top:1px solid var(--line-soft)}
+.page-settings .cfoot .k{font-size:12.5px;font-weight:700}
+.page-settings .cfoot .sp{margin-left:auto}
+.page-settings .linkbtn{border:none;background:transparent;font-family:inherit;cursor:pointer;
+  font-size:12.5px;font-weight:600;color:var(--blue);padding:2px 0}
+.page-settings .linkbtn:hover{text-decoration:underline}
+
+/* ---------- a screen that is not designed yet ----------
+   Named rather than hidden. A menu item that opens an empty card reads as
+   broken; one that says what it will hold reads as a plan, and the sidebar can
+   be reviewed as a whole before any of it is drawn. */
+.page-settings .todo{display:flex;flex-direction:column;align-items:flex-start;gap:9px;
+  padding:44px 24px 48px;max-width:520px}
+.page-settings .todo .badge{font-size:8.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--faint);background:var(--panel-2);border:1px solid var(--line);padding:3px 8px;border-radius:5px}
+.page-settings .todo .h{font-size:15px;font-weight:700}
+.page-settings .todo .p{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* Under 900px the rail stops being a rail: it unsticks, gives up its height and
+   sits above the content as a block, because a 250px column on a phone leaves
+   the panel too narrow to read the thing the rail was for. */
+@media (max-width:900px){
+  .page-settings .shell{grid-template-columns:1fr}
+  .page-settings .side{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}
+  .page-settings .sidehead{height:60px}
+}
