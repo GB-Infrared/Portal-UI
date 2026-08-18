@@ -67,15 +67,8 @@
    width — that is what stops a centred column of numbers from going ragged. */
 .page-kpi .ttools{display:flex;align-items:center;gap:8px;padding:0 16px 13px;
   border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
-.page-kpi .msel-inline{display:inline-flex}
-.page-kpi .msel-inline .mbtn{height:31px;min-width:118px;font-size:12px;font-weight:700;letter-spacing:.04em}
-.page-kpi .tbtn{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;
-  font-size:12px;font-weight:700;letter-spacing:.04em;background:transparent;
-  border:1px solid var(--line);color:var(--muted)}
-.page-kpi .tbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi);background:var(--hover)}
-.page-kpi .tbtn:disabled{opacity:.45;cursor:default}
 .page-kpi .tablewrap{overflow-x:auto}
-.page-kpi table{width:100%;border-collapse:collapse;min-width:520px}
+.page-kpi table{width:100%;border-collapse:separate;border-spacing:0;min-width:520px}
 .page-kpi thead th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   color:var(--muted);padding:9px 16px;border-bottom:1px solid var(--line-soft);
   text-align:center;white-space:nowrap}
@@ -86,7 +79,18 @@
   text-align:center;border-bottom:1px solid var(--line-soft);color:var(--text);white-space:nowrap}
 .page-kpi tbody td.ts{color:var(--muted)}
 .page-kpi tbody td.nil{color:var(--faint)}
-.page-kpi tbody tr:hover{background:var(--hover-soft)}
+/* THE ROW UNDER THE POINTER LIFTS OFF THE TABLE. A tint alone was not enough on
+   a table this wide - at 4.5% it was invisible, and even raised it only shaded a
+   band the eye still slips out of. So the row is picked out the way every other
+   raised surface in this portal is: its own ring, and a shadow under it. The
+   borders are separated rather than collapsed for it, because a browser will not
+   paint a shadow on a row that does not own its own edges; only bottom borders
+   are ever set here, so nothing doubles up. */
+.page-kpi tbody tr{transition:background-color .12s ease,box-shadow .12s ease}
+.page-kpi tbody tr:hover{background:var(--row-hover);position:relative;z-index:1;
+  box-shadow:inset 0 0 0 1px var(--line-hi),0 10px 22px -12px var(--shadow),0 2px 6px -4px var(--shadow)}
+/* the readings come up to full strength with it; a dash stays a dash */
+.page-kpi tbody tr:hover td:not(.nil){color:var(--text)}
 
 .page-kpi .tfoot{display:flex;align-items:center;gap:16px;padding:11px 16px;font-size:12px;color:var(--muted)}
 .page-kpi .tfoot .sp{margin-left:auto}

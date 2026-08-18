@@ -16,6 +16,8 @@
   --sel:#e8f0fb;           /* selected card surface      */
   --hover:rgba(11,99,206,.07);
   --hover-soft:rgba(11,99,206,.045);
+  /* the row under the pointer, and only that row */
+  --row-hover:rgba(11,99,206,.10);
   --grid-v:rgba(21,34,52,.05);
   --shadow:rgba(19,38,63,.16);
   --scrim:rgba(13,29,48,.42);
@@ -68,6 +70,7 @@
   --sel:#1e2c3d;
   --hover:rgba(255,255,255,.07);
   --hover-soft:rgba(255,255,255,.04);
+  --row-hover:rgba(255,255,255,.075);
   --grid-v:rgba(255,255,255,.04);
   --shadow:rgba(0,0,0,.65);
   --scrim:rgba(3,8,14,.7);

@@ -60,6 +60,12 @@ export default function Monitoring() {
      inferring it here from a table of our own would go stale the first time a
      site publishes a register we have not heard of */
   const unit = (devicePower && devicePower.unit) || '';
+  /* the card is titled with what it is DRAWING. 'Active Power' was a hardcoded
+     fact about one register, still on screen after the user had asked for
+     frequency - the chart and its title disagreeing is exactly the gap a reader
+     is misled by. Data first, because the site may name its own tag better than
+     the raw code; then the selection; then a neutral word, never a guess. */
+  const title = (devicePower && devicePower.label) || query.dataPoint || 'Device Data';
 
   return (
     <>
@@ -154,7 +160,7 @@ export default function Monitoring() {
 
             <div className="card" ref={chartCardRef}>
               <div className="chead">
-                <div className="title">Active Power</div>
+                <div className="title">{title}</div>
                 <div className="legend">
                   {series.map((s, i) => {
                     const color = s.color || PLOT_COLORS[i % PLOT_COLORS.length];

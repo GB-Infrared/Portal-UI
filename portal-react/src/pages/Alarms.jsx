@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { usePortal } from '../data/PortalData';
 import { useToast } from '../components/Toasts';
 import { PanelSelect } from '../components/PanelSelect';
+import { RowPop } from '../components/RowPop';
 import { PlantPicker } from '../components/PlantPicker';
 import { DateTimeField } from '../components/DateTimeField';
 import { SEVERITY_BANDS, ALARM_STATUS, ROWS_PER_PAGE } from '../data/constants';
@@ -24,6 +25,8 @@ export default function Alarms() {
   const toast = useToast();
 
   const page = alarmsPage || null;
+  /* the row-pop reads this table's live header and cells */
+  const wrapRef = useRef(null);
   const rows = (page && page.rows) || [];
   const total = page && page.total != null ? page.total : rows.length;
 
@@ -152,7 +155,7 @@ export default function Alarms() {
             </button>
           </div>
 
-          <div className="tablewrap">
+          <div className="tablewrap" ref={wrapRef}>
             <table>
               <thead>
                 <tr>
@@ -182,6 +185,9 @@ export default function Alarms() {
               </tbody>
             </table>
           </div>
+          {/* the row under the pointer, spelled out in full, so a wide table is
+              never read by scrolling sideways */}
+          <RowPop wrapRef={wrapRef} />
 
           <div className="tfoot">
             <span>Rows per page</span>

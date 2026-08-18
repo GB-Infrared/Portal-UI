@@ -3,6 +3,7 @@ import { useMeasuredSvg } from '../../lib/useMeasuredSvg';
 import { niceMax } from '../../lib/path';
 import { fixed } from '../../lib/format';
 import { ChartTip, NO_TIP, placeTip } from './ChartTip';
+import { MONTHS_SHORT } from '../../data/constants';
 
 const M = { l: 64, t: 14, b: 42 };
 
@@ -25,7 +26,11 @@ export function AnalysisChart({ series, window: win, dateLabel, y1Label, y2Label
   const hasY2 = (series || []).some(s => s.axis === 2);
   /* the right gutter only exists when there is a second scale to print in it */
   const m = { ...M, r: hasY2 ? 58 : 20 };
-  const [wrapRef, { w, h }] = useMeasuredSvg({ ratio: 0.26, min: 260, max: 620 });
+  /* Height tracks width but stays in a band. The ratio is lower than it looks like
+     it should be, because this page has no side rail: the card is the full width
+     of the screen, and a quarter of that is half a screen of plot for two lines
+     that only have to be told apart. */
+  const [wrapRef, { w, h }] = useMeasuredSvg({ ratio: 0.21, min: 230, max: 380 });
   const svgRef = useRef(null);
   const [tip, setTip] = useState(NO_TIP);
 
@@ -73,7 +78,16 @@ export function AnalysisChart({ series, window: win, dateLabel, y1Label, y2Label
   const ticks = [];
   if (win && pw > 0) {
     const count = Math.max(2, Math.min(14, Math.floor(pw / 86)));
-    for (let i = 0; i <= count; i++) ticks.push(win.from + (span * i) / count);
+    /* The format is chosen from the STEP between ticks, not the length of the
+       window. Choosing from the span printed '17/08' seven times in a row on a
+       24-hour window - fifteen marks carrying two distinct labels, which places
+       nothing. What a reader walks along is the gap between one tick and the
+       next, so that gap is what the label has to resolve. */
+    const step = span / count;
+    for (let i = 0; i <= count; i++) {
+      const t = win.from + (span * i) / count;
+      ticks.push({ t, ...tickLabel(t, step, i ? ticks[i - 1].t : null) });
+    }
   }
 
   function onMove(e) {
@@ -124,10 +138,17 @@ export function AnalysisChart({ series, window: win, dateLabel, y1Label, y2Label
             <line key={'h' + i} className="gl" x1={m.l} y1={m.t + ph * (i / 4)}
                   x2={w - m.r} y2={m.t + ph * (i / 4)} />
           ))}
-          {ticks.map((t, i) => (
+          {ticks.map((tk, i) => (
             <g key={'t' + i}>
-              <line className="gl v" x1={X(t)} y1={m.t} x2={X(t)} y2={m.t + ph} />
-              <text className="axt" x={X(t)} y={h - 14} textAnchor="middle">{tickLabel(t, span)}</text>
+              <line className="gl v" x1={X(tk.t)} y1={m.t} x2={X(tk.t)} y2={m.t + ph} />
+              {/* the date rides ABOVE the clock, and only where the day turns
+                  over: on a window that crosses midnight the same 11:11 appears
+                  at both ends of the axis, and a clock alone cannot tell them
+                  apart */}
+              <text className="axt" x={X(tk.t)} y={h - 14} textAnchor="middle">
+                {tk.day && <tspan x={X(tk.t)} dy="-11">{tk.day}</tspan>}
+                <tspan x={X(tk.t)} dy={tk.day ? 11 : 0}>{tk.label}</tspan>
+              </text>
             </g>
           ))}
 
@@ -224,11 +245,51 @@ function areaOf(run, X, Y, baseY) {
 
 const p2 = n => String(n).padStart(2, '0');
 
-/* below a day, the clock is what places a reading; above it, the date is */
-function tickLabel(ms, span) {
+const DAY = 86400000;
+const sameDay = (a, b) => a.getFullYear() === b.getFullYear() &&
+                          a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+/**
+ * One tick's label, resolved to the STEP between ticks — the distance the reader
+ * is actually crossing — rather than to the length of the window.
+ *
+ * Ticks a few minutes apart need seconds; a few hours apart need the clock; days
+ * apart need the date; months apart need the month. Any coarser and neighbouring
+ * ticks print the same string, which is a mark on the axis that places nothing.
+ *
+ * `day` comes back separately, and only on the first tick and wherever the date
+ * turns over, so the axis is dated exactly where a clock stops being unambiguous.
+ *
+ * @param {number} ms    the instant
+ * @param {number} step  ms between one tick and the next
+ * @param {number|null} prev  the previous tick, or null for the first
+ */
+function tickLabel(ms, step, prev) {
   const d = new Date(ms);
-  if (span < 86400000) return p2(d.getHours()) + ':' + p2(d.getMinutes());
-  return p2(d.getDate()) + '/' + p2(d.getMonth() + 1);
+  const clock = p2(d.getHours()) + ':' + p2(d.getMinutes());
+
+  if (step < 60000) {
+    return { label: clock + ':' + p2(d.getSeconds()),
+             day: prev == null || !sameDay(d, new Date(prev))
+               ? p2(d.getDate()) + '/' + p2(d.getMonth() + 1) : null };
+  }
+  if (step < DAY) {
+    return { label: clock,
+             day: prev == null || !sameDay(d, new Date(prev))
+               ? p2(d.getDate()) + '/' + p2(d.getMonth() + 1) : null };
+  }
+  /* 45 days, not 30: ticks a month apart are not MONTH-aligned, so two of them
+     land in the same calendar month and print the same name. Past 45 they cannot. */
+  if (step < 45 * DAY) {
+    /* the year is only worth printing where it changes - on a window inside one
+       year it is the same four digits under every tick, and says nothing */
+    return { label: p2(d.getDate()) + '/' + p2(d.getMonth() + 1),
+             day: prev == null || d.getFullYear() !== new Date(prev).getFullYear()
+               ? String(d.getFullYear()) : null };
+  }
+  return { label: MONTHS_SHORT[d.getMonth()],
+           day: prev == null || d.getFullYear() !== new Date(prev).getFullYear()
+             ? String(d.getFullYear()) : null };
 }
 
 export function stampMs(ms) {

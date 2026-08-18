@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useToast } from '../../components/Toasts';
+import { RowPop } from '../../components/RowPop';
+import { PanelSelect } from '../../components/PanelSelect';
 import { ROWS_PER_PAGE } from '../../data/constants';
-import { ColumnsIcon, ExportIcon } from '../../components/icons';
+import { ExportIcon } from '../../components/icons';
 
 /** A column with no value in any row has nothing to export; say so rather than
  *  let someone tick it and get a file of empty cells without warning. */
@@ -26,7 +28,13 @@ const PLACEHOLDER_COLS = 3;
  * the row that produced it.
  *
  * The column picker is the only filter: what is ticked shows in the table AND
- * goes into the CSV. Time stamp is always present and is not offered.
+ * goes into the CSV. Time stamp is always present, and is stated in the panel as
+ * a locked row rather than left out of it — a column the export carries but the
+ * picker never mentions is a surprise waiting in a spreadsheet.
+ *
+ * It is the portal's own PanelSelect, the control Analysis and KPI use for the
+ * same job. This page used to hand-roll the panel, its outside-click handling and
+ * a parallel sheet of CSS, which drifted into a second look for one question.
  */
 /**
  * A history row is a point in TIME, not a time of day.
@@ -58,6 +66,8 @@ function stamp(time, day) {
 
 export function HistoryTable({ data, pageSize, onPageSizeChange, page, onPageChange, day }) {
   const toast = useToast();
+  /* the row-pop reads this table's live header and cells */
+  const wrapRef = useRef(null);
   const columns = (data && data.columns) || [];
   const rows = (data && data.rows) || [];
   const total = (data && data.total) || 0;
@@ -66,17 +76,6 @@ export function HistoryTable({ data, pageSize, onPageSizeChange, page, onPageCha
 
   /* held as hidden ids, so a column the backend adds later shows by default */
   const [hidden, setHidden] = useState(() => new Set());
-  const [open, setOpen] = useState(false);
-  const pickRef = useRef(null);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const onDown = e => { if (pickRef.current && !pickRef.current.contains(e.target)) setOpen(false); };
-    const onKey = e => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('click', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => { document.removeEventListener('click', onDown); document.removeEventListener('keydown', onKey); };
-  }, [open]);
 
   /* keep the source index: row.values is positional against the full column list */
   const shown = columns.map((c, i) => ({ c, i })).filter(({ c }) => !hidden.has(c.id));
@@ -89,12 +88,14 @@ export function HistoryTable({ data, pageSize, onPageSizeChange, page, onPageCha
   const blank = !shown.length || !rows.length;
   const ph = Array.from({ length: PLACEHOLDER_COLS }, (_, i) => i);
 
-  const toggle = id => setHidden(s => {
-    const n = new Set(s);
-    if (n.has(id)) n.delete(id); else n.add(id);
-    return n;
-  });
-  const setAll = on => setHidden(on ? new Set() : new Set(columns.map(c => c.id)));
+  /* PanelSelect speaks in what is ON; this table stores what is OFF. Converting
+     at the boundary keeps the default — a column nobody has heard of yet is
+     shown — without teaching the shared control a second way to be asked. */
+  const visible = columns.filter(c => !hidden.has(c.id)).map(c => c.id);
+  const setVisible = next => {
+    const on = new Set(next);
+    setHidden(new Set(columns.filter(c => !on.has(c.id)).map(c => c.id)));
+  };
 
   function exportCsv() {
     /* the file carries the same two header rows the table shows: device names
@@ -125,45 +126,30 @@ export function HistoryTable({ data, pageSize, onPageSizeChange, page, onPageCha
   return (
     <div className="card tcard">
       <div className="ttools">
-        <div className="colpick" ref={pickRef}>
-          <button className="tbtn" type="button" aria-expanded={open}
-                  onClick={e => { e.stopPropagation(); setOpen(o => !o); }}>
-            <ColumnsIcon />COLUMNS
-          </button>
-          {open && (
-            <div className="colpanel">
-              <div className="colhead">Shown in the table and the export</div>
-              <label className="colrow locked">
-                <input type="checkbox" checked disabled readOnly />
-                Time Stamp<span className="req">REQUIRED</span>
-              </label>
-              <div className="coldiv" />
-              {columns.map((c, i) => {
-                const live = hasData(rows, i);
-                return (
-                  <label className="colrow" key={c.id}>
-                    <input type="checkbox" checked={!hidden.has(c.id)}
-                           onChange={() => toggle(c.id)} />
-                    <span className="dot" style={{ background: live ? (c.color || 'var(--green)') : 'var(--red)' }} />
-                    {c.label}
-                    {!live && <span className="noda">NO DATA</span>}
-                  </label>
-                );
-              })}
-              {!columns.length && <div className="colhead">No columns for this selection</div>}
-              <div className="colfoot">
-                <button type="button" onClick={() => setAll(true)}>All</button>
-                <button type="button" onClick={() => setAll(false)}>None</button>
-              </div>
-            </div>
-          )}
+        <div className="msel-inline">
+          <PanelSelect multiple head="Shown in the table and the export" id="mon-cols"
+                       fixedLabel="COLUMNS" locked="Time Stamp"
+                       options={columns.map((c, i) => {
+                         /* a column with no reading in any row is marked where the
+                            choice is made, not discovered in the file afterwards */
+                         const live = hasData(rows, i);
+                         return {
+                           value: c.id,
+                           label: c.label,
+                           color: live ? (c.color || 'var(--green)') : 'var(--red)',
+                           note: live ? null : 'NO DATA'
+                         };
+                       })}
+                       value={visible} onChange={setVisible} />
         </div>
-        <button className="tbtn" type="button" onClick={exportCsv}>
+        {/* nothing on screen is nothing to carry out: the button matches Analysis
+            and Alarms rather than handing over a file of headers */}
+        <button className="tbtn" type="button" onClick={exportCsv} disabled={blank}>
           <ExportIcon />EXPORT CSV
         </button>
       </div>
 
-      <div className="tablewrap">
+      <div className="tablewrap" ref={wrapRef}>
         <table>
           <thead>
             <tr className="grp">
@@ -213,6 +199,9 @@ export function HistoryTable({ data, pageSize, onPageSizeChange, page, onPageCha
           </tbody>
         </table>
       </div>
+      {/* the row under the pointer, spelled out in full, so a wide table is
+          never read by scrolling sideways */}
+      <RowPop wrapRef={wrapRef} />
 
       <div className="tfoot">
         <span>Rows per page</span>

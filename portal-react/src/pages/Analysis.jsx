@@ -124,17 +124,27 @@ export default function Analysis() {
           </div>
 
           <div className="field"><label>--- Y2 category</label>
-            {/* a second scale that is not wanted should be switchable OFF rather
-                than set to something harmless */}
-            <PanelSelect head="Y2 category" anyLabel={NONE} id="an-y2c"
-                         options={[{ value: NONE }].concat(cats.map(c => ({ value: c.value })))}
-                         value={query.y2Category || NONE}
+            {/* A second scale that is not wanted should be switchable OFF rather
+                than set to something harmless — but OFF is a CHOICE, and a choice
+                only exists once there is something to choose between. With no
+                categories offered, Y2 read "— None —" in the confident voice while
+                Y1 read "No categories" in the muted one: two answers to one state,
+                and the louder of them claimed somebody had declined a second axis
+                that was never on offer. So NONE joins the list only when the list
+                has something in it, and until then Y2 says exactly what Y1 says. */}
+            <PanelSelect head="Y2 category" anyLabel={cats.length ? NONE : 'No categories'} id="an-y2c"
+                         options={cats.length
+                           ? [{ value: NONE }].concat(cats.map(c => ({ value: c.value })))
+                           : []}
+                         value={cats.length ? (query.y2Category || NONE) : null}
                          onChange={v => setQuery({
                            y2Category: v === NONE ? null : v, y2Value: null, analysisPage: 1
                          })} />
           </div>
           <div className="field"><label>Y2 value</label>
-            <PanelSelect head="Y2 value" anyLabel="—" id="an-y2v"
+            {/* the same words Y1 uses, because it is the same state: a value list
+                with no category above it has nothing to offer either way */}
+            <PanelSelect head="Y2 value" anyLabel="No values" id="an-y2v"
                          options={valuesOf(query.y2Category)}
                          value={query.y2Value}
                          onChange={v => setQuery({ y2Value: v, analysisPage: 1 })} />

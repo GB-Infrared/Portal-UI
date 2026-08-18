@@ -14,15 +14,26 @@ import { usePanel } from '../lib/usePanel';
  *             of these is true at a time, and the control should say so before
  *             it is used, not after.
  *
- * @param {Array<{value:string,label?:string,count?:number,dot?:string}>} options
+ * @param {Array<{value:string,label?:string,count?:number,dot?:string,
+ *                 color?:string,note?:string}>} options
+ *   `color` is a free colour — the swatch a column picker uses to tie a row to
+ *   the line it draws — and sits BEFORE the label, where a reader looks for the
+ *   thing being named. `dot` is the fixed severity class Alarms uses and stays
+ *   after it. `note` is a short badge on the right, e.g. NO DATA.
  * @param {string[]|string|null} value   array when multiple, else the one value
  * @param {(next:string[]|string)=>void} onChange
  * @param {string} [anyLabel]  what an empty multiple selection is called
  * @param {string} [head]      panel heading
  * @param {boolean} [right]    hang the panel from the control's right edge
+ * @param {string} [locked]    a row that is always on and cannot be unticked,
+ *                             printed above the rest — a time stamp is not a
+ *                             column you may drop, it is what makes the others
+ *                             readings. Stated in the panel rather than left out
+ *                             of it, or the export silently carries a column the
+ *                             picker never mentioned.
  */
 export function PanelSelect({ options, value, onChange, multiple, anyLabel = 'All',
-                              head, right, title, id, fixedLabel }) {
+                              head, right, title, id, fixedLabel, locked }) {
   const { open, toggle, close, ref } = usePanel();
   const list = options || [];
   const picked = multiple ? (value || []) : value;
@@ -57,6 +68,17 @@ export function PanelSelect({ options, value, onChange, multiple, anyLabel = 'Al
       {open && (
         <div className={'mpanel' + (right ? ' right' : '')} role="listbox">
           {head && <div className="mhead">{head}</div>}
+
+          {locked && (
+            <>
+              <label className="mrow locked">
+                <input type="checkbox" checked disabled readOnly />
+                {locked}<span className="req">Required</span>
+              </label>
+              <div className="mdiv" />
+            </>
+          )}
+
           {!list.length && <div className="mrow" style={{ color: 'var(--faint)' }}>Nothing to choose</div>}
 
           {list.map(o => {
@@ -69,8 +91,10 @@ export function PanelSelect({ options, value, onChange, multiple, anyLabel = 'Al
                          if (multiple) toggleOne(o.value, e.target.checked);
                          else { onChange(o.value); close(); }
                        }} />
+                {o.color && <i className="sw" style={{ background: o.color }} />}
                 {o.label != null ? o.label : o.value}
                 {o.count != null && <span className="n">{o.count}</span>}
+                {o.note && <span className="note">{o.note}</span>}
                 {o.dot && <i className={o.dot} />}
               </label>
             );

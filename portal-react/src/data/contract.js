@@ -113,6 +113,12 @@
  *
  * @typedef {Object} LineChartData
  * @property {Series[]} series
+ * @property {string} [label]             what the chart is drawing, e.g. 'Active
+ *                                        Power'. Titles the card. Omit and the
+ *                                        page falls back to the data point the
+ *                                        user picked - send it when the site
+ *                                        names its own tag better than the raw
+ *                                        register code does.
  * @property {string} [unit]              'kW', 'Hz', 'A'… the unit of the chosen
  *                                        data point. Sent, not inferred: the app
  *                                        used to map P_AC→kW, F_AC→Hz and so on
@@ -344,7 +350,9 @@
  *                                        answer different questions and a page
  *                                        that showed one where the other belongs
  *                                        would be quietly wrong.
- * @property {LineChartData|null} devicePower        monitoring · Active Power
+ * @property {LineChartData|null} devicePower        monitoring · the chart, one
+ *                                                   series per device of the
+ *                                                   selected data point
  * @property {PowerIrradianceData|null} powerIrradiance   home · top chart
  * @property {DailyEnergyData|null} dailyEnergy      home · Plant Energy Generation
  * @property {DailyKpiData|null} dailyKpi            home · Plant KPI

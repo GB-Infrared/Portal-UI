@@ -49,6 +49,32 @@
   background:transparent;color:var(--muted);font-size:11.5px;font-weight:700;font-family:inherit;cursor:pointer}
 .mfoot button:hover{border-color:var(--line-hi);color:var(--text);background:var(--hover)}
 
+/* a row that is always on: stated, plainly not a choice, and not hoverable -
+   nothing about it responds, because nothing about it can be changed */
+.mrow.locked{cursor:default;color:var(--muted)}
+.mrow.locked:hover{background:transparent}
+.mrow .req{margin-left:auto;font-size:8px;font-weight:800;letter-spacing:.09em;
+  color:var(--faint);background:var(--panel-2);border:1px solid var(--line);
+  padding:2px 6px;border-radius:5px;text-transform:uppercase}
+/* free-colour swatch, BEFORE the label: it ties the row to the line that colour
+   draws, so it belongs against the thing it is naming */
+.mrow .sw{width:7px;height:7px;border-radius:50%;flex:none;margin-left:0}
+.mrow .note{margin-left:auto;font-size:8.5px;font-weight:800;letter-spacing:.08em;color:var(--faint)}
+.mdiv{height:1px;background:var(--line-soft);margin:6px 4px}
+
+/* ---------- the table toolbar ----------
+   Unscoped for the same reason the dropdown is. Four pages carried a copy of
+   these two rules; three agreed and Monitoring's had drifted - it glowed green
+   on hover and had no :disabled state at all, so its EXPORT button stayed lit
+   over an empty table while the other three greyed out. */
+.msel-inline{display:inline-flex}
+.msel-inline .mbtn{height:31px;min-width:118px;font-size:12px;font-weight:700;letter-spacing:.04em}
+.tbtn{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;
+  font-size:12px;font-weight:700;letter-spacing:.04em;background:transparent;
+  border:1px solid var(--line);color:var(--muted);cursor:pointer;font-family:inherit}
+.tbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi);background:var(--hover)}
+.tbtn:disabled{opacity:.45;cursor:default}
+
 /* ---------- plant picker ----------
    A site is chosen on its state, not just on its name, so each option is a card
    carrying whatever that page can say about it — live power on Home, capacity
@@ -170,3 +196,28 @@
 .mpick-grid button:hover{border-color:var(--line-hi);background:var(--hover)}
 /* selection is a surface, the same language the plant cards use */
 .mpick-grid button.on{background:var(--sel);border-color:var(--line-hi);color:var(--text);font-weight:800}
+
+/* ---------- the row, spelled out in full ----------
+   Shared by all four data tables, so it lives here with the other shared UI. See
+   components/RowPop.jsx for what it is for: a table wider than the screen is read
+   by scrolling sideways, and a row read sideways is a row half remembered.
+
+   It follows the pointer, it is never clickable, and it goes the moment the
+   pointer leaves. It opens on every row, whether or not the table is currently
+   wider than the screen - the same gesture has to give the same answer on a
+   laptop as on a wall display. */
+.rowpop{position:fixed;z-index:120;pointer-events:none;opacity:0;transition:opacity .12s ease;
+  background:var(--elev);border:1px solid var(--line);border-radius:11px;padding:11px 13px;
+  box-shadow:0 20px 48px -18px var(--shadow),0 3px 10px -6px var(--shadow);
+  max-width:min(620px,92vw)}
+.rowpop.on{opacity:1}
+.rowpop .rp-h{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.05em;
+  color:var(--text);padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line-soft)}
+.rowpop .rp-g{display:grid;grid-template-columns:auto 1fr;gap:5px 16px;align-items:baseline}
+.rowpop .rp-g.two{grid-template-columns:auto 1fr auto 1fr}
+.rowpop .rp-k{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--faint);white-space:nowrap}
+.rowpop .rp-v{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);
+  text-align:right;white-space:nowrap}
+/* a cell with nothing in it stays a dash, and says so quietly */
+.rowpop .rp-v.nil{color:var(--faint);font-weight:600}

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { PanelSelect } from '../../components/PanelSelect';
+import { RowPop } from '../../components/RowPop';
 import { ROWS_PER_PAGE } from '../../data/constants';
 import { downloadCsv } from '../../lib/csv';
 import { fixed } from '../../lib/format';
@@ -17,6 +18,8 @@ import { useToast } from '../../components/Toasts';
 export function KpiTable({ data, title, page, pageSize, onPage, onPageSize, status }) {
   const [cols, setCols] = useState(() => KPI_SERIES.map(s => s.key));
   const toast = useToast();
+  /* the row-pop reads this table's live header and cells */
+  const wrapRef = useRef(null);
 
   const buckets = (data && data.buckets) || [];
   const unit = (data && data.unit) || '';
@@ -53,7 +56,7 @@ export function KpiTable({ data, title, page, pageSize, onPage, onPageSize, stat
       <div className="ttools">
         <div className="msel-inline">
           <PanelSelect multiple head="Shown in the table and the export" id="k-cols"
-                       fixedLabel="COLUMNS"
+                       fixedLabel="COLUMNS" locked="Timestamp"
                        options={KPI_SERIES.map(s => ({ value: s.key, label: s.label }))}
                        value={cols} onChange={setCols} />
         </div>
@@ -65,7 +68,7 @@ export function KpiTable({ data, title, page, pageSize, onPage, onPageSize, stat
         </button>
       </div>
 
-      <div className="tablewrap">
+      <div className="tablewrap" ref={wrapRef}>
         <table>
           <thead>
             <tr>
@@ -101,6 +104,9 @@ export function KpiTable({ data, title, page, pageSize, onPage, onPageSize, stat
           </tbody>
         </table>
       </div>
+      {/* the row under the pointer, spelled out in full, so a wide table is
+          never read by scrolling sideways */}
+      <RowPop wrapRef={wrapRef} />
 
       <div className="tfoot">
         <span>Rows per page</span>

@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { PanelSelect } from '../../components/PanelSelect';
+import { RowPop } from '../../components/RowPop';
 import { ROWS_PER_PAGE } from '../../data/constants';
 import { downloadCsv } from '../../lib/csv';
 import { fixed } from '../../lib/format';
@@ -20,6 +22,8 @@ const PLACEHOLDER_COLS = 3;
 export function AnalysisTable({ pairs, rows, total, page, pageSize, onPage, onPageSize,
                                 devices, cols, onCols, status, y1, y2 }) {
   const toast = useToast();
+  /* the row-pop reads this table's live header and cells */
+  const wrapRef = useRef(null);
   /* nothing to show in either direction — draw the SHAPE and say which it is */
   const blank = !pairs.length || !rows.length;
   const ph = Array.from({ length: PLACEHOLDER_COLS }, (_, i) => i);
@@ -50,7 +54,7 @@ export function AnalysisTable({ pairs, rows, total, page, pageSize, onPage, onPa
       <div className="ttools">
         <div className="msel-inline">
           <PanelSelect multiple head="Shown in the table and the export" id="an-cols"
-                       fixedLabel="COLUMNS"
+                       fixedLabel="COLUMNS" locked="Time Stamp"
                        options={(devices || []).map(d => ({ value: d }))}
                        value={cols} onChange={onCols} />
         </div>
@@ -62,7 +66,7 @@ export function AnalysisTable({ pairs, rows, total, page, pageSize, onPage, onPa
         </button>
       </div>
 
-      <div className="tablewrap">
+      <div className="tablewrap" ref={wrapRef}>
         <table>
           <thead>
             <tr className="grp">
@@ -113,6 +117,9 @@ export function AnalysisTable({ pairs, rows, total, page, pageSize, onPage, onPa
           </tbody>
         </table>
       </div>
+      {/* the row under the pointer, spelled out in full, so a wide table is
+          never read by scrolling sideways */}
+      <RowPop wrapRef={wrapRef} />
 
       <div className="tfoot">
         <span>Rows per page</span>
