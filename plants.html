@@ -1,0 +1,1138 @@
+<!doctype html>
+<!-- The theme is pinned here, on the element, rather than read from storage by
+     a script: it has to be true before the first CSS rule is applied, or there
+     is a frame in which this page is light. This screen does not follow the
+     portal's theme and is not meant to. The void, the stars, the aurora and the
+     lit ring ARE the design; there is no light-mode version of them, only an
+     absence of them. Every colour below is still a token — they
+     simply always resolve to the portal's dark values. -->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ENEROPS OS · Site Overview</title>
+<link rel="icon" href="logo/favicon.png">
+<style>
+
+:root{
+  /* ---- LIGHT · UTILITY BLUE (default) · enterprise solar-portal palette ---- */
+  --bg:#f1f4f8;            /* page background            */
+  --panel:#ffffff;         /* card surface               */
+  --panel-2:#f5f8fb;       /* nested surface / inputs    */
+  --line:#dde4ec;          /* card borders               */
+  --line-soft:#e9eef4;     /* gridlines, dividers        */
+  --line-hi:#b5c2d1;       /* hover / active borders     */
+  --text:#152234;          /* primary text               */
+  --muted:#5a6b7f;         /* secondary text             */
+  --faint:#8494a6;         /* tertiary text              */
+  --dim:#aab6c4;           /* dead readouts (offline)    */
+  --elev:#ffffff;          /* tooltips, toasts           */
+  --sel:#e8f0fb;           /* selected card surface      */
+  --hover:rgba(11,99,206,.07);
+  --hover-soft:rgba(11,99,206,.045);
+  /* the row under the pointer, and only that row */
+  --row-hover:rgba(11,99,206,.10);
+  --shadow:rgba(19,38,63,.16);
+  --on-accent:#ffffff;     /* text on a filled accent    */
+  /* header bar — same surface family as the cards */
+  --topbar:var(--panel);
+  --topbar-fg:var(--text);
+  --topbar-fg-2:var(--muted);
+  --topbar-tab:var(--muted);
+  --topbar-hover:var(--hover);
+  --topbar-active:var(--green-soft);
+  --green:#12a150;         /* producing / healthy        */
+  --green-rgb:18,161,80;   /* same green, for rgba() glows */
+  --green-soft:rgba(18,161,80,.12);
+  --green-deep:#0b7a3c;
+  --blue:#1a73c8;
+  --blue-soft:rgba(26,115,200,.12);
+  --red:#d92d20;           /* offline / alarms           */
+  --red-soft:rgba(217,45,32,.1);
+  --amber:#dc7a06;         /* yield / deviations         */
+  --amber-soft:rgba(220,122,6,.12);
+  --brand:#a87b0f;         /* wordmark · gold            */
+  --mono:ui-monospace,'SF Mono','Cascadia Code','Roboto Mono',Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
+  --r-lg:14px; --r-md:10px; --r-sm:8px;
+}
+/* ---- DARK · same hues on navy. Only the base tokens are redefined; the
+   header/brand tokens above reference them, so they follow automatically. ---- */
+:root[data-theme="dark"]{
+  --bg:#0a1017;
+  --panel:#151e2b;
+  --panel-2:#1d2836;
+  --line:#2c3a4c;
+  --line-soft:#232f3e;
+  --line-hi:#42556c;
+  --text:#eff4fa;
+  --muted:#a3b4c8;
+  --faint:#7a8ca1;
+  --dim:#4d5f74;
+  --elev:#1a2432;
+  --sel:#1e2c3d;
+  --hover:rgba(255,255,255,.07);
+  --hover-soft:rgba(255,255,255,.04);
+  --row-hover:rgba(255,255,255,.075);
+  --shadow:rgba(0,0,0,.65);
+  --on-accent:#04121f;
+  /* Accents are LIFTED for navy, not copied from light.
+     They used to be identical in both themes on the theory that only the
+     surfaces changed - but a hue picked to carry on white is too dark to carry
+     on #151e2b, and the greens and reds sank into the card instead of reading
+     off it. These are the same hues moved up in lightness and eased back in
+     saturation, so the meaning is unchanged and the contrast is not.
+     The soft washes are correspondingly stronger: .12 of a dark ink over a dark
+     card is invisible, where over white it was a tint. */
+  --green:#2fd07a;
+  --green-rgb:47,208,122;
+  --green-soft:rgba(47,208,122,.16);
+  --green-deep:#7ee2ab;    /* headline numbers, needs to out-read the body */
+  --blue:#5aa2f0;
+  --blue-soft:rgba(90,162,240,.16);
+  --red:#ff6b6b;
+  --red-soft:rgba(255,107,107,.15);
+  --amber:#f0b249;
+  --amber-soft:rgba(240,178,73,.16);
+  --brand:#e3b23c;         /* wordmark · gold, lifted for navy */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scrollbar-color:var(--line-hi) transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.45;
+     -webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+/* =====================================================================
+   SELECT A SITE — the room between the sign-in and the portal.
+
+   Signing in used to drop you straight onto one plant's Home, which meant
+   the portfolio was something you discovered afterwards from a dropdown.
+   This makes the portfolio the first thing you see: one core, every site
+   in orbit around it, and the portal opens on whichever one you pick.
+
+   It continues the sign-in rather than starting something new — same void,
+   same stars, same aurora, same corner brackets — so signing in and choosing
+   a site read as one arrival instead of two screens that happen to follow
+   each other.
+
+   WHAT THE PICTURE ENCODES, and it is only these three things:
+     POSITION   nothing. Sites sit evenly around the ring in the order the
+                backend lists them. It is a picker, not a map — inventing a
+                geography here would be inventing a fact.
+     SIZE       AC capacity. The biggest site is the biggest node.
+     COLOUR     health, and health only: green producing, amber a warning,
+                red a critical alarm, grey nothing coming in. Warm anywhere
+                on this ring means somebody has to look at something.
+   Brightness rides on output, so a fleet at midday glows and the same fleet
+   at midnight goes quiet without a single number being read.
+   ===================================================================== */
+html,body{height:100%}
+/* ---------- the field ----------
+   One lit navy pool behind the content, falling off to --bg at the edges. The
+   portal never shows a flat background either: it is always cards lifted off a
+   base, and that separation is what makes it look like itself. */
+body{background:
+    radial-gradient(ellipse 86% 66% at 50% 44%, rgba(35,54,82,.62) 0%, rgba(15,24,37,.22) 46%, transparent 72%),
+    var(--bg);
+  color:var(--muted);font-family:var(--mono);overflow:hidden}
+
+/* ---------- ambient · identical to the sign-in ---------- */
+#stars{position:fixed;inset:0;z-index:0;opacity:.6;pointer-events:none;
+  background-image:
+    radial-gradient(1.2px 1.2px at 12% 18%, #9dbfdaaa, transparent),
+    radial-gradient(1px 1px at 27% 9%,   #7ee2ab88, transparent),
+    radial-gradient(1px 1px at 44% 26%,  #9dbfda77, transparent),
+    radial-gradient(1.4px 1.4px at 63% 12%, #e3b23c66, transparent),
+    radial-gradient(1px 1px at 78% 24%,  #9dbfda88, transparent),
+    radial-gradient(1px 1px at 88% 7%,   #7ee2ab66, transparent),
+    radial-gradient(1px 1px at 8% 44%,   #9dbfda66, transparent),
+    radial-gradient(1.2px 1.2px at 34% 52%, #9dbfda55, transparent),
+    radial-gradient(1px 1px at 57% 38%,  #7ee2ab55, transparent),
+    radial-gradient(1px 1px at 71% 57%,  #9dbfda55, transparent),
+    radial-gradient(1px 1px at 93% 47%,  #9dbfda66, transparent),
+    radial-gradient(1px 1px at 19% 72%,  #9dbfda44, transparent),
+    radial-gradient(1px 1px at 47% 88%,  #9dbfda44, transparent),
+    radial-gradient(1px 1px at 82% 78%,  #7ee2ab44, transparent)}
+.aurora{position:fixed;left:-20%;right:-20%;bottom:-45vh;height:80vh;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 100%, rgba(var(--green-rgb),.17) 0%, rgba(90,162,240,.11) 40%, transparent 70%);
+  filter:blur(44px);animation:breathe 15s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.55;transform:translateY(0)}50%{opacity:1;transform:translateY(-3vh)}}
+.vignette{position:fixed;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 46%, transparent 58%, rgba(6,11,19,.60) 100%)}
+.grain{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.05;
+  background:repeating-linear-gradient(0deg,transparent 0 2px,#131e2b 2px 3px)}
+.corner{position:fixed;width:26px;height:26px;z-index:4;pointer-events:none}
+.corner.tl{top:16px;left:16px;border-top:1px solid rgba(var(--green-rgb),.42);border-left:1px solid rgba(var(--green-rgb),.42)}
+.corner.br{bottom:16px;right:16px;border-bottom:1px solid rgba(var(--green-rgb),.42);border-right:1px solid rgba(var(--green-rgb),.42)}
+
+/* ---------- header ---------- */
+.hud{position:fixed;top:0;left:0;right:0;z-index:6;display:flex;align-items:center;gap:22px;
+  height:62px;padding:0 20px;font-size:11px;color:var(--faint);
+  background:color-mix(in srgb, var(--panel) 62%, transparent);
+  border-bottom:1px solid var(--line);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.hud .mark{display:flex;align-items:center;gap:11px;padding-right:24px;flex:none}
+.hud .mark img{height:30px;width:auto;display:block;flex:none}
+.hud .word{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--brand);letter-spacing:.2px;
+  line-height:1.05;display:block}
+.hud .sub{font-size:9px;letter-spacing:.28em;color:var(--faint);text-transform:uppercase;
+  display:block;margin-top:3px}
+/* The headline numbers live IN the bar rather than in a panel on the field.
+   A panel beside the ring is a second thing competing for the same glance; a
+   bar above it is the frame the picture is read inside. */
+.hud .cell{display:flex;flex-direction:column;justify-content:center;gap:6px;flex:none;
+  height:100%;padding:0 20px;border-left:1px solid var(--line)}
+.hud .cell .k{font-size:9px;letter-spacing:.22em;color:var(--faint);text-transform:uppercase;
+  white-space:nowrap}
+.hud .cell .v{font-size:12.5px;letter-spacing:.04em;color:var(--text);line-height:1;
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.hud .cell .v small{font-size:.8em;color:var(--faint);letter-spacing:.14em;margin-left:5px}
+.hud .right{margin-left:auto;display:flex;align-items:center;height:100%;flex:none}
+.hud .right .cell:first-child{border-left:1px solid var(--line)}
+.hud .live{width:6px;height:6px;border-radius:50%;flex:none;background:var(--green);
+  box-shadow:0 0 8px rgba(var(--green-rgb),.75);animation:lv 2.4s ease-in-out infinite;
+  margin-right:14px}
+@keyframes lv{0%,100%{opacity:1}50%{opacity:.3}}
+.hud .out{background:none;border:1px solid var(--line);border-radius:6px;color:var(--faint);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;padding:8px 15px;margin-left:20px}
+.hud .out:hover{color:var(--red);border-color:rgba(255,107,107,.5)}
+/* the cells fold from the least load-bearing end inward rather than wrapping */
+/* Measured against the widest each cell actually gets, not guessed: at 17px
+   the five cells plus the mark and the right-hand block need about 1430px, and
+   each fold buys back roughly its own cell. Folding earlier than that throws
+   away a number the screen had room for. */
+@media (max-width:1400px){ .hud .cell.c4{display:none} }
+@media (max-width:1280px){ .hud .cell.c3{display:none} }
+@media (max-width:1160px){ .hud .cell.c2{display:none} }
+
+/* ---------- the theatre ---------- */
+/* The map owns everything between the bar and the rail. The canvas measures its
+   own parent, so moving these four numbers is the whole of moving the orbit:
+   the centre, the ring radius and every chip follow from the box. */
+.theatre{position:fixed;top:62px;left:0;right:360px;bottom:0;z-index:5;cursor:crosshair}
+@media (max-width:1100px){ .theatre{right:0} }
+#orbital{position:absolute;inset:0;width:100%;height:100%}
+
+.hud .clk{font-size:10px;letter-spacing:.16em;color:var(--faint);
+  font-variant-numeric:tabular-nums}
+.hud .live{width:6px;height:6px;border-radius:50%;flex:none;background:var(--green);
+  box-shadow:0 0 8px rgba(var(--green-rgb),.75);animation:lv 2.4s ease-in-out infinite}
+@keyframes lv{0%,100%{opacity:1}50%{opacity:.3}}
+@media (max-width:860px){ .hud .clk,.hud .live{display:none} }
+
+/* ---------- the core readout ----------
+   The portfolio total, in the middle of the thing it is the total of. It is a
+   SUM, and it says so: a number in the centre of a ring of sites would
+   otherwise read as one of them. */
+/* absolute, not fixed: the core belongs to the MAP's centre, and the map is no
+   longer the viewport */
+.core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;
+  text-align:center;pointer-events:none}
+.core .kw{font-family:var(--mono);font-weight:300;font-size:clamp(28px,4vw,46px);
+  color:var(--brand);letter-spacing:.02em;line-height:1}
+:root[data-theme="dark"] .core .kw{color:#f0dcae;
+  text-shadow:0 0 32px rgba(227,178,60,.30),0 0 90px rgba(227,178,60,.14)}
+.core .kw small{font-size:.4em;color:var(--faint);letter-spacing:.24em;margin-left:7px}
+.core .cap{font-size:9.5px;letter-spacing:.34em;color:var(--muted);margin-top:8px}
+
+/* ---------- a site, as a chip ----------
+   A real <button> over the canvas rather than a shape drawn into it: the canvas
+   can render a hundred sites beautifully and not one of them would be reachable
+   by keyboard, focusable, or readable aloud. The picture is the canvas; the
+   CONTROL is always HTML.
+
+   The button IS the node. It used to sit 140% ABOVE its circle, which left the
+   one thing a reader actually aims at — the glowing disc — completely inert:
+   you had to hit the small text instead, and clicking the site did nothing.
+   Now the hit area is a 58px circle centred on the node, comfortably past the
+   44px a finger needs, with the label hanging above inside the same button. One
+   click anywhere on a site opens it. */
+.chip{position:absolute;z-index:7;transform:translate(-50%,-50%);
+  width:58px;height:58px;border-radius:50%;
+  background:none;border:none;padding:0;
+  font-family:var(--mono);white-space:nowrap;
+  transition:opacity .25s}
+/* the label hangs above the disc but belongs to the SAME button, so it is one
+   target rather than two things that look related */
+.chip .lbl{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);
+  margin-bottom:6px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  text-align:center;transition:transform .18s}
+.chip .nm{font-size:clamp(11.5px,.78vw,15px);letter-spacing:.12em;color:var(--text);font-weight:500}
+.chip .mt{display:flex;align-items:center;justify-content:center;gap:7px}
+.chip .val{font-size:clamp(10px,.66vw,13px);letter-spacing:.06em;color:var(--green-deep)}
+.chip .val.warn{color:var(--amber)} .chip .val.crit{color:var(--red)} .chip .val.off{color:var(--faint)}
+/* HOW MANY, on the node itself. Colour already said that something is wrong at
+   Mendoza; it cannot say whether that is one alarm or nine, and the difference
+   decides which site gets opened first. A site with nothing open carries no pip
+   at all — a badge reading 0 is a mark you have to read to learn it
+   says nothing. */
+.chip .alm{display:none;align-items:center;justify-content:center;
+  min-width:16px;height:16px;padding:0 4px;border-radius:8px;
+  font-size:9px;font-weight:600;letter-spacing:0;font-variant-numeric:tabular-nums;
+  background:color-mix(in srgb, var(--amber) 16%, transparent);
+  border:1px solid color-mix(in srgb, var(--amber) 60%, transparent);color:var(--amber)}
+.chip .alm.on{display:inline-flex}
+.chip .alm.crit{background:color-mix(in srgb, var(--red) 16%, transparent);
+  border-color:color-mix(in srgb, var(--red) 60%, transparent);color:var(--red)}
+/* past nine or ten sites the labels begin to touch, so the type steps down
+   rather than the ring being allowed to become a knot */
+.theatre.dense .chip .nm{font-size:10.5px}
+.theatre.dense .chip .val{font-size:9.5px}
+.chip:hover,.chip:focus-visible{outline:none}
+.chip:hover .lbl,.chip:focus-visible .lbl{transform:translateX(-50%) translateY(-4px)}
+.chip:hover .nm,.chip:focus-visible .nm{color:var(--green)}
+.chip:focus-visible{box-shadow:0 0 0 1px rgba(var(--green-rgb),.7),0 0 22px rgba(var(--green-rgb),.25)}
+/* everything else recedes while one is under the pointer — the ring is a
+   comparison, and a comparison needs one thing at a time to be the subject */
+.theatre.hot .chip:not(.on){opacity:.32}
+
+/* ---------- the readout for the site under the pointer ---------- */
+/* Glass rather than a flat panel: the card sits OVER the ring, and a solid fill
+   punches a hole in the picture it is describing. Blurring what is behind it
+   keeps the corner it covers legible as part of the same scene. */
+.detail{position:fixed;left:24px;bottom:24px;z-index:8;width:312px;
+  background:color-mix(in srgb, var(--panel) 78%, transparent);
+  border:1px solid var(--line);border-radius:14px;padding:16px 18px;
+  -webkit-backdrop-filter:blur(18px) saturate(130%);backdrop-filter:blur(18px) saturate(130%);
+  box-shadow:0 18px 46px var(--shadow);
+  opacity:0;transform:translateY(8px) scale(.985);
+  transition:opacity .2s ease-out,transform .2s cubic-bezier(.2,.7,.3,1);pointer-events:none}
+.detail.on{opacity:1;transform:none}
+.detail .t{font-size:13px;letter-spacing:.14em;color:var(--text);font-weight:500}
+.detail .a{font-size:9.5px;color:var(--faint);line-height:1.6;margin-top:4px;white-space:normal}
+.detail .sep{height:1px;background:var(--line);margin-top:13px}
+.detail .rows{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.detail .r{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.1em}
+.detail .r .k{color:var(--faint);min-width:92px;flex:none}
+.detail .r .dots{flex:1;min-width:10px;height:1px;background:repeating-linear-gradient(90deg,var(--line) 0 2px,transparent 2px 6px)}
+.detail .r .v{color:var(--text);white-space:nowrap;font-variant-numeric:tabular-nums}
+.detail .r .v.ok{color:var(--green)} .detail .r .v.warn{color:var(--amber)} .detail .r .v.crit{color:var(--red)}
+/* ---------- pinned ----------
+   A card that vanishes the moment the pointer leaves it can be glanced at and
+   nothing else: not read at leisure, not held while you look across at the site
+   next to it, and above all not clicked. Double click pins it. A pinned card
+   stops being a caption and becomes a surface — it takes the pointer, its OPEN
+   line becomes a real button, and it stays until you dismiss it or pin another
+   site. Single click still opens the site, so the fast path is unchanged and
+   the slow one is new. */
+.detail .go{display:block;width:100%;margin-top:14px;padding:10px 0 0;text-align:left;
+  background:none;border:none;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:9px;letter-spacing:.26em;color:var(--green);
+  cursor:default;transition:color .2s}
+.detail.pin{pointer-events:auto;border-color:color-mix(in srgb, var(--green) 50%, transparent);
+  box-shadow:0 18px 46px var(--shadow),0 0 0 1px rgba(var(--green-rgb),.16)}
+.detail.pin .go{cursor:pointer}
+.detail.pin .go:hover{color:var(--green-deep)}
+/* the dismiss appears only once there is something to dismiss */
+.detail .x{display:none;position:absolute;top:11px;right:12px;
+  width:22px;height:22px;border:none;background:none;border-radius:6px;
+  color:var(--faint);font-family:var(--mono);font-size:14px;line-height:1;cursor:pointer}
+.detail.pin .x{display:block}
+.detail .x:hover{color:var(--text);background:var(--hover)}
+
+/* ---------- the list, for when the ring will not do ----------
+   Under 720px the orbit stops being readable — the nodes crowd and the chips
+   overlap — so the same sites become a plain list. Same data, same click, no
+   picture: the picture was never the point, choosing was. */
+.fallback{display:none}
+@media (max-width:720px){
+  .theatre,.core,.rail{display:none}
+  .fallback{display:block;position:fixed;inset:0;z-index:7;overflow-y:auto;
+    padding:96px 18px 32px}
+  .flist{display:flex;flex-direction:column;gap:9px;max-width:420px;margin:0 auto}
+  .frow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+    background:color-mix(in srgb, var(--panel) 92%, transparent);
+    border:1px solid var(--line);border-radius:10px;padding:13px 15px;
+    font-family:var(--mono)}
+  .frow:hover{border-color:var(--green)}
+  .frow .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .frow .nm{font-size:12.5px;letter-spacing:.1em;color:var(--text)}
+  .frow .ac{font-size:9.5px;color:var(--faint);margin-top:2px}
+  .frow .kw{margin-left:auto;font-size:11.5px;color:var(--green-deep);text-align:right}
+}
+
+/* ---------- the rail ----------
+   Three modules, and each answers something the ring is structurally unable to:
+   the ring can show that a site is bright but not how hard it is working against
+   its OWN size; it can show that a site is red but not what tripped; and it can
+   show the fleet is quiet without saying whether that is night or a fault.
+   Stacked in the order you would ask them, and the alarms take the slack because
+   that is the one whose length is not known in advance. */
+.rail{position:fixed;top:62px;right:0;bottom:0;width:360px;z-index:7;
+  display:flex;flex-direction:column;
+  background:color-mix(in srgb, var(--panel) 54%, transparent);
+  border-left:1px solid var(--line);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.rail .mod{padding:16px 20px;border-bottom:1px solid var(--line)}
+.rail .mod:last-child{border-bottom:none}
+.rail .mod.grow{flex:1;min-height:0;display:flex;flex-direction:column}
+.rail .h{display:flex;align-items:baseline;gap:7px;margin-bottom:13px;flex:none;
+  font-size:10px;letter-spacing:.22em;color:var(--faint);text-transform:uppercase}
+.rail .h b{color:var(--green);font-weight:500}
+.rail .h .r{margin-left:auto;color:var(--faint);letter-spacing:.1em;
+  font-variant-numeric:tabular-nums}
+/* the severity split, in the header rather than counted off the rows: the list
+   below is scrollable, so a total you can only reach by scrolling to the end of
+   it is not a total anybody will read */
+.rail .h .r .crit{color:var(--red)}
+.rail .h .r .warn{color:var(--amber)}
+.rail .h .r .sep{color:var(--dim);margin:0 5px}
+.rail .h .r .none{color:var(--dim)}
+
+/* output, per site, against its own nameplate */
+.bars{display:flex;flex-direction:column;gap:11px}
+.bar{font-family:var(--mono)}
+.bar .t{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;
+  font-size:11px;letter-spacing:.08em;color:var(--faint)}
+.bar .t .n{color:var(--text)}
+.bar .t .v{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar .track{height:4px;border-radius:2px;background:var(--line-soft);overflow:hidden}
+.bar .fill{display:block;height:100%;border-radius:2px;transition:width .6s ease-out}
+
+/* peak, per site */
+.peaks{display:flex;flex-direction:column;gap:9px}
+.peaks .p{display:flex;align-items:baseline;gap:8px;font-size:11px;letter-spacing:.08em}
+.peaks .p .n{color:var(--text)}
+.peaks .p .v{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+.peaks .p .tm{color:var(--dim);font-variant-numeric:tabular-nums;flex:none}
+
+/* what is open, newest first */
+.log{flex:1;min-height:0;overflow-y:auto;margin-right:-6px;padding-right:6px}
+.log .row{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line-soft);
+  font-size:10.5px;letter-spacing:.04em;align-items:baseline}
+.log .row:first-child{border-top:none}
+.log .tm{color:var(--dim);flex:none;font-variant-numeric:tabular-nums}
+.log .sid{color:var(--text);flex:none;width:66px;overflow:hidden;white-space:nowrap;
+  text-overflow:ellipsis}
+.log .ms{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  color:var(--muted)}
+.log .row.crit .ms{color:var(--red)}
+.log .row.warn .ms{color:var(--amber)}
+.log .none{font-size:10.5px;letter-spacing:.18em;color:var(--dim);padding:4px 0}
+@media (max-width:1100px){ .rail{display:none} }
+
+@media (prefers-reduced-motion:reduce){ .aurora{animation:none} }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+<div class="aurora"></div>
+<div class="vignette"></div>
+<div class="grain"></div>
+<div class="corner tl"></div>
+<div class="corner br"></div>
+
+<header class="hud">
+  <div class="mark">
+    <img src="logo/logo-mark.png" alt="EnerOps Data Systems Pvt Ltd">
+    <span>
+      <span class="word">ENEROPS OS</span>
+      <span class="sub">Site Overview</span>
+    </span>
+  </div>
+  <div class="cell"><span class="k">Generation today</span><span class="v" id="t-kwh">—</span></div>
+  <div class="cell c2"><span class="k">Peak power</span><span class="v" id="t-peak">—</span></div>
+  <div class="cell c3"><span class="k">Capacity</span><span class="v" id="t-ac">—</span></div>
+  <div class="cell c4"><span class="k">Revenue today</span><span class="v" id="t-rev">—</span></div>
+  <div class="cell"><span class="k">Devices</span><span class="v" id="t-dev">—</span></div>
+  <div class="right">
+    <span class="live" aria-hidden="true"></span>
+    <div class="cell"><span class="k">Operator</span><span class="v" id="who">—</span></div>
+    <div class="cell"><span class="k">Local</span><span class="v" id="clk">—</span></div>
+    <button class="out" type="button" onclick="location.href='login.html'">SIGN OUT</button>
+  </div>
+</header>
+
+<section class="theatre" id="theatre" aria-label="Portfolio orbital map">
+  <canvas id="orbital"></canvas>
+
+  <div class="core">
+    <div class="kw"><span id="core-kw">—</span><small>kW</small></div>
+    <div class="cap" id="core-cap">PORTFOLIO OUTPUT</div>
+  </div>
+</section>
+
+<aside class="rail">
+  <div class="mod">
+    <div class="h">Output <b>//</b> by site<span class="r" id="r-out">—</span></div>
+    <div class="bars" id="bars"></div>
+  </div>
+  <!-- Output says what a site is doing this minute; peak says the most it has
+       managed today and when. A site sitting at 0 kW at four in the afternoon
+       reads very differently once you can see it peaked at noon and stopped. -->
+  <div class="mod">
+    <div class="h">Peak power <b>//</b> by site<span class="r" id="r-pk">—</span></div>
+    <div class="peaks" id="peaks"></div>
+  </div>
+
+  <div class="mod grow">
+    <div class="h">Alarms <b>//</b> open<span class="r" id="r-alm">—</span></div>
+    <div class="log" id="log"></div>
+  </div>
+</aside>
+
+<div class="detail" id="detail" aria-live="polite">
+  <button class="x" type="button" id="d-x" title="Close" aria-label="Close">×</button>
+  <div class="t" id="d-name">—</div>
+  <div class="a" id="d-addr">—</div>
+  <div class="sep"></div>
+  <div class="rows">
+    <div class="r"><span class="k">CAPACITY</span><span class="dots"></span><span class="v" id="d-ac">—</span></div>
+    <div class="r"><span class="k">OUTPUT</span><span class="dots"></span><span class="v" id="d-kw">—</span></div>
+    <div class="r"><span class="k">PEAK POWER</span><span class="dots"></span><span class="v" id="d-peak">—</span></div>
+    <div class="r"><span class="k">TODAY ENERGY</span><span class="dots"></span><span class="v" id="d-e">—</span></div>
+    <div class="r"><span class="k">DEVICES</span><span class="dots"></span><span class="v" id="d-dev">—</span></div>
+    <div class="r"><span class="k">ALARMS</span><span class="dots"></span><span class="v" id="d-alm">—</span></div>
+  </div>
+  <button class="go" type="button" id="d-go">↵ OPEN THIS SITE</button>
+</div>
+
+<!-- the same sites, without the picture, for narrow screens -->
+<div class="fallback">
+  <div class="flist" id="flist"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= THE PORTFOLIO =================
+   The same three sites the rest of the portal carries, with the same addresses
+   and the same capacities, so the picker here reads as the picker there. A
+   mockup may simulate; it may not disagree with itself. */
+/* `sky` is the site's own weather, held apart from `perf`, which is the plant's
+   own quality. Keeping them separate is the whole point: a site can be having a
+   bad DAY without being a bad PLANT, and a screen that folds the two together
+   sends somebody to a substation to look for a cloud. */
+const PLANTS=[
+  {id:'Sangria', addr:'2 DLP, Kikarwali Road Nathwana Sangria',
+   ac:2500, perf:1.00, sky:1.00, dev:9, down:5, warn:1, crit:0},
+  {id:'Rioja',   addr:'Plot 14, Bikaner Road, Bikaner',
+   ac:1800, perf:0.93, sky:0.96, dev:8, down:0, warn:0, crit:0},
+  {id:'Mendoza', addr:'NH-52, Pokhran Road, Jaisalmer',
+   ac:3200, perf:1.05, sky:1.03, dev:11, down:1, warn:1, crit:1}
+];
+
+/* ?plants=N grows the portfolio, so the ring can be reviewed with more than
+   three on it — the same switch home.html carries for its picker */
+(function(){
+  const N=parseInt(new URLSearchParams(location.search).get('plants')||'0',10);
+  const TOWN=['Bikaner','Jaisalmer','Jodhpur','Barmer','Pokhran','Nagaur','Churu','Sikar','Alwar','Kota'];
+  for(let k=4;k<=N;k++){
+    PLANTS.push({id:'Site '+String(k).padStart(2,'0'),
+      addr:'NH-'+(10+k%80)+', '+TOWN[k%TOWN.length],
+      ac:1500+((k*370)%2200), perf:0.88+((k*7)%22)/100, sky:0.92+((k*13)%16)/100,
+      dev:6+(k%8), down:(k%4===0)?2:0, warn:(k%3===0)?1:0, crit:(k%7===0)?1:0});
+  }
+})();
+
+try{ $('who').textContent = (localStorage.getItem('enerops-operator')||'vikram.sethi@enerops.example').split('@')[0]; }
+catch(e){ $('who').textContent='operator'; }
+
+/* ================= SIMULATED OUTPUT =================
+   A day curve, so the ring looks like a fleet rather than a diagram: sites are
+   bright at noon and dark at night, which is the one thing about solar that a
+   picture should get right. Anchored to the viewer's own clock — nothing here
+   is a reading, and the caption never claims it is. */
+/* The curve is now asked about ARBITRARY hours, not just this one, because the
+   energy figure integrates it from dawn to now. Same shape, one argument. */
+function curve(h){
+  if(h<5.5||h>18.5) return 0;
+  const x=(h-5.5)/13;                       /* 0 at dawn, 1 at dusk */
+  return Math.pow(Math.sin(Math.PI*x),1.35);
+}
+function dayFactor(){
+  const d=new Date();
+  return curve(d.getHours()+d.getMinutes()/60);
+}
+function outputOf(p){
+  if(p.down>=p.dev) return 0;               /* every device down is zero, not dim */
+  const live=(p.dev-p.down)/p.dev;
+  return p.ac*p.perf*p.sky*dayFactor()*live;
+}
+function stateOf(p){
+  if(p.crit>0) return 'crit';
+  if(p.down>=p.dev) return 'off';
+  if(p.warn>0||p.down>0) return 'warn';
+  return 'ok';
+}
+/* The canvas cannot read a CSS variable, so it asks the document for one and
+   keeps the answer. Asked ONCE, because this screen carries no theme control of
+   its own — exactly like the sign-in. Both wear whatever the portal was last
+   set to, applied by the script in the head before the first paint, and neither
+   can change under its own feet while it is up.
+   Asked at all, rather than hardcoded, because the portal LIFTS its accents for
+   the dark theme instead of reusing them: a green picked to carry on white is
+   not the green that carries on navy, and a ring painted in the wrong one stops
+   matching the page it is drawn on. */
+let COLOR={}, BRAND='#e3b23c', RINGC='', SPOKEC='';
+const ah=a=>Math.round(Math.max(0,Math.min(1,a))*255).toString(16).padStart(2,'0');
+function readTheme(){
+  const cs=getComputedStyle(document.documentElement);
+  const t=n=>cs.getPropertyValue(n).trim();
+  COLOR={ok:t('--green'),warn:t('--amber'),crit:t('--red'),off:t('--dim')};
+  BRAND=t('--brand');
+  RINGC=t('--blue')+'33';
+  SPOKEC=t('--blue')+'26';
+}
+readTheme();
+const STATE_TEXT={ok:'PRODUCING',warn:'ATTENTION',crit:'CRITICAL',off:'OFFLINE'};
+const num=n=>Math.round(n).toLocaleString('en-IN');
+
+/* kW under a megawatt and MW over it. A portfolio line reading 7,500 kW makes
+   you count digits to learn it is seven and a half megawatts, which is the
+   whole of what the line was for. */
+const fmtP=kw=> kw>=1000 ? (kw/1000).toFixed(kw>=10000?0:1)+' MW'  : num(kw)+' kW';
+const fmtE=e => e >=1000 ? (e /1000).toFixed(e >=10000?0:1)+' MWh' : num(e)+' kWh';
+
+/* A site's OPEN ALARMS are its criticals and its warnings. A device that is
+   simply down is counted separately and never folded in here: an inverter off
+   for maintenance is a fact about the fleet, not somebody shouting. */
+const alarmsOf=p=>p.crit+p.warn;
+
+const nowH=()=>{ const d=new Date(); return d.getHours()+d.getMinutes()/60; };
+const hhmm=h=>String(Math.floor(h)).padStart(2,'0')+':'+
+              String(Math.round((h%1)*60)).padStart(2,'0');
+
+/* Plane-of-array irradiance, from the same curve every other number here is
+   built on: about 1010 W/m² at the top of a clear day at these latitudes. It is
+   the reading that answers the only question a low output ever raises — is that
+   the plant, or is it the sky? Every portal shows the kilowatts. The ones worth
+   using show what the kilowatts were made FROM, because a fleet at half output
+   under half a sun is a fleet behaving perfectly. */
+/* THE PEAK SO FAR TODAY, and deliberately not the peak the model says is still
+   coming: this is a monitoring screen, and a number it has not measured yet is
+   a forecast wearing a reading's clothes. The day has exactly one maximum, at
+   noon, so the highest point reached is the curve at noon once noon has passed
+   and the curve at NOW before it. No search, and no pretending. */
+function peakAt(){
+  const h=nowH();
+  return h<=5.5 ? 0 : Math.min(h,12);      /* 0 = nothing has happened yet today */
+}
+function peakOf(p){
+  const t=peakAt();
+  if(!t||p.down>=p.dev) return 0;
+  return p.ac*p.perf*p.sky*curve(t)*((p.dev-p.down)/p.dev);
+}
+/* Every site peaks at the same hour, so the fleet's peak is the sum of theirs
+   rather than a maximum over a series somebody has to keep. */
+const peakFleet=()=>PLANTS.reduce(function(a,p){ return a+peakOf(p); },0);
+
+
+/* the tariff Home already costs energy at, so the two screens cannot quote
+   different money for the same kilowatt-hours */
+const TARIFF=2.84;
+const inr=v=> v>=1e7 ? '₹'+(v/1e7).toFixed(2)+' Cr'
+            : v>=1e5 ? '₹'+(v/1e5).toFixed(2)+' L'
+            : '₹'+num(v);
+
+/* kWh so far today, integrated from the same curve the ring is lit by — a
+   number that disagreed with the picture beside it would be worse than no
+   number at all. Trapezoid at five-minute steps, which at this scale is exact
+   enough that a finer step moves nothing on screen. */
+function energyToday(p){
+  if(p.down>=p.dev) return 0;
+  const d=new Date(), h=d.getHours()+d.getMinutes()/60;
+  const live=(p.dev-p.down)/p.dev, step=5/60;
+  let e=0;
+  for(let t=5.5;t<Math.min(h,18.5);t+=step) e+=curve(t)*step;
+  return p.ac*p.perf*p.sky*live*e;
+}
+
+/* ================= THE CANVAS ================= */
+const oc=$('orbital'), ox=oc.getContext('2d');
+let W=0,H=0,CX=0,CY=0;
+function size(){
+  const r=oc.parentElement.getBoundingClientRect();
+  W=r.width; H=r.height;
+  const dpr=window.devicePixelRatio||1;
+  oc.width=W*dpr; oc.height=H*dpr;
+  oc.style.width=W+'px'; oc.style.height=H+'px';
+  ox.setTransform(dpr,0,0,dpr,0,0);
+  /* no nudge any more: the canvas measures the MAP, and the map already starts
+     below the bar and stops at the rail, so its own centre is the right one */
+  CX=W/2; CY=H/2;
+}
+size(); addEventListener('resize',()=>{ size(); place(); });
+/* The panels down both edges are not decoration the ring may sit under: the
+   width actually available to the orbit is what is left BETWEEN them. Sizing
+   off the full viewport, the left-hand node slid in behind the fleet panel at
+   about 1200px — an ordinary laptop, not an edge case. The floor keeps the
+   ring from collapsing on the way down to the width where the list takes over. */
+/* nothing is parked on the field any more, so the ring gets all of it back */
+const ringR=f=>Math.min(W,H)*f*0.62;
+
+/* Sites sit evenly around ONE ring, in the order the backend lists them.
+   Concentric rings would imply a ranking, and a ring further out would be
+   read as worse — a picker must not grade the things it is offering. */
+/* 0.66, not 0.74: at the wider radius the topmost chip sat under the header —
+   the label is drawn 140% ABOVE its node, so the ring has to stop well short of
+   the edge the labels grow towards */
+const RING=0.66;
+let THETA=0;
+
+/* one chip per site, built once */
+const chips=PLANTS.map((p,i)=>{
+  const b=document.createElement('button');
+  b.className='chip'; b.type='button';
+  b.innerHTML='<span class="lbl"><span class="nm"></span>'+
+              '<span class="mt"><span class="val"></span><span class="alm"></span></span></span>';
+  /* A single click opens the site, but it cannot open it IMMEDIATELY: the
+     second half of a double click would never arrive, because the first half
+     had already navigated away. So a mouse click arms the open and a double
+     click disarms it and pins instead. A keyboard Enter arrives as a click with
+     no click count and no double coming, so that one opens at once. */
+  b.addEventListener('click',e=>{ if(e.detail===0) open(p); else armOpen(p); });
+  b.addEventListener('dblclick',e=>{ e.preventDefault(); cancelOpen(); pinTo(p,b); });
+  b.addEventListener('mouseenter',()=>hover(p,b));
+  b.addEventListener('focus',()=>hover(p,b));
+  b.addEventListener('mouseleave',cool);
+  b.addEventListener('blur',cool);
+  $('theatre').appendChild(b);
+  p._i=i; p._chip=b;
+  return b;
+});
+
+function open(p){
+  /* the portal opens ON the site that was clicked — the whole point of the
+     screen. home.html reads ?plant= and selects it. */
+  location.href='home.html?plant='+encodeURIComponent(p.id);
+}
+
+let hot=null;
+/* the site whose readout is pinned open, and the click waiting to learn whether
+   it was the first half of a double */
+let pin=null, clickT=0;
+
+function armOpen(p){ clearTimeout(clickT); clickT=setTimeout(function(){ open(p); },260); }
+function cancelOpen(){ clearTimeout(clickT); clickT=0; }
+
+/* pin is set BEFORE hover runs, because hover refuses to repaint a pinned card
+   for any site but the pinned one — which is what stops the pointer wandering
+   across the ring from quietly rewriting the card you asked it to hold */
+function pinTo(p,chip){
+  if(pin===p){ unpin(); return; }        /* double-clicking it again puts it away */
+  pin=p;
+  $('detail').classList.add('pin');
+  hover(p,chip);
+}
+function unpin(){
+  if(!pin) return;
+  pin=null;
+  $('detail').classList.remove('pin');
+  cool();
+}
+
+function hover(p,chip){
+  if(pin&&pin!==p) return;
+  hot=p;
+  $('theatre').classList.add('hot');
+  chips.forEach(c=>c.classList.toggle('on',c===chip));
+  const st=stateOf(p), kw=outputOf(p);
+  $('d-name').textContent=p.id;
+  $('d-addr').textContent=p.addr;
+  $('d-ac').textContent=fmtP(p.ac)+' AC';
+  /* Output ALONE cannot be compared across sites of different sizes, so the
+     share of nameplate rides beside it: 414 kW at Mendoza and 227 kW at Rioja
+     are two sites working about equally hard, and only the percentage says so. */
+  /* OFFLINE lives here now that the STATE row is gone: a site with nothing
+     coming in has no output to report, and saying so in the output line is more
+     direct than a separate row repeating what the colour already said. */
+  $('d-kw').textContent = st==='off' ? 'OFFLINE'
+    : num(kw)+' kW · '+(p.ac?Math.round(kw/p.ac*100):0)+'%';
+  $('d-e').textContent=fmtE(energyToday(p));
+  const spk=peakOf(p);
+  $('d-peak').textContent = spk>0 ? num(spk)+' kW · '+hhmm(peakAt()) : '—';
+  $('d-dev').textContent=(p.dev-p.down)+' of '+p.dev+' online';
+  /* HOW MANY are open, as one number. The severity breakdown was two phrases
+     in a row sized for one and it crushed the leaders to nothing; the colour
+     carries the worst severity, which is the part that changes what you do. */
+  const al=$('d-alm');
+  al.textContent=alarmsOf(p);
+  al.className='v '+(p.crit?'crit':p.warn?'warn':'ok');
+  $('detail').classList.add('on');
+}
+function cool(){
+  if(pin) return;                        /* a pinned card is not taken down by the pointer */
+  hot=null;
+  $('theatre').classList.remove('hot');
+  chips.forEach(c=>c.classList.remove('on'));
+  $('detail').classList.remove('on');
+}
+
+/* chips are positioned from the same angle the canvas draws the node at, so the
+   label can never drift off the thing it names */
+function place(){
+  PLANTS.forEach((p,i)=>{
+    const a=THETA+i*Math.PI*2/PLANTS.length;
+    const r=ringR(RING);
+    p.x=CX+Math.cos(a)*r;
+    p.y=CY+Math.sin(a)*r*0.92;
+    p.a=a;
+    const c=p._chip;
+    c.style.left=p.x+'px';
+    c.style.top=p.y+'px';
+  });
+}
+
+function paintChips(){
+  PLANTS.forEach(p=>{
+    const st=stateOf(p), kw=outputOf(p);
+    const c=p._chip;
+    c.querySelector('.nm').textContent=p.id;
+    const val=c.querySelector('.val');
+    val.textContent = st==='off' ? 'OFFLINE' : num(kw)+' kW';
+    val.className='val '+(st==='ok'?'':st);
+    const n=alarmsOf(p), pip=c.querySelector('.alm');
+    pip.textContent=n||'';
+    pip.className='alm'+(n?' on':'')+(p.crit?' crit':'');
+    c.setAttribute('aria-label',p.id+' — '+STATE_TEXT[st]+', '+num(kw)+' kilowatts, '+
+      (n?n+' open alarm'+(n>1?'s':''):'no open alarms')+'. Open this site.');
+  });
+}
+
+/* particles run from each producing site INTO the core, which is what makes the
+   centre read as a sum of the ring rather than a decoration in the middle of it */
+const parts=[];
+function spawn(dt){
+  if(reduced) return;
+  PLANTS.forEach(p=>{
+    const kw=outputOf(p);
+    if(kw<=1) return;
+    p._acc=(p._acc||0)+dt*(0.5+kw/900);
+    while(p._acc>1){
+      p._acc-=1;
+      parts.push({p,f:0,sp:0.20+Math.random()*0.12,off:(Math.random()-0.5)*12,r:0.8+Math.random()*1.1});
+    }
+  });
+}
+function drawParts(dt){
+  for(let i=parts.length-1;i>=0;i--){
+    const q=parts[i]; q.f+=q.sp*dt;
+    if(q.f>=1){ parts.splice(i,1); continue; }
+    const x=q.p.x+(CX-q.p.x)*q.f, y=q.p.y+(CY-q.p.y)*q.f;
+    const dx=CX-q.p.x, dy=CY-q.p.y, L=Math.hypot(dx,dy)||1;
+    const nx=-dy/L, ny=dx/L, wob=Math.sin(q.f*9)*q.off*(1-q.f);
+    ox.beginPath();
+    ox.globalAlpha=(1-q.f*0.35)*(hot&&hot!==q.p?0.3:1);
+    ox.fillStyle=COLOR[stateOf(q.p)];
+    ox.arc(x+nx*wob,y+ny*wob,q.r*(1-q.f*0.45),0,Math.PI*2);
+    ox.fill();
+  }
+  ox.globalAlpha=1;
+}
+
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  if(!reduced) THETA+=dt*0.035;             /* one turn every three minutes */
+  place();
+  ox.clearRect(0,0,W,H);
+
+  const r=ringR(RING);
+
+  /* two hairlines through the core: the field reads as an instrument rather
+     than a canvas, and the eye is handed the centre before the ring is */
+  ox.strokeStyle=SPOKEC; ox.lineWidth=1;
+  ox.beginPath();
+  ox.moveTo(0,CY); ox.lineTo(W,CY);
+  ox.moveTo(CX,0); ox.lineTo(CX,H);
+  ox.stroke();
+
+  /* the ring the sites sit on */
+  ox.beginPath();
+  ox.strokeStyle=RINGC; ox.lineWidth=1;
+  ox.ellipse(CX,CY,r,r*0.92,0,0,Math.PI*2); ox.stroke();
+
+  /* spokes from the core to each site: the sum is made OF these, and a ring
+     with nothing crossing it would be a decoration rather than a relationship */
+  PLANTS.forEach(p=>{
+    ox.beginPath();
+    ox.strokeStyle=SPOKEC; ox.lineWidth=1;
+    ox.moveTo(CX,CY); ox.lineTo(p.x,p.y); ox.stroke();
+  });
+
+  /* ---- the core ---- */
+  const total=PLANTS.reduce((s,p)=>s+outputOf(p),0);
+  const capTotal=PLANTS.reduce((s,p)=>s+p.ac,0);
+  const load=capTotal?Math.min(1,total/capTotal):0;
+  const breathe=reduced?1:(1+Math.sin(now/1000*1.4)*0.05);
+  /* NO hard disc. Fleet Control can draw one because nothing is printed over
+     it; here the portfolio total is, and a bright 17px circle landed between the
+     digits and read as a smudge rather than as a core. So the centre is marked
+     by glow alone — which the number then sits IN rather than on top of — and
+     the structure moves out to a collar of ticks that clears the text.
+     The glow breathes with load, so a fleet at noon burns and the same fleet at
+     midnight is a cold point, without a number having to be read. */
+  const R=17*breathe*(0.55+load*0.45);
+  let g=ox.createRadialGradient(CX,CY,0,CX,CY,R*5.4);
+  g.addColorStop(0,   BRAND+ah(0.30+load*0.34));
+  g.addColorStop(0.18, BRAND+ah(0.16+load*0.20));
+  g.addColorStop(0.45, BRAND+'10');
+  g.addColorStop(1,    BRAND+'00');
+  ox.fillStyle=g; ox.beginPath(); ox.arc(CX,CY,R*5.4,0,Math.PI*2); ox.fill();
+
+  /* the collar: twelve marks on a dial, at a radius that clears the readout on
+     both axes so a five-digit total never collides with them */
+  const CR=Math.max(96,ringR(RING)*0.30);
+  ox.strokeStyle=BRAND+ah(0.16+load*0.20); ox.lineWidth=1;
+  for(let i=0;i<12;i++){
+    const a=i*Math.PI/6+(reduced?0:now/1000*0.06);
+    ox.beginPath();
+    ox.moveTo(CX+Math.cos(a)*CR,CY+Math.sin(a)*CR*0.92);
+    ox.lineTo(CX+Math.cos(a)*(CR+7),CY+Math.sin(a)*(CR+7)*0.92);
+    ox.stroke();
+  }
+
+  spawn(dt); drawParts(dt);
+
+  /* ---- the sites ---- */
+  PLANTS.forEach(p=>{
+    const st=stateOf(p), col=COLOR[st], kw=outputOf(p);
+    const dim=(hot&&hot!==p)?0.3:1;
+    /* SIZE is capacity and brightness is output — two channels, two questions,
+       so "big" never has to mean "busy" */
+    /* The disc under the pointer grows a little, eased rather than snapped: a
+       picture that answers a movement is what tells a reader it is live rather
+       than printed. */
+    p._h=(p._h||0)+((hot===p?1:0)-(p._h||0))*Math.min(1,dt*9);
+    const rad=(7+Math.sqrt(p.ac/3200)*7)*(1+p._h*0.15);
+    const lit=st==='off'?0:Math.min(1,kw/(p.ac||1));
+
+    ox.save(); ox.globalAlpha=dim;
+
+    const halo=ox.createRadialGradient(p.x,p.y,0,p.x,p.y,rad*3.4);
+    halo.addColorStop(0,col+Math.round((40+lit*120)).toString(16).padStart(2,'0'));
+    halo.addColorStop(1,col+'00');
+    ox.fillStyle=halo; ox.beginPath(); ox.arc(p.x,p.y,rad*3.4,0,Math.PI*2); ox.fill();
+
+    ox.fillStyle=col; ox.globalAlpha=dim*(0.45+lit*0.55);
+    ox.beginPath(); ox.arc(p.x,p.y,rad,0,Math.PI*2); ox.fill();
+
+    ox.globalAlpha=dim; ox.strokeStyle=col; ox.lineWidth=1.4;
+    ox.beginPath(); ox.arc(p.x,p.y,rad+4,0,Math.PI*2); ox.stroke();
+
+    /* a critical site keeps a slow pulse, so it is found without being hunted */
+    if(st==='crit'&&!reduced){
+      const t=(now/1000)%2/2;
+      ox.globalAlpha=dim*(1-t)*0.55; ox.lineWidth=1.2;
+      ox.beginPath(); ox.arc(p.x,p.y,rad+4+t*22,0,Math.PI*2); ox.stroke();
+    }
+    ox.restore();
+  });
+
+  $('core-kw').textContent = total<1 ? '0' : num(total);
+  $('core-cap').textContent = PLANTS.length+' SITES · PORTFOLIO OUTPUT';
+
+  paintChips();
+  requestAnimationFrame(frame);
+}
+place(); paintChips(); requestAnimationFrame(frame);
+
+/* clicking the empty field does nothing on purpose: there is no "all sites"
+   destination, and a stray click should not be a navigation */
+
+/* ================= WHAT THE COLOURS MEAN =================
+   Built from the same COLOR map the canvas paints with, so the swatch in the
+   corner and the node on the ring can never disagree about what amber is. */
+/* ================= THE BAR, IN FIVE NUMBERS ================= */
+function paintTop(){
+  let ac=0, dev=0, up=0, e=0;
+  PLANTS.forEach(function(p){
+    ac+=p.ac; dev+=p.dev; up+=p.dev-p.down; e+=energyToday(p);
+  });
+  $('t-kwh').textContent=fmtE(e);
+  const pk=peakFleet(), pt=peakAt();
+  $('t-peak').innerHTML = pk>0 ? fmtP(pk)+'<small>AT '+hhmm(pt)+'</small>' : fmtP(0);
+  $('t-ac').textContent=fmtP(ac);
+  $('t-rev').textContent=inr(e*TARIFF);
+  /* how much of the fleet is reporting, and nothing about how loudly. The
+     severity split lives in the alarms header, beside the rows it is counting;
+     saying it twice on one screen makes the reader check whether the two agree. */
+  $('t-dev').innerHTML=up+'<small>OF '+dev+'</small>';
+}
+
+/* ================= OUTPUT, PER SITE =================
+   The bar is each site against its OWN nameplate, never against the fleet's. A
+   3.2 MW site at 40% and a 1.8 MW site at 90% are two very different mornings,
+   and a chart scaled to the biggest site would have drawn the better one
+   shorter. This is the comparison the ring structurally cannot make, because
+   on the ring size already means capacity. */
+/* A READOUT, not a control. It was a <button> that navigated, so crossing the
+   list on the way to something else offered to leave the page, and the whole
+   rail read as clickable when only one thing on this screen opens a site: the
+   ring. One way in, and it is the picture. */
+const barEls=PLANTS.map(function(p){
+  const b=document.createElement('div');
+  b.className='bar';
+  b.innerHTML='<span class="t"><span class="n"></span><span class="v"></span></span>'+
+              '<span class="track"><span class="fill"></span></span>';
+  $('bars').appendChild(b);
+  return b;
+});
+function paintBars(){
+  let tot=0;
+  PLANTS.forEach(function(p,i){
+    const st=stateOf(p), kw=outputOf(p), f=p.ac?Math.min(1,kw/p.ac):0;
+    tot+=kw;
+    const b=barEls[i];
+    b.querySelector('.n').textContent=p.id;
+    b.querySelector('.t .v').textContent = st==='off' ? 'OFFLINE'
+      : num(kw)+' kW · '+Math.round(f*100)+'%';
+    const fill=b.querySelector('.fill');
+    fill.style.width=(f*100).toFixed(1)+'%';
+    fill.style.background=COLOR[st];
+  });
+  $('r-out').textContent=fmtP(tot);
+}
+
+/* ================= PEAK, PER SITE =================
+   Output says what a site is doing this minute. Peak says the most it managed
+   today and when it managed it, which is the difference between a site that is
+   quiet because it is evening and one that stopped at noon and never came back.
+   Sites hold their order from the ring, so the two lists are read the same way. */
+const peakEls=PLANTS.map(function(p){
+  const d=document.createElement('div');
+  d.className='p';
+  d.innerHTML='<span class="n"></span><span class="v"></span><span class="tm"></span>';
+  $('peaks').appendChild(d);
+  return d;
+});
+function paintPeaks(){
+  const t=peakAt();
+  let tot=0;
+  PLANTS.forEach(function(p,i){
+    const v=peakOf(p); tot+=v;
+    const d=peakEls[i];
+    d.querySelector('.n').textContent=p.id;
+    d.querySelector('.v').textContent = v>0 ? num(v)+' kW' : '—';
+    d.querySelector('.tm').textContent = v>0 ? hhmm(t) : '';
+  });
+  $('r-pk').textContent = tot>0 ? fmtP(tot) : '—';
+}
+
+/* ================= WHAT IS ACTUALLY OPEN =================
+   The ring can say a site is red; it cannot say WHAT, and "1 critical" is not
+   something anybody can act on. These are the records those counts were always
+   a summary of. Built ONCE at load, so the ages advance with the clock instead
+   of being reshuffled on every repaint — a log whose timestamps move is not a
+   log, it is a decoration. */
+const FAULTS={
+  crit:['DC insulation fault','Inverter overtemperature','Earth fault','DC arc detected'],
+  warn:['Communication error','String underperformance','Grid overvoltage','Cooling fan failure']
+};
+const ALARMS=(function(){
+  const out=[], t0=Date.now();
+  PLANTS.forEach(function(p,i){
+    ['crit','warn'].forEach(function(sev){
+      for(let k=0;k<p[sev];k++){
+        const seed=i*7+k*3+(sev==='crit'?1:4);
+        out.push({site:p.id, sev:sev,
+          txt:FAULTS[sev][seed%FAULTS[sev].length],
+          dev:'INV'+String(1+(seed%9)).padStart(2,'0'),
+          at:t0-(11+(seed*47)%620)*60000});
+      }
+    });
+  });
+  return out.sort(function(a,b){ return b.at-a.at; });
+})();
+const ago=function(ms){
+  const m=Math.max(0,Math.round(ms/60000));
+  return m<60 ? m+'m' : Math.floor(m/60)+'h '+(m%60)+'m';
+};
+function paintLog(){
+  const now=Date.now();
+  /* what is open, split by how loudly: a bare 3 says the same thing whether it
+     is three warnings or three sites on fire, and only one of those is a call */
+  const nc=ALARMS.filter(function(a){ return a.sev==='crit'; }).length;
+  const nw=ALARMS.length-nc;
+  $('r-alm').innerHTML = ALARMS.length
+    ? (nc?'<span class="crit">'+nc+'</span> CRIT':'')+
+      (nc&&nw?'<span class="sep">·</span>':'')+
+      (nw?'<span class="warn">'+nw+'</span> WARN':'')
+    : '<span class="none">NONE</span>';
+  $('log').innerHTML = ALARMS.length
+    ? ALARMS.map(function(a){
+        return '<div class="row '+a.sev+'"><span class="tm">'+ago(now-a.at)+'</span>'+
+               '<span class="sid">'+a.site+'</span>'+
+               '<span class="ms">'+a.dev+' · '+a.txt+'</span></div>';
+      }).join('')
+    : '<div class="none">NOTHING OPEN ACROSS THE FLEET</div>';
+}
+
+/* The pinned card is the only thing on this screen that can be clicked without
+   being a site, so it carries both of the actions a pinned card implies. */
+$('d-go').addEventListener('click',function(){ if(pin) open(pin); });
+$('d-x').addEventListener('click',unpin);
+/* Escape, and a click on the empty field, both put it away. Clicking the field
+   still navigates nowhere — dismissing is not a destination. */
+addEventListener('keydown',function(e){ if(e.key==='Escape') unpin(); });
+$('theatre').addEventListener('click',function(e){
+  if(!e.target.closest('.chip')) unpin();
+});
+
+/* ================= WALKING THE RING =================
+   Tab reaches the sites, but a ring is a shape and the natural way through a
+   shape is to move along it. Left and right step round the orbit and wrap at
+   the ends; Enter opens whatever the cursor is on, which the button already
+   does. Because focusing a chip runs the same hover() the pointer does, the
+   readout in the corner follows the keyboard exactly as it follows the mouse.
+
+   A typed character is left alone — nothing on this screen takes text, but a
+   browser find bar does, and stealing the arrow keys from it would be rude. */
+addEventListener('keydown',function(e){
+  if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+  if(e.altKey||e.ctrlKey||e.metaKey) return;
+  const n=chips.length; if(!n) return;
+  /* stepping the ring is a change of subject, so it releases a pinned card
+     rather than walking a focus ring the readout has stopped following */
+  unpin();
+  const at=chips.indexOf(document.activeElement);
+  const step=e.key==='ArrowRight'?1:-1;
+  e.preventDefault();
+  chips[at<0?(step>0?0:n-1):(at+step+n)%n].focus();
+});
+
+/* ================= THE LIST ================= */
+const fl=$('flist');
+PLANTS.forEach(p=>{
+  const b=document.createElement('button');
+  b.className='frow'; b.type='button';
+  b.addEventListener('click',()=>open(p));
+  fl.appendChild(b);
+  p._row=b;
+});
+function paintList(){
+  PLANTS.forEach(p=>{
+    const st=stateOf(p), kw=outputOf(p);
+    p._row.innerHTML=
+      '<span class="dot" style="background:'+COLOR[st]+'"></span>'+
+      '<span><span class="nm">'+p.id+'</span><br><span class="ac">'+num(p.ac)+' kW AC · '+
+        (p.dev-p.down)+'/'+p.dev+' online</span></span>'+
+      '<span class="kw">'+(st==='off'?'OFFLINE':num(kw)+' kW')+'</span>';
+  });
+}
+/* past nine or ten the labels begin to touch, so the type steps down */
+if(PLANTS.length>9) $('theatre').classList.add('dense');
+
+const tick=function(){ paintList(); paintTop(); paintBars(); paintPeaks(); paintLog(); };
+tick(); setInterval(tick,10000);
+
+/* the clock is the one thing on the page that has to move every second */
+const clock=function(){
+  const d=new Date();
+  $('clk').textContent=d.toLocaleTimeString('en-IN',{hour12:true,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+};
+clock(); setInterval(clock,1000);
+})();
+</script>
+</body>
+</html>

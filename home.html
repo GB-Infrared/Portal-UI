@@ -61,24 +61,33 @@
 /* ---- DARK · same hues on navy. Only the base tokens are redefined; the
    header/brand tokens above reference them, so they follow automatically. ---- */
 :root[data-theme="dark"]{
-  /* deeper page + clearly lifted cards, so surfaces separate instead of merging */
-  --bg:#0a1017;
-  --panel:#151e2b;
-  --panel-2:#1d2836;
-  --line:#2c3a4c;
-  --line-soft:#232f3e;
-  --line-hi:#42556c;
+  /* A WORKING dark, not a black one. #0a1017 was chosen while this theme still
+     sat beside a light one and had to read as unmistakably the other thing.
+     Now that it is the only theme it is a room somebody spends a shift in, and
+     a near-black page under white text is glare with the contrast turned up.
+     The whole ramp lifts by about the same amount, so every separation the old
+     values bought is still bought: page to card, card to input, and the
+     hairline between them keep their distance from one another.
+     The SIGN-IN and the SITE OVERVIEW deliberately do NOT follow this. They are
+     a void by design, and a void has to be dark to be one. */
+  --bg:#121a26;            /* the page                    */
+  --panel:#1b2533;         /* cards, lifted off it        */
+  --panel-2:#232e3f;       /* inputs, lifted off the card */
+  --line:#324054;
+  --line-soft:#2a3647;
+  --line-hi:#4a5d75;
   --text:#eff4fa;
   --muted:#a3b4c8;
   --faint:#7a8ca1;
-  --dim:#4d5f74;
-  --elev:#1a2432;
-  --sel:#1e2c3d;
+  --dim:#56697f;           /* lifted with the surfaces it sits on */
+  --elev:#202a38;
+  --sel:#27354a;
   --hover:rgba(255,255,255,.07);
   --hover-soft:rgba(255,255,255,.04);
-  --grid-v:rgba(255,255,255,.04);
-  --shadow:rgba(0,0,0,.65);
-  --scrim:rgba(3,8,14,.7);
+  --grid-v:rgba(255,255,255,.05);
+  /* a shadow only reads against something lighter than itself */
+  --shadow:rgba(0,0,0,.5);
+  --scrim:rgba(9,14,22,.66);
   --on-accent:#04121f;
   /* Accents are LIFTED for navy, not copied from light.
      They used to be identical in both themes on the theory that only the
@@ -153,6 +162,30 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .iconbtn:hover{color:var(--text);background:var(--hover);border-color:var(--line)}
 .avatar{width:30px;height:30px;border-radius:50%;background:var(--panel-2);
   display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--text);border:1px solid var(--line)}
+/* ---------- account menu ----------
+   The avatar was a dead circle: it named the signed-in user and offered nothing.
+   It is the only place Settings and Sign out can live without spending a tab on
+   either, and every page carries the same one so the way out is never hunted for. */
+.acct{position:relative;display:flex}
+.avatar{padding:0}
+.avatar:hover,.acct.open .avatar{border-color:var(--line-hi);background:var(--hover)}
+.acctmenu{position:absolute;top:calc(100% + 8px);right:0;z-index:90;width:224px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-md);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:6px;display:none}
+.acct.open .acctmenu{display:block}
+.acctwho{padding:9px 10px 10px}
+.acctwho .nm{font-size:13px;font-weight:700;color:var(--text);line-height:1.3}
+.acctwho .em{font-size:11.5px;color:var(--muted);line-height:1.35;word-break:break-all}
+.acctdiv{height:1px;background:var(--line-soft);margin:4px}
+.acctitem{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;
+  font-size:12.5px;font-weight:600;color:var(--text);width:100%;
+  border:none;background:transparent;text-align:left;font-family:inherit}
+.acctitem:hover{background:var(--hover)}
+.acctitem svg{flex:none;color:var(--faint)}
+.acctitem:hover svg{color:var(--muted)}
+.acctitem.out:hover{background:var(--red-soft);color:var(--red)}
+.acctitem.out:hover svg{color:var(--red)}
+
 
 /* ---------- page ---------- */
 .page{max-width:2400px;margin:0 auto;padding:12px clamp(14px,1.5vw,28px) 16px;
@@ -705,7 +738,19 @@ try{var _t=localStorage.getItem('enerops-theme');if(_t==='dark')document.documen
         <option value="900">15 min</option></select>
     </div>
     <button class="iconbtn" id="themebtn" onclick="toggleTheme()" title="Switch to dark theme"></button>
-    <div class="avatar">V</div>
+    <div class="acct" id="acct">
+      <button class="avatar" onclick="toggleAcct(event)" aria-haspopup="menu" aria-expanded="false"
+              id="acctbtn" title="Account">V</button>
+      <div class="acctmenu" role="menu">
+        <div class="acctwho">
+          <div class="nm">Vikram Sethi</div>
+          <div class="em">vikram.sethi@enerops.example</div>
+        </div>
+        <div class="acctdiv"></div>
+        <a class="acctitem" role="menuitem" href="settings.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.7 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15.1 4.7a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.09A1.7 1.7 0 0 0 21 10.1a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg> Settings</a>
+        <a class="acctitem out" role="menuitem" href="login.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 16.5v1.8a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2V5.7a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1.8"/><path d="M19.8 12H9.4m10.4 0-3.2-3.2M19.8 12l-3.2 3.2"/></svg> Sign out</a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -715,10 +760,14 @@ try{var _t=localStorage.getItem('enerops-theme');if(_t==='dark')document.documen
   <section class="planthead">
    <div class="phrow">
     <div class="pname">
-      <!-- click the name to open the header and see every plant's state -->
+      <!-- Switching site is done in ONE place now, and it is the site
+           overview: the orbit shows every plant's state at once, side by side,
+           which a panel dropped out of one plant's own header never could. The
+           name is the way there. -->
       <div class="pswitch">
-        <button class="pname-btn" type="button" id="p-btn" aria-expanded="false"
-                aria-controls="p-exp" onclick="togglePlants()" title="Switch plant">
+        <button class="pname-btn" type="button" id="p-btn"
+                onclick="location.href='plants.html'"
+                title="Switch site &middot; opens the site overview">
           <span class="n" id="p-name">Sangria</span>
         </button>
       </div>
@@ -760,7 +809,6 @@ try{var _t=localStorage.getItem('enerops-theme');if(_t==='dark')document.documen
         <div class="lbl">Plant energy</div>
         <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.5H11L9.8 22 19 10h-6.6L13 2Z"/></svg></span>
         <div class="val"><span id="k-etot">101158.90</span><span class="u">kWh</span></div>
-        <div class="sub">Lifetime</div>
       </div>
       <div class="kpi">
         <div class="lbl">Performance ratio</div>
@@ -948,6 +996,23 @@ window.toggleTheme=function(){
   T(next==='dark'?'Dark theme':'Light theme');
 };
 applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light');
+
+/* ---------- account menu ---------- */
+window.toggleAcct=function(e){
+  e.stopPropagation();
+  const a=$('acct'), open=a.classList.toggle('open');
+  $('acctbtn').setAttribute('aria-expanded', open?'true':'false');
+};
+document.addEventListener('click',function(){
+  const a=$('acct'); if(!a) return;
+  a.classList.remove('open'); $('acctbtn').setAttribute('aria-expanded','false');
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape') return;
+  const a=$('acct'); if(!a||!a.classList.contains('open')) return;
+  a.classList.remove('open'); $('acctbtn').setAttribute('aria-expanded','false'); $('acctbtn').focus();
+});
+
 
 /* ---------- month + year picker ---------- */
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1791,12 +1856,10 @@ function closePlants(){
   $('p-exp').classList.remove('open');
   $('p-btn').setAttribute('aria-expanded','false');
 }
-/* Hover opens it, the same rule the alarms box uses: it stays while the pointer
-   is on the name or on the panel, and closes 150 ms after it leaves both. The
-   address line sits between the two, so the grace period is what lets the
-   pointer cross it. A click still toggles, for touch. */
-$('p-btn').addEventListener('mouseenter',openPlants);
-$('p-btn').addEventListener('focus',openPlants);
+/* The in-header picker is no longer opened from anywhere: the name navigates to
+   the site overview instead. openPlants and the panel below it stay wired to
+   each other and to nothing else, so the header cannot half-open on a stray
+   hover while the browser is on its way to the orbit. */
 const armPlantClose=()=>{clearTimeout(pHideT);pHideT=setTimeout(closePlants,150);};
 document.addEventListener('mouseover',function(e){
   if(!$('p-exp').classList.contains('open')) return;
@@ -2149,6 +2212,17 @@ if(window.ResizeObserver){
 }
 window.addEventListener('resize',refit);
 $('k-rev').textContent=inr(eTotal*2.84);$('k-co2').textContent=inr(eTotal*0.71);
+
+/* ---------- arriving from the site picker ----------
+   plants.html sends ?plant=<id>, and the portal opens ON that site rather than
+   on whichever one happens to be first. pickPlant already re-seats the entire
+   model, so this is the whole of the handover — and an id the portfolio does
+   not contain is ignored rather than blanking the page, because a stale
+   bookmark should still land somewhere readable. */
+(function(){
+  const want=new URLSearchParams(location.search).get('plant');
+  if(want && PLANTS.some(function(p){ return p.id===want; })) pickPlant(want);
+})();
 })();
 </script>
 </body>

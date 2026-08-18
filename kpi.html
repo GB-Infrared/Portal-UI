@@ -25,6 +25,8 @@
   --sel:#e8f0fb;           /* selected card surface      */
   --hover:rgba(11,99,206,.07);
   --hover-soft:rgba(11,99,206,.045);
+  /* the row under the pointer, and only that row */
+  --row-hover:rgba(11,99,206,.10);
   --grid-v:rgba(21,34,52,.05);
   --shadow:rgba(19,38,63,.16);
   --on-accent:#ffffff;     /* text on a filled accent    */
@@ -74,22 +76,33 @@
 /* ---- DARK · same hues on navy. Only the base tokens are redefined; the
    header/brand tokens above reference them, so they follow automatically. ---- */
 :root[data-theme="dark"]{
-  --bg:#0a1017;
-  --panel:#151e2b;
-  --panel-2:#1d2836;
-  --line:#2c3a4c;
-  --line-soft:#232f3e;
-  --line-hi:#42556c;
+  /* A WORKING dark, not a black one. #0a1017 was chosen while this theme still
+     sat beside a light one and had to read as unmistakably the other thing.
+     Now that it is the only theme it is a room somebody spends a shift in, and
+     a near-black page under white text is glare with the contrast turned up.
+     The whole ramp lifts by about the same amount, so every separation the old
+     values bought is still bought: page to card, card to input, and the
+     hairline between them keep their distance from one another.
+     The SIGN-IN and the SITE OVERVIEW deliberately do NOT follow this. They are
+     a void by design, and a void has to be dark to be one. */
+  --bg:#121a26;            /* the page                    */
+  --panel:#1b2533;         /* cards, lifted off it        */
+  --panel-2:#232e3f;       /* inputs, lifted off the card */
+  --line:#324054;
+  --line-soft:#2a3647;
+  --line-hi:#4a5d75;
   --text:#eff4fa;
   --muted:#a3b4c8;
   --faint:#7a8ca1;
-  --dim:#4d5f74;
-  --elev:#1a2432;
-  --sel:#1e2c3d;
+  --dim:#56697f;           /* lifted with the surfaces it sits on */
+  --elev:#202a38;
+  --sel:#27354a;
   --hover:rgba(255,255,255,.07);
   --hover-soft:rgba(255,255,255,.04);
-  --grid-v:rgba(255,255,255,.04);
-  --shadow:rgba(0,0,0,.65);
+  --row-hover:rgba(255,255,255,.075);
+  --grid-v:rgba(255,255,255,.05);
+  /* a shadow only reads against something lighter than itself */
+  --shadow:rgba(0,0,0,.5);
   --on-accent:#04121f;
   --green:#2fd07a;
   --green-rgb:47,208,122;
@@ -154,6 +167,30 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .avatar{width:30px;height:30px;border-radius:50%;background:var(--panel-2);
   display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--text);
   border:1px solid var(--line)}
+/* ---------- account menu ----------
+   The avatar was a dead circle: it named the signed-in user and offered nothing.
+   It is the only place Settings and Sign out can live without spending a tab on
+   either, and every page carries the same one so the way out is never hunted for. */
+.acct{position:relative;display:flex}
+.avatar{padding:0}
+.avatar:hover,.acct.open .avatar{border-color:var(--line-hi);background:var(--hover)}
+.acctmenu{position:absolute;top:calc(100% + 8px);right:0;z-index:90;width:224px;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-md);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:6px;display:none}
+.acct.open .acctmenu{display:block}
+.acctwho{padding:9px 10px 10px}
+.acctwho .nm{font-size:13px;font-weight:700;color:var(--text);line-height:1.3}
+.acctwho .em{font-size:11.5px;color:var(--muted);line-height:1.35;word-break:break-all}
+.acctdiv{height:1px;background:var(--line-soft);margin:4px}
+.acctitem{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;
+  font-size:12.5px;font-weight:600;color:var(--text);width:100%;
+  border:none;background:transparent;text-align:left;font-family:inherit}
+.acctitem:hover{background:var(--hover)}
+.acctitem svg{flex:none;color:var(--faint)}
+.acctitem:hover svg{color:var(--muted)}
+.acctitem.out:hover{background:var(--red-soft);color:var(--red)}
+.acctitem.out:hover svg{color:var(--red)}
+
 
 /* ---------- page shell ----------
    One column, no rail. Analysis is driven entirely by the bar above it, and a
@@ -309,7 +346,7 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
   letter-spacing:.04em;background:transparent;border:1px solid var(--line);color:var(--muted)}
 .tbtn:hover{color:var(--text);border-color:var(--line-hi);background:var(--hover)}
 .tablewrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:520px}
+table{width:100%;min-width:520px}
 thead th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   padding:9px 16px;border-bottom:1px solid var(--line-soft);text-align:center;white-space:nowrap}
 thead .grp th{border-bottom:none;padding-bottom:2px;font-size:11.5px;color:var(--text);letter-spacing:.06em}
@@ -322,7 +359,26 @@ tbody td{padding:9px 16px;font-family:var(--mono);font-size:12.5px;font-weight:6
   border-bottom:1px solid var(--line-soft);color:var(--text);white-space:nowrap}
 tbody td.ts{color:var(--muted);font-weight:600}
 tbody td.nil{color:var(--faint)}
-tbody tr:hover{background:var(--hover-soft)}
+/* THE ROW UNDER THE POINTER LIFTS OFF THE TABLE. A tint alone was not enough on
+   a table this wide - at 4.5% it was invisible, and even raised it only shaded a
+   band the eye still slips out of. So the row is picked out the way every other
+   raised surface in this portal is: its own ring, and a shadow under it. It
+   reads as one object rather than as a row of separate cells, which is the point
+   when a value has to be carried across ten columns.
+
+   It marks where the POINTER is, so it clears the moment the pointer leaves and
+   can never be mistaken for a selection that persists. The table's borders are
+   separated rather than collapsed for it: a collapsed table draws one shared
+   border between two rows, and a browser will not paint a shadow on a row that
+   does not own its own edges. Only bottom borders are ever set here, so nothing
+   doubles up and the table looks exactly as it did. */
+table{border-collapse:separate;border-spacing:0}
+tbody tr{transition:background-color .12s ease,box-shadow .12s ease}
+tbody tr:hover{background:var(--row-hover);position:relative;z-index:1;
+  box-shadow:inset 0 0 0 1px var(--line-hi),0 10px 22px -12px var(--shadow),0 2px 6px -4px var(--shadow)}
+/* the readings come up to full strength with it; a dash stays a dash, because a
+   cell with nothing in it has nothing to bring forward */
+tbody tr:hover td:not(.nil){color:var(--text)}
 /* the y2 half of a device's pair is ruled off from the y1 half, so a wide table
    does not read as one undifferentiated block of numbers */
 thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
@@ -393,6 +449,34 @@ thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
    what the chart actually draws */
 .lg i.sq{width:10px;height:10px;border-radius:3px;border-top:none}
 .tip .tr i.sq{width:9px;height:9px;border-radius:2px;border-top:none}
+
+/* ---------- the row, spelled out in full ----------
+   A table wider than the screen is read by scrolling sideways, and a row read
+   sideways is a row half remembered: by the time the last column is on screen,
+   the device name that started it is not. Hovering a row lifts the WHOLE of it
+   out as a card - every column of that one row, label and value, in one place -
+   so the reading is taken in a glance instead of in two swipes.
+
+   It follows the pointer, it is never clickable, and it goes the moment the
+   pointer leaves. It opens on every row, whether or not the table is currently
+   wider than the screen - the same gesture has to give the same answer on a
+   laptop as on a wall display, and a reader who learns it on one must not find
+   it missing on the other. */
+.rowpop{position:fixed;z-index:120;pointer-events:none;opacity:0;transition:opacity .12s ease;
+  background:var(--elev);border:1px solid var(--line);border-radius:11px;padding:11px 13px;
+  box-shadow:0 20px 48px -18px var(--shadow),0 3px 10px -6px var(--shadow);
+  max-width:min(620px,92vw)}
+.rowpop.on{opacity:1}
+.rowpop .rp-h{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.05em;
+  color:var(--text);padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line-soft)}
+.rowpop .rp-g{display:grid;grid-template-columns:auto 1fr;gap:5px 16px;align-items:baseline}
+.rowpop .rp-g.two{grid-template-columns:auto 1fr auto 1fr}
+.rowpop .rp-k{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--faint);white-space:nowrap}
+.rowpop .rp-v{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);
+  text-align:right;white-space:nowrap}
+/* a cell with nothing in it stays a dash, and says so quietly */
+.rowpop .rp-v.nil{color:var(--faint);font-weight:600}
 </style>
 <script>/* stored theme applied before first paint, so there is no flash */
 try{var _t=localStorage.getItem('enerops-theme');if(_t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}
@@ -422,7 +506,19 @@ try{var _t=localStorage.getItem('enerops-theme');if(_t==='dark')document.documen
       </select>
     </div>
     <button class="iconbtn" id="themebtn" onclick="toggleTheme()" title="Switch to dark theme"></button>
-    <div class="avatar">V</div>
+    <div class="acct" id="acct">
+      <button class="avatar" onclick="toggleAcct(event)" aria-haspopup="menu" aria-expanded="false"
+              id="acctbtn" title="Account">V</button>
+      <div class="acctmenu" role="menu">
+        <div class="acctwho">
+          <div class="nm">Vikram Sethi</div>
+          <div class="em">vikram.sethi@enerops.example</div>
+        </div>
+        <div class="acctdiv"></div>
+        <a class="acctitem" role="menuitem" href="settings.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.7 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15.1 4.7a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.09A1.7 1.7 0 0 0 21 10.1a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg> Settings</a>
+        <a class="acctitem out" role="menuitem" href="login.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 16.5v1.8a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2V5.7a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1.8"/><path d="M19.8 12H9.4m10.4 0-3.2-3.2M19.8 12l-3.2 3.2"/></svg> Sign out</a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -566,6 +662,23 @@ window.toggleTheme=function(){
   T(next==='dark'?'Dark theme':'Light theme');
 };
 applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light');
+
+/* ---------- account menu ---------- */
+window.toggleAcct=function(e){
+  e.stopPropagation();
+  const a=$('acct'), open=a.classList.toggle('open');
+  $('acctbtn').setAttribute('aria-expanded', open?'true':'false');
+};
+document.addEventListener('click',function(){
+  const a=$('acct'); if(!a) return;
+  a.classList.remove('open'); $('acctbtn').setAttribute('aria-expanded','false');
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape') return;
+  const a=$('acct'); if(!a||!a.classList.contains('open')) return;
+  a.classList.remove('open'); $('acctbtn').setAttribute('aria-expanded','false'); $('acctbtn').focus();
+});
+
 
 /* ---------- clock ---------- */
 const START_T=12+10/60+3/3600, t0=Date.now();
@@ -1174,6 +1287,108 @@ if(window.ResizeObserver) new ResizeObserver(refit).observe($('chartwrap'));
 /* BOTH, not one or the other: the observer sees the wrapper's WIDTH change, and
    a window that only gets taller resizes nothing it can see. */
 window.addEventListener('resize',refit);
+})();
+</script>
+
+<!-- ======================= THE ROW, IN FULL =======================
+     Hover a row and the whole of it is lifted out beside the pointer, so a table
+     wider than the screen does not have to be read in two swipes. The labels are
+     taken from the table's OWN header every time it opens - including the
+     two-deck device/variable header, where a column is named by both decks - so
+     a page that re-renders its columns can never label a value wrongly here. -->
+<script>
+(function(){
+  const wrap=document.querySelector('.tablewrap');
+  if(!wrap) return;
+  const table=wrap.querySelector('table'), tbody=table&&table.tBodies[0];
+  if(!tbody) return;
+
+  const pop=document.createElement('div');
+  pop.className='rowpop';
+  document.body.appendChild(pop);
+
+  /* Column names, read off the header as it stands. A header cell can span rows
+     and columns, so the deck is laid out into a grid first and each column then
+     reads down its own line - which is what turns "INV06" over "P_AC (kW)" into
+     one name for one column. */
+  function headerLabels(){
+    const head=table.tHead; if(!head) return [];
+    const grid=[];
+    [].forEach.call(head.rows,function(tr,r){
+      grid[r]=grid[r]||[];
+      let c=0;
+      [].forEach.call(tr.cells,function(cell){
+        while(grid[r][c]!==undefined) c++;
+        const rs=cell.rowSpan||1, cs=cell.colSpan||1;
+        /* the sort arrow is a control, not part of the column's name */
+        const txt=cell.textContent.replace(/[\u25b2\u25bc]/g,'').trim();
+        for(let i=0;i<rs;i++){
+          grid[r+i]=grid[r+i]||[];
+          for(let j=0;j<cs;j++) grid[r+i][c+j]=txt;
+        }
+        c+=cs;
+      });
+    });
+    const n=grid.reduce((m,g)=>Math.max(m,g.length),0), out=[];
+    for(let c=0;c<n;c++){
+      const parts=[];
+      for(let r=0;r<grid.length;r++){
+        const t=(grid[r]||[])[c];
+        if(t&&parts[parts.length-1]!==t) parts.push(t);
+      }
+      out.push(parts.join(' \u00b7 '));
+    }
+    return out;
+  }
+
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let row=null;
+
+  function hide(){ pop.classList.remove('on'); row=null; }
+
+  function fill(tr){
+    const labels=headerLabels();
+    const cells=[].slice.call(tr.cells);
+    /* the "nothing here" row is one cell spanning the table - there is no
+       reading to spell out */
+    if(cells.length<2) return false;
+    let body='';
+    cells.forEach(function(td,i){
+      const v=td.textContent.trim();
+      body+='<span class="rp-k">'+esc(labels[i]||('Column '+(i+1)))+'</span>'+
+            '<span class="rp-v'+(v==='\u2014'||v===''?' nil':'')+'">'+esc(v||'\u2014')+'</span>';
+    });
+    /* the first cell is the row's identity - its time stamp - so it heads the
+       card rather than sitting in the list as one field among many */
+    pop.innerHTML='<div class="rp-h">'+esc(cells[0].textContent.trim())+'</div>'+
+      '<div class="rp-g'+(cells.length>9?' two':'')+'">'+body+'</div>';
+    return true;
+  }
+
+  function place(e){
+    const w=pop.offsetWidth, h=pop.offsetHeight;
+    let x=e.clientX+20, y=e.clientY+18;
+    if(x+w>window.innerWidth-10) x=e.clientX-w-20;   /* flip rather than overflow */
+    if(y+h>window.innerHeight-10) y=Math.max(10,e.clientY-h-14);
+    pop.style.left=x+'px';
+    pop.style.top=y+'px';
+  }
+
+  tbody.addEventListener('mousemove',function(e){
+    const tr=e.target.closest&&e.target.closest('tr');
+    if(!tr||!tbody.contains(tr)){ hide(); return; }
+    if(tr!==row){
+      if(!fill(tr)){ hide(); return; }
+      row=tr;
+      pop.classList.add('on');
+    }
+    place(e);
+  });
+  tbody.addEventListener('mouseleave',hide);
+  /* it is pinned to the pointer, so anything that moves the page under it makes
+     it a lie */
+  window.addEventListener('scroll',hide,true);
+  window.addEventListener('resize',hide);
 })();
 </script>
 </body>
