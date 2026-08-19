@@ -1,0 +1,283 @@
+/* ==========================================================================
+   SITE OVERVIEW — the room between the sign-in and the portal.
+
+   Signing in used to drop you straight onto one plant's Home, which made the
+   portfolio something you discovered afterwards from a dropdown. This makes the
+   portfolio the first thing you see: one core, every site in orbit around it,
+   and the portal opens on whichever one you pick.
+
+   WHAT THE PICTURE ENCODES, and it is only these three things:
+     POSITION   nothing. Sites sit evenly around the ring in the order the
+                backend lists them. It is a picker, not a map — inventing a
+                geography here would be inventing a fact.
+     SIZE       AC capacity. The biggest site is the biggest node.
+     COLOUR     health, and health only: green producing, amber a warning,
+                red a critical alarm, grey nothing coming in.
+   Brightness rides on output, so a fleet at midday glows and the same fleet at
+   midnight goes quiet without a single number being read.
+
+   Every colour below is a LITERAL, and the page does not follow the theme.
+   That is deliberate rather than lazy: the void, the stars and the aurora ARE
+   the design, and there is no light-mode version of them, only an absence of
+   them. Each literal is the portal's own dark token — #121a26 is --bg, #1b2533
+   is --panel, #324054 is --line, #eff4fa/#a3b4c8/#7a8ca1/#56697f are
+   --text/--muted/--faint/--dim, and the accents are --green #2fd07a, --blue
+   #5aa2f0, --red #ff6b6b, --amber #f0b249, --brand #e3b23c.
+   ========================================================================== */
+.page-plants{position:fixed;inset:0;overflow:hidden;font-family:var(--mono);color:#a3b4c8;
+  background:
+    radial-gradient(ellipse 86% 66% at 50% 44%, rgba(35,54,82,.62) 0%, rgba(15,24,37,.22) 46%, transparent 72%),
+    #121a26}
+
+/* ---------- ambient · identical to the sign-in ---------- */
+.page-plants .stars{position:absolute;inset:0;z-index:0;opacity:.6;pointer-events:none;
+  background-image:
+    radial-gradient(1.2px 1.2px at 12% 18%, #9dbfdaaa, transparent),
+    radial-gradient(1px 1px at 27% 9%,   #7ee2ab88, transparent),
+    radial-gradient(1px 1px at 44% 26%,  #9dbfda77, transparent),
+    radial-gradient(1.4px 1.4px at 63% 12%, #e3b23c66, transparent),
+    radial-gradient(1px 1px at 78% 24%,  #9dbfda88, transparent),
+    radial-gradient(1px 1px at 88% 7%,   #7ee2ab66, transparent),
+    radial-gradient(1px 1px at 8% 44%,   #9dbfda66, transparent),
+    radial-gradient(1.2px 1.2px at 34% 52%, #9dbfda55, transparent),
+    radial-gradient(1px 1px at 57% 38%,  #7ee2ab55, transparent),
+    radial-gradient(1px 1px at 71% 57%,  #9dbfda55, transparent),
+    radial-gradient(1px 1px at 93% 47%,  #9dbfda66, transparent),
+    radial-gradient(1px 1px at 19% 72%,  #9dbfda44, transparent),
+    radial-gradient(1px 1px at 47% 88%,  #9dbfda44, transparent),
+    radial-gradient(1px 1px at 82% 78%,  #7ee2ab44, transparent)}
+.page-plants .aurora{position:absolute;left:-20%;right:-20%;bottom:-45vh;height:80vh;z-index:0;
+  pointer-events:none;filter:blur(44px);animation:pl-breathe 15s ease-in-out infinite;
+  background:radial-gradient(ellipse at 50% 100%, rgba(47,208,122,.17) 0%, rgba(90,162,240,.11) 40%, transparent 70%)}
+@keyframes pl-breathe{0%,100%{opacity:.55;transform:translateY(0)}50%{opacity:1;transform:translateY(-3vh)}}
+.page-plants .vignette{position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 46%, transparent 58%, rgba(6,11,19,.60) 100%)}
+/* the faint horizontal ruling of a CRT, at the edge of visibility — it is what
+   makes the black read as a screen rather than as absence */
+.page-plants .grain{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:.05;
+  background:repeating-linear-gradient(0deg,transparent 0 2px,#131e2b 2px 3px)}
+.page-plants .corner{position:absolute;width:26px;height:26px;z-index:4;pointer-events:none}
+.page-plants .corner.tl{top:16px;left:16px;
+  border-top:1px solid rgba(47,208,122,.42);border-left:1px solid rgba(47,208,122,.42)}
+.page-plants .corner.br{bottom:16px;right:16px;
+  border-bottom:1px solid rgba(47,208,122,.42);border-right:1px solid rgba(47,208,122,.42)}
+
+/* ---------- the bar ----------
+   The headline numbers live IN the bar rather than in a panel on the field. A
+   panel beside the ring is a second thing competing for the same glance; a bar
+   above it is the frame the picture is read inside. */
+.page-plants .hud{position:fixed;top:0;left:0;right:0;z-index:8;display:flex;align-items:center;
+  height:62px;padding:0 20px;font-size:11px;color:#7a8ca1;
+  background:rgba(27,37,51,.62);border-bottom:1px solid #324054;
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.page-plants .hud .mark{display:flex;align-items:center;gap:11px;padding-right:24px;flex:none}
+.page-plants .hud .mark img{height:30px;width:auto;display:block;flex:none}
+.page-plants .hud .word{font-family:var(--serif);font-weight:700;font-size:17px;color:#e3b23c;
+  letter-spacing:.2px;line-height:1.05;display:block}
+.page-plants .hud .sub{font-size:9px;letter-spacing:.28em;color:#7a8ca1;text-transform:uppercase;
+  display:block;margin-top:3px}
+.page-plants .hud .cell{display:flex;flex-direction:column;justify-content:center;gap:6px;flex:none;
+  height:100%;padding:0 20px;border-left:1px solid #324054}
+.page-plants .hud .cell .k{font-size:9px;letter-spacing:.22em;color:#7a8ca1;text-transform:uppercase;
+  white-space:nowrap}
+.page-plants .hud .cell .v{font-size:12.5px;letter-spacing:.04em;color:#eff4fa;line-height:1;
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.page-plants .hud .cell .v small{font-size:.8em;color:#7a8ca1;letter-spacing:.14em;margin-left:5px}
+.page-plants .hud .right{margin-left:auto;display:flex;align-items:center;height:100%;flex:none}
+.page-plants .hud .right .cell:first-child{border-left:1px solid #324054}
+.page-plants .hud .live{width:6px;height:6px;border-radius:50%;flex:none;background:#2fd07a;
+  box-shadow:0 0 8px rgba(47,208,122,.75);animation:pl-lv 2.4s ease-in-out infinite;margin-right:14px}
+@keyframes pl-lv{0%,100%{opacity:1}50%{opacity:.3}}
+.page-plants .hud .out{background:none;border:1px solid #324054;border-radius:6px;color:#7a8ca1;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;padding:8px 15px;margin-left:20px;
+  cursor:pointer}
+.page-plants .hud .out:hover{color:#ff6b6b;border-color:rgba(255,107,107,.5)}
+/* Measured against the widest each cell actually gets: the five cells plus the
+   mark and the right-hand block need about 1330px, and each fold buys back
+   roughly its own cell. Folding earlier throws away a number there was room for. */
+@media (max-width:1400px){ .page-plants .hud .cell.c4{display:none} }
+@media (max-width:1280px){ .page-plants .hud .cell.c3{display:none} }
+@media (max-width:1160px){ .page-plants .hud .cell.c2{display:none} }
+
+/* ---------- the map ----------
+   It owns everything between the bar and the rail. The canvas measures its own
+   parent, so these four numbers are the whole of moving the orbit: the centre,
+   the ring radius and every chip follow from the box. */
+.page-plants .theatre{position:fixed;top:62px;left:0;right:360px;bottom:0;z-index:5;cursor:crosshair}
+.page-plants .theatre canvas{position:absolute;inset:0;width:100%;height:100%}
+@media (max-width:1100px){ .page-plants .theatre{right:0} }
+
+/* ---------- the core readout ----------
+   The portfolio total, in the middle of the thing it is the total of. It is a
+   SUM, and it says so: a number in the centre of a ring of sites would
+   otherwise read as one of them. */
+.page-plants .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;
+  text-align:center;pointer-events:none}
+.page-plants .core .kw{font-family:var(--mono);font-weight:300;font-size:clamp(28px,4vw,46px);
+  color:#f0dcae;letter-spacing:.02em;line-height:1;
+  text-shadow:0 0 32px rgba(227,178,60,.30),0 0 90px rgba(227,178,60,.14)}
+.page-plants .core .kw small{font-size:.4em;color:#7a8ca1;letter-spacing:.24em;margin-left:7px}
+.page-plants .core .cap{font-size:9.5px;letter-spacing:.34em;color:#a3b4c8;margin-top:8px}
+
+/* ---------- a site, as a chip ----------
+   A real <button> over the canvas rather than a shape drawn into it: the canvas
+   can render a hundred sites beautifully and not one of them would be reachable
+   by keyboard, focusable, or readable aloud. The picture is the canvas; the
+   CONTROL is always HTML. The hit area is a 58px circle centred on the node,
+   comfortably past the 44px a finger needs, with the label hanging above inside
+   the same button — one target rather than two things that look related. */
+.page-plants .chip{position:absolute;z-index:7;transform:translate(-50%,-50%);
+  width:58px;height:58px;border-radius:50%;background:none;border:none;padding:0;
+  font-family:var(--mono);white-space:nowrap;transition:opacity .25s;cursor:pointer}
+.page-plants .chip .lbl{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);
+  margin-bottom:6px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  text-align:center;transition:transform .18s}
+.page-plants .chip .nm{font-size:clamp(11.5px,.78vw,15px);letter-spacing:.12em;color:#eff4fa;
+  font-weight:500}
+.page-plants .chip .mt{display:flex;align-items:center;justify-content:center;gap:7px}
+.page-plants .chip .val{font-size:clamp(10px,.66vw,13px);letter-spacing:.06em;color:#7ee2ab}
+.page-plants .chip .val.warn{color:#f0b249}
+.page-plants .chip .val.crit{color:#ff6b6b}
+.page-plants .chip .val.off{color:#7a8ca1}
+/* HOW MANY, on the node itself. Colour already said something is wrong at a
+   site; it cannot say whether that is one alarm or nine, and the difference
+   decides which one gets opened first. A site with nothing open carries no pip
+   at all — a badge reading 0 is a mark you have to read to learn it says nothing. */
+.page-plants .chip .alm{display:none;align-items:center;justify-content:center;
+  min-width:16px;height:16px;padding:0 4px;border-radius:8px;
+  font-size:9px;font-weight:600;letter-spacing:0;font-variant-numeric:tabular-nums;
+  background:rgba(240,178,73,.16);border:1px solid rgba(240,178,73,.6);color:#f0b249}
+.page-plants .chip .alm.on{display:inline-flex}
+.page-plants .chip .alm.crit{background:rgba(255,107,107,.16);
+  border-color:rgba(255,107,107,.6);color:#ff6b6b}
+.page-plants .chip:hover,.page-plants .chip:focus-visible{outline:none}
+.page-plants .chip:hover .lbl,
+.page-plants .chip:focus-visible .lbl{transform:translateX(-50%) translateY(-4px)}
+.page-plants .chip:hover .nm,.page-plants .chip:focus-visible .nm{color:#2fd07a}
+.page-plants .chip:focus-visible{box-shadow:0 0 0 1px rgba(47,208,122,.7),0 0 22px rgba(47,208,122,.25)}
+/* everything else recedes while one is under the pointer — the ring is a
+   comparison, and a comparison needs one thing at a time to be the subject */
+.page-plants .theatre.hot .chip:not(.on){opacity:.32}
+/* past nine or ten the labels begin to touch, so the type steps down rather
+   than the ring being allowed to become a knot */
+.page-plants .theatre.dense .chip .nm{font-size:10.5px}
+.page-plants .theatre.dense .chip .val{font-size:9.5px}
+
+/* ---------- the rail ----------
+   Two modules, and each answers something the ring is structurally unable to:
+   the ring can show a site is bright, but not how hard it is working against its
+   OWN size; and it can show a site is red, but not what tripped. */
+.page-plants .rail{position:fixed;top:62px;right:0;bottom:0;width:360px;z-index:7;
+  display:flex;flex-direction:column;
+  background:rgba(27,37,51,.54);border-left:1px solid #324054;
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.page-plants .rail .mod{padding:16px 20px;border-bottom:1px solid #324054}
+.page-plants .rail .mod:last-child{border-bottom:none}
+.page-plants .rail .mod.grow{flex:1;min-height:0;display:flex;flex-direction:column}
+.page-plants .rail .h{display:flex;align-items:baseline;gap:7px;margin-bottom:13px;flex:none;
+  font-size:10px;letter-spacing:.22em;color:#7a8ca1;text-transform:uppercase}
+.page-plants .rail .h b{color:#2fd07a;font-weight:500}
+.page-plants .rail .h .r{margin-left:auto;color:#7a8ca1;letter-spacing:.1em;
+  font-variant-numeric:tabular-nums}
+/* the severity split, in the header rather than counted off the rows: the list
+   below scrolls, so a total you can only reach by scrolling to the end of it is
+   not a total anybody reads */
+.page-plants .rail .h .r .crit{color:#ff6b6b}
+.page-plants .rail .h .r .warn{color:#f0b249}
+.page-plants .rail .h .r .sep{color:#56697f;margin:0 5px}
+.page-plants .rail .h .r .none{color:#56697f}
+
+/* output, per site, against its own nameplate — a READOUT, not a control.
+   Only one thing on this screen opens a site, and it is the ring. */
+.page-plants .bars{display:flex;flex-direction:column;gap:11px}
+.page-plants .bar{font-family:var(--mono)}
+.page-plants .bar .t{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;
+  font-size:11px;letter-spacing:.08em;color:#7a8ca1}
+.page-plants .bar .t .n{color:#eff4fa}
+.page-plants .bar .t .v{margin-left:auto;color:#a3b4c8;font-variant-numeric:tabular-nums}
+.page-plants .bar .track{height:4px;border-radius:2px;background:#2a3647;overflow:hidden}
+.page-plants .bar .fill{display:block;height:100%;border-radius:2px;transition:width .6s ease-out}
+
+/* what is open, newest first */
+.page-plants .log{flex:1;min-height:0;overflow-y:auto;margin-right:-6px;padding-right:6px}
+.page-plants .log .row{display:flex;gap:10px;padding:8px 0;border-top:1px solid #2a3647;
+  font-size:10.5px;letter-spacing:.04em;align-items:baseline}
+.page-plants .log .row:first-child{border-top:none}
+.page-plants .log .tm{color:#56697f;flex:none;font-variant-numeric:tabular-nums}
+.page-plants .log .sid{color:#eff4fa;flex:none;width:66px;overflow:hidden;white-space:nowrap;
+  text-overflow:ellipsis}
+.page-plants .log .ms{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  color:#a3b4c8}
+.page-plants .log .row.crit .ms{color:#ff6b6b}
+.page-plants .log .row.warn .ms{color:#f0b249}
+.page-plants .log .none{font-size:10.5px;letter-spacing:.18em;color:#56697f;padding:4px 0}
+
+/* ---------- the readout for the site under the pointer ----------
+   Glass rather than a flat panel: the card sits OVER the ring, and a solid fill
+   punches a hole in the picture it is describing. */
+.page-plants .detail{position:fixed;left:24px;bottom:24px;z-index:8;width:312px;
+  background:rgba(27,37,51,.78);border:1px solid #324054;border-radius:14px;padding:16px 18px;
+  -webkit-backdrop-filter:blur(18px) saturate(130%);backdrop-filter:blur(18px) saturate(130%);
+  box-shadow:0 18px 46px rgba(0,0,0,.5);
+  opacity:0;transform:translateY(8px) scale(.985);
+  transition:opacity .2s ease-out,transform .2s cubic-bezier(.2,.7,.3,1);pointer-events:none}
+.page-plants .detail.on{opacity:1;transform:none}
+.page-plants .detail .t{font-size:13px;letter-spacing:.14em;color:#eff4fa;font-weight:500}
+.page-plants .detail .a{font-size:9.5px;color:#7a8ca1;line-height:1.6;margin-top:4px;white-space:normal}
+.page-plants .detail .sep{height:1px;background:#324054;margin-top:13px}
+.page-plants .detail .rows{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.page-plants .detail .r{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.1em}
+.page-plants .detail .r .k{color:#7a8ca1;min-width:96px;flex:none}
+.page-plants .detail .r .dots{flex:1;min-width:10px;height:1px;
+  background:repeating-linear-gradient(90deg,#324054 0 2px,transparent 2px 6px)}
+.page-plants .detail .r .v{color:#eff4fa;white-space:nowrap;font-variant-numeric:tabular-nums}
+.page-plants .detail .r .v.ok{color:#2fd07a}
+.page-plants .detail .r .v.warn{color:#f0b249}
+.page-plants .detail .r .v.crit{color:#ff6b6b}
+/* ---------- pinned ----------
+   A card that vanishes the moment the pointer leaves it can be glanced at and
+   nothing else: not read at leisure, not held while you look across at the site
+   next to it, and above all not clicked. Double click pins it; single click
+   still opens the site, so the fast path is unchanged and the slow one is new. */
+.page-plants .detail .go{display:block;width:100%;margin-top:14px;padding:10px 0 0;text-align:left;
+  background:none;border:none;border-top:1px solid #324054;
+  font-family:var(--mono);font-size:9px;letter-spacing:.26em;color:#2fd07a;
+  cursor:default;transition:color .2s}
+.page-plants .detail.pin{pointer-events:auto;border-color:rgba(47,208,122,.5);
+  box-shadow:0 18px 46px rgba(0,0,0,.55),0 0 0 1px rgba(47,208,122,.16)}
+.page-plants .detail.pin .go{cursor:pointer}
+.page-plants .detail.pin .go:hover{color:#7ee2ab}
+.page-plants .detail .x{display:none;position:absolute;top:11px;right:12px;
+  width:22px;height:22px;border:none;background:none;border-radius:6px;
+  color:#7a8ca1;font-family:var(--mono);font-size:14px;line-height:1;cursor:pointer}
+.page-plants .detail.pin .x{display:block}
+.page-plants .detail .x:hover{color:#eff4fa;background:rgba(255,255,255,.07)}
+
+/* ---------- the list, for when the ring will not do ----------
+   Under 720px the orbit stops being readable — the nodes crowd and the chips
+   overlap — so the same sites become a plain list. Same data, same click, no
+   picture: the picture was never the point, choosing was. */
+.page-plants .fallback{display:none}
+@media (max-width:720px){
+  .page-plants .theatre,.page-plants .core,.page-plants .rail{display:none}
+  .page-plants .fallback{display:block;position:fixed;inset:0;z-index:7;overflow-y:auto;
+    padding:96px 18px 32px}
+  .page-plants .flist{display:flex;flex-direction:column;gap:9px;max-width:420px;margin:0 auto}
+  .page-plants .frow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+    background:rgba(27,37,51,.9);border:1px solid #324054;border-radius:10px;padding:13px 15px;
+    font-family:var(--mono);cursor:pointer}
+  .page-plants .frow:hover{border-color:#2fd07a}
+  .page-plants .frow .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .page-plants .frow .nm{font-size:12.5px;letter-spacing:.1em;color:#eff4fa}
+  .page-plants .frow .ac{font-size:9.5px;color:#7a8ca1;margin-top:2px}
+  .page-plants .frow .kw{margin-left:auto;font-size:11.5px;color:#7ee2ab;text-align:right}
+}
+
+/* nothing to draw at all — the portfolio itself is missing, not merely quiet */
+.page-plants .void{position:fixed;inset:62px 0 0 0;z-index:6;display:flex;align-items:center;
+  justify-content:center;text-align:center;font-size:11px;letter-spacing:.24em;color:#56697f;
+  text-transform:uppercase}
+
+@media (prefers-reduced-motion:reduce){
+  .page-plants .aurora{animation:none}
+}

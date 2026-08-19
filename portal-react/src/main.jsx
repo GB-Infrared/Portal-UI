@@ -17,6 +17,7 @@ import './styles/page-alarms.css';
 import './styles/page-analysis.css';
 import './styles/page-kpi.css';
 import './styles/page-login.css';
+import './styles/page-plants.css';
 import './styles/page-settings.css';
 import './styles/app.css';
 

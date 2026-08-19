@@ -5,6 +5,7 @@ import { TopBar } from './components/TopBar';
 import { useTheme } from './lib/useTheme';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Plants from './pages/Plants';
 import Settings from './pages/Settings';
 import Monitoring from './pages/Monitoring';
 import Alarms from './pages/Alarms';
@@ -35,6 +36,11 @@ export default function App({ fetchData, onSignIn, onResetPassword }) {
         <Routes>
           <Route path="/login"
                  element={<Login onSignIn={onSignIn} onResetPassword={onResetPassword} />} />
+          {/* The site overview carries its own chrome too, and for the same
+              reason Login does: the Shell's tabs, clock and plant selectors all
+              describe a session that is already inside ONE plant, and this is
+              the screen for choosing which. It sits beside the Shell, not in it. */}
+          <Route path="/plants" element={<Plants />} />
           {/* Settings carries its own chrome — a sidebar instead of tabs, and no
               clock or refresh, because nothing on it is a live reading — so it
               sits beside the Shell rather than inside it */}

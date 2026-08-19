@@ -17,8 +17,19 @@
    tokens to switch. It covers the viewport, which is what keeps <body>'s own
    light background from showing through at the edges.
    ========================================================================== */
-.page-login{position:fixed;inset:0;overflow:hidden;
-  background:#05090e;color:#c3cfda;font-family:var(--mono)}
+/* The page pins itself to the portal's DARK values and does not follow the
+   theme. That is not laziness about light mode: the void, the stars and the
+   aurora are the design, and there is no light version of them, only an absence
+   of them. So the literals below are the dark tokens, copied deliberately --
+   #121a26 is --bg, #232e3f is --panel-2, #324054 is --line, and the accents are
+   --green #2fd07a, --blue #5aa2f0, --red #ff6b6b, --amber #f0b249, --brand
+   #e3b23c. This used to be a second dark palette invented beside the portal's,
+   right down to the LIGHT green #12a150 on the focus ring and the button, which
+   was the one hue here that could not have come from the app it opens. */
+.page-login{position:fixed;inset:0;overflow:hidden;font-family:var(--mono);color:#a3b4c8;
+  background:
+    radial-gradient(ellipse 86% 66% at 50% 44%, rgba(35,54,82,.62) 0%, rgba(15,24,37,.22) 46%, transparent 72%),
+    #121a26}
 
 /* ---------- ambient ---------- */
 .page-login .stars{position:absolute;inset:0;z-index:0;opacity:.6;pointer-events:none;
@@ -39,18 +50,18 @@
     radial-gradient(1px 1px at 82% 68%,  #7ee2ab44, transparent)}
 .page-login .aurora{position:absolute;left:-20%;right:-20%;bottom:-45vh;height:80vh;z-index:0;
   pointer-events:none;
-  background:radial-gradient(ellipse at 50% 100%, rgba(47,208,122,.20) 0%, rgba(26,115,200,.10) 40%, transparent 70%);
+  background:radial-gradient(ellipse at 50% 100%, rgba(47,208,122,.20) 0%, rgba(90,162,240,.12) 40%, transparent 70%);
   filter:blur(44px);animation:lg-breathe 15s ease-in-out infinite}
 .page-login .aurora.two{left:-10%;bottom:-55vh;
   background:radial-gradient(ellipse at 30% 100%, rgba(227,178,60,.13) 0%, transparent 65%);
   animation-duration:19s;animation-delay:-7s}
 @keyframes lg-breathe{0%,100%{opacity:.55;transform:translateY(0)}50%{opacity:1;transform:translateY(-3vh)}}
 .page-login .vignette{position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 42%, transparent 55%, rgba(3,6,10,.66) 100%)}
+  background:radial-gradient(ellipse at 50% 42%, transparent 55%, rgba(6,11,19,.58) 100%)}
 /* the faint horizontal ruling of a CRT, at the edge of visibility — it is what
    makes the black read as a screen rather than as absence */
 .page-login .grain{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.05;
-  background:repeating-linear-gradient(0deg,transparent 0 2px,#0a141a 2px 3px)}
+  background:repeating-linear-gradient(0deg,transparent 0 2px,#131e2b 2px 3px)}
 
 /* framing marks: they say "instrument" in two strokes and cost nothing */
 .page-login .corner{position:absolute;width:26px;height:26px;z-index:3;pointer-events:none}
@@ -64,19 +75,19 @@
   display:flex;align-items:center;justify-content:center;padding:24px}
 /* the log sets the scale for the whole screen — the box below is sized off it,
    so these two numbers are the only ones to touch to make the page read bigger */
-.page-login .bootlog{font-family:var(--mono);font-size:13.5px;line-height:2.05;color:#8b9cab;
-  min-width:510px;white-space:pre;margin:0}
-.page-login .bootlog .bt{color:#e3b23c;letter-spacing:.34em;font-size:15px;font-weight:700}
-.page-login .bootlog .sub{color:#6f8496;letter-spacing:.16em}
-.page-login .bootlog .rule{color:#2c3a4c}
+.page-login .bootlog{font-family:var(--mono);font-size:14px;line-height:2.02;color:#a3b4c8;
+  min-width:540px;white-space:pre;margin:0}
+.page-login .bootlog .bt{color:#e3b23c;letter-spacing:.34em;font-size:16px;font-weight:700}
+.page-login .bootlog .sub{color:#7a8ca1;letter-spacing:.16em}
+.page-login .bootlog .rule{color:#324054}
 .page-login .bootlog b{color:#2fd07a;font-weight:500}
 .page-login .bootlog .warm{color:#e3b23c}
 @media (max-width:560px){
-  .page-login .bootlog{min-width:0;font-size:11.5px;white-space:pre-wrap}
+  .page-login .bootlog{min-width:0;font-size:12px;white-space:pre-wrap}
 }
 
 .page-login .skip{position:absolute;bottom:26px;left:0;right:0;text-align:center;z-index:11;
-  font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:#4e6070}
+  font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:#56697f}
 
 /* ---------- the login box ----------
    Fleet Control's exact shape: a label column at a fixed width, the field
@@ -86,14 +97,14 @@
 .page-login .lbox{margin-top:26px;animation:lg-fadein .5s ease-out}
 @keyframes lg-fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .page-login .lrow{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.page-login .lrow label{font-size:10px;letter-spacing:.3em;color:#6f8496;width:116px;flex:none;
+.page-login .lrow label{font-size:10.5px;letter-spacing:.3em;color:#7a8ca1;width:120px;flex:none;
   text-transform:uppercase}
-.page-login .lfield{position:relative;display:flex;width:268px}
-.page-login .lbox input{background:#080e14;border:1px solid #24313f;border-radius:5px;color:#d8e2e8;
-  font-family:var(--mono);font-size:13px;padding:10px 12px;width:100%;outline:none;letter-spacing:.08em;
+.page-login .lfield{position:relative;display:flex;width:282px}
+.page-login .lbox input{background:#232e3f;border:1px solid #324054;border-radius:6px;color:#eff4fa;
+  font-family:var(--mono);font-size:13.5px;padding:10px 12px;width:100%;outline:none;letter-spacing:.08em;
   transition:border-color .2s,box-shadow .2s}
-.page-login .lbox input::placeholder{color:#3f5163;letter-spacing:.04em}
-.page-login .lbox input:focus{border-color:#12a150;box-shadow:0 0 14px rgba(18,161,80,.22)}
+.page-login .lbox input::placeholder{color:#56697f;letter-spacing:.04em}
+.page-login .lbox input:focus{border-color:#2fd07a;box-shadow:0 0 14px rgba(47,208,122,.20)}
 .page-login .lbox input.bad{border-color:#ff6b6b;box-shadow:0 0 14px rgba(255,107,107,.18)}
 /* Chrome paints its own pale yellow over an autofilled field, which on this
    near-black would lose the field entirely. The inset shadow is the only
@@ -101,9 +112,9 @@
 .page-login .lbox input:-webkit-autofill,
 .page-login .lbox input:-webkit-autofill:hover,
 .page-login .lbox input:-webkit-autofill:focus{
-  -webkit-text-fill-color:#d8e2e8;
-  -webkit-box-shadow:0 0 0 40px #080e14 inset;
-  caret-color:#d8e2e8}
+  -webkit-text-fill-color:#eff4fa;
+  -webkit-box-shadow:0 0 0 40px #232e3f inset;
+  caret-color:#eff4fa}
 
 /* ---------- one reveal, and it is the eye ----------
    Edge and IE draw their OWN eye inside every password field. It sat beside
@@ -119,34 +130,34 @@
 .page-login .reveal{position:absolute;right:3px;top:50%;transform:translateY(-50%);
   display:inline-flex;align-items:center;justify-content:center;
   width:30px;height:30px;border-radius:4px;border:none;background:transparent;
-  color:#5b6f81;cursor:pointer}
-.page-login .reveal:hover{color:#c3cfda}
-.page-login .reveal:focus-visible{outline:1px solid #12a150;outline-offset:1px}
+  color:#7a8ca1;cursor:pointer}
+.page-login .reveal:hover{color:#eff4fa}
+.page-login .reveal:focus-visible{outline:1px solid #2fd07a;outline-offset:1px}
 
-.page-login .lact{display:flex;align-items:center;gap:16px;margin-left:128px;margin-top:16px;
+.page-login .lact{display:flex;align-items:center;gap:16px;margin-left:132px;margin-top:15px;
   flex-wrap:wrap}
-.page-login .lgo{background:rgba(18,161,80,.10);border:1px solid #12a150;border-radius:5px;color:#2fd07a;
-  font-family:var(--mono);font-size:11px;letter-spacing:.3em;padding:12px 26px;cursor:pointer;
+.page-login .lgo{background:rgba(47,208,122,.10);border:1px solid #2fd07a;border-radius:6px;color:#2fd07a;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.3em;padding:12px 26px;cursor:pointer;
   display:inline-flex;align-items:center;gap:9px;transition:box-shadow .25s,background-color .25s}
-.page-login .lgo:hover:not(:disabled){background:rgba(18,161,80,.18);box-shadow:0 0 20px rgba(18,161,80,.22)}
+.page-login .lgo:hover:not(:disabled){background:rgba(47,208,122,.18);box-shadow:0 0 20px rgba(47,208,122,.22)}
 .page-login .lgo:disabled{opacity:.5;cursor:default}
-.page-login .lalt{background:none;border:none;color:#5b6f81;font-family:var(--mono);
-  font-size:10px;letter-spacing:.22em;cursor:pointer}
-.page-login .lalt:hover{color:#9dbfda}
+.page-login .lalt{background:none;border:none;color:#7a8ca1;font-family:var(--mono);
+  font-size:10.5px;letter-spacing:.22em;cursor:pointer}
+.page-login .lalt:hover{color:#5aa2f0}
 .page-login .spin{width:11px;height:11px;border-radius:50%;flex:none;
   border:1.6px solid rgba(47,208,122,.28);border-top-color:#2fd07a;animation:lg-sp .6s linear infinite}
 @keyframes lg-sp{to{transform:rotate(360deg)}}
 
 /* the refusal and the warning share one slot under the fields — never a bubble
    over the field, which covers the thing it is complaining about */
-.page-login .lerr{color:#ff6b6b;font-size:10.5px;letter-spacing:.16em;margin-left:128px;margin-top:10px;
+.page-login .lerr{color:#ff6b6b;font-size:11px;letter-spacing:.16em;margin-left:132px;margin-top:10px;
   min-height:14px;text-transform:uppercase;max-width:390px;line-height:1.7}
 /* Caps Lock is the commonest reason a correct passkey is refused, and the field
    cannot show it back to you to check. Warned while it is true and taken down
    the moment it is not — a warning that outlives its condition teaches people
    to ignore the next one. */
-.page-login .lcaps{color:#f0b249;font-size:10.5px;letter-spacing:.16em;margin-left:128px;margin-top:6px}
-.page-login .lhint{color:#4e6070;font-size:10px;letter-spacing:.14em;margin-left:128px;margin-top:8px}
+.page-login .lcaps{color:#f0b249;font-size:11px;letter-spacing:.16em;margin-left:132px;margin-top:6px}
+.page-login .lhint{color:#56697f;font-size:10.5px;letter-spacing:.14em;margin-left:132px;margin-top:8px}
 
 @media (prefers-reduced-motion:reduce){
   .page-login .aurora{animation:none}

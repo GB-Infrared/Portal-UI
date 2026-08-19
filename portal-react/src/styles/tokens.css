@@ -55,25 +55,34 @@
 /* ---- DARK · same hues on navy. Only the base tokens are redefined; the
    header/brand tokens above reference them, so they follow automatically. ---- */
 :root[data-theme="dark"]{
-  /* deeper page + clearly lifted cards, so surfaces separate instead of merging */
-  --bg:#0a1017;
-  --panel:#151e2b;
-  --panel-2:#1d2836;
-  --line:#2c3a4c;
-  --line-soft:#232f3e;
-  --line-hi:#42556c;
+  /* A WORKING dark, not a black one. #0a1017 was chosen while this theme was
+     the opt-in alternative and had to read as unmistakably the other thing.
+     It is the room somebody spends a shift in, and a near-black page under
+     white text is glare with the contrast turned up. The whole ramp lifts by
+     about the same amount, so every separation the old values bought is still
+     bought: page to card, card to input, and the hairline between them all
+     keep their distance from one another.
+     The SIGN-IN and the SITE OVERVIEW deliberately do not follow this. They are
+     void compositions, and a void has to be dark to be one. */
+  --bg:#121a26;            /* the page                    */
+  --panel:#1b2533;         /* cards, lifted off it        */
+  --panel-2:#232e3f;       /* inputs, lifted off the card */
+  --line:#324054;
+  --line-soft:#2a3647;
+  --line-hi:#4a5d75;
   --text:#eff4fa;
   --muted:#a3b4c8;
   --faint:#7a8ca1;
-  --dim:#4d5f74;
-  --elev:#1a2432;
-  --sel:#1e2c3d;
+  --dim:#56697f;           /* lifted with the surfaces it sits on */
+  --elev:#202a38;
+  --sel:#27354a;
   --hover:rgba(255,255,255,.07);
   --hover-soft:rgba(255,255,255,.04);
   --row-hover:rgba(255,255,255,.075);
   --grid-v:rgba(255,255,255,.04);
-  --shadow:rgba(0,0,0,.65);
-  --scrim:rgba(3,8,14,.7);
+  /* a shadow only reads against something lighter than itself */
+  --shadow:rgba(0,0,0,.5);
+  --scrim:rgba(9,14,22,.66);
   --on-accent:#04121f;
   /* Accents are LIFTED for navy, not copied from light.
      They used to be identical in both themes on the theory that only the

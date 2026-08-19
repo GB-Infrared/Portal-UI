@@ -1,8 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { num } from '../../lib/format';
 
 /**
- * Home · the plant header, and the switcher built into it.
+ * Home · the plant header, and the way out to the site overview.
+ *
+ * This USED to open a panel of plant cards downward into the header. It no
+ * longer does: switching site happens in exactly one place now, and that place
+ * is the site overview, which can show every plant's state at once, side by
+ * side, in a way a panel dropped out of one plant's own header never could.
+ * Two screens that both answer "which site" is one screen too many, and the
+ * one that answers it better should be the one that answers it.
  *
  * Clicking or hovering the name opens the header downward onto one card per
  * plant. Two earlier passes treated "switch plant" as a menu problem: cycling
@@ -30,6 +38,7 @@ import { num } from '../../lib/format';
  */
 export function PlantSwitch({ plant, plants, onPick, onOpenChange }) {
   const list = plants || [];
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const hideT = useRef(0);
   const zoneRef = useRef(null);
@@ -82,12 +91,14 @@ export function PlantSwitch({ plant, plants, onPick, onOpenChange }) {
       <div className="phrow">
         <div className="pname">
           <div className="pswitch">
+            {/* The name is the way OUT to the site overview, not the lid on a
+                panel. Hover no longer opens anything: a header that unfolded
+                because the pointer crossed it was answering a question nobody
+                had asked yet, and the answer it gave was worse than the one the
+                orbit gives. */}
             <button className="pname-btn" type="button" disabled={!switchable}
-                    aria-expanded={open} aria-controls="p-exp"
-                    title={switchable ? 'Switch plant' : undefined}
-                    onClick={() => switchable && setOpen(o => !o)}
-                    onMouseEnter={switchable ? show : undefined}
-                    onFocus={switchable ? show : undefined}>
+                    title={switchable ? 'Switch site · opens the site overview' : undefined}
+                    onClick={() => switchable && navigate('/plants')}>
               <span className="n">{(plant && plant.name) || 'No plant selected'}</span>
             </button>
           </div>
