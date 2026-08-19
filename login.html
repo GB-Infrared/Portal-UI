@@ -1,0 +1,571 @@
+<!doctype html>
+<!-- THE FRONT DOOR IS LIGHT NOW, and it has no dark.
+
+     It was pinned to the portal's dark theme and defended as a void - stars, an
+     aurora, a black field with a log typing itself out. The site overview it
+     hands you to has since become a daylit screen with a photograph of a sunlit
+     Earth on it, and a black sign-in opening onto that is a door into a
+     different building. The portal has one final palette and this is the light
+     half of it, so nothing is pinned on this element any more: :root already
+     carries the light values, and the dark block that used to override them has
+     been deleted rather than left switched off. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ENEROPS OS · Sign in</title>
+<link rel="icon" href="logo/favicon.png">
+<style>
+
+:root{
+  /* ---- LIGHT · UTILITY BLUE (default) · enterprise solar-portal palette ---- */
+  --bg:#f1f4f8;            /* page background            */
+  --panel:#ffffff;         /* card surface               */
+  --panel-2:#f5f8fb;       /* nested surface / inputs    */
+  --line:#dde4ec;          /* card borders               */
+  --line-soft:#e9eef4;     /* gridlines, dividers        */
+  --line-hi:#b5c2d1;       /* hover / active borders     */
+  --text:#152234;          /* primary text               */
+  --muted:#5a6b7f;         /* secondary text             */
+  --faint:#8494a6;         /* tertiary text              */
+  --dim:#aab6c4;           /* dead readouts (offline)    */
+  --elev:#ffffff;          /* tooltips, toasts           */
+  --sel:#e8f0fb;           /* selected card surface      */
+  --hover:rgba(11,99,206,.07);
+  --hover-soft:rgba(11,99,206,.045);
+  /* the row under the pointer, and only that row */
+  --row-hover:rgba(11,99,206,.10);
+  --shadow:rgba(19,38,63,.16);
+  --on-accent:#ffffff;     /* text on a filled accent    */
+  /* header bar — same surface family as the cards */
+  --topbar:var(--panel);
+  --topbar-fg:var(--text);
+  --topbar-fg-2:var(--muted);
+  --topbar-tab:var(--muted);
+  --topbar-hover:var(--hover);
+  --topbar-active:var(--green-soft);
+  --green:#12a150;         /* producing / healthy        */
+  --green-rgb:18,161,80;   /* same green, for rgba() glows */
+  --green-soft:rgba(18,161,80,.12);
+  --green-deep:#0b7a3c;
+  --blue:#1a73c8;
+  --blue-soft:rgba(26,115,200,.12);
+  --red:#d92d20;           /* offline / alarms           */
+  --red-soft:rgba(217,45,32,.1);
+  --amber:#dc7a06;         /* yield / deviations         */
+  --amber-soft:rgba(220,122,6,.12);
+  --brand:#a87b0f;         /* wordmark · gold            */
+  --mono:ui-monospace,'SF Mono','Cascadia Code','Roboto Mono',Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
+  --r-lg:14px; --r-md:10px; --r-sm:8px;
+}
+/* ---- DARK · same hues on navy. Only the base tokens are redefined; the
+   header/brand tokens above reference them, so they follow automatically. ---- */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scrollbar-color:var(--line-hi) transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.45;
+     -webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+/* =====================================================================
+   SIGN IN — Fleet Control's login, in this portal's colours.
+
+   Fleet Control boots before it asks anything: a black field, a log typing
+   itself out a line at a time, and only then OPERATOR / PASSKEY /
+   AUTHENTICATE in letterspaced monospace. That is the screen, and this is the
+   same screen — the earlier split-panel version was a conventional marketing
+   login wearing a few of its parts.
+
+   What is NOT copied is the palette. Fleet Control's --signal #6adcb6 and
+   --solar #eec888 become this portal's green and gold, so the two read as one
+   product family rather than one repainted as the other. Its type stack
+   (Michroma / JetBrains Mono, from Google Fonts) becomes the portal's own
+   --mono, because these mockups open straight off disk and have never needed
+   a network.
+
+   Every colour below is a TOKEN, and the tokens are now the portal's LIGHT
+   ones. The void, the stars and the aurora have gone with the dark theme they
+   belonged to - they were night, and the screen this door opens onto is a
+   sunlit Earth. What is behind the panel instead is the same solar wash the
+   site overview uses: warm from above, cool below. The front door and the app
+   behind it still look like one product; the product simply moved into
+   daylight.
+
+   This used to be a second dark palette invented beside the portal's —
+   near-black surfaces, cooler greys, and the LIGHT green #12a150 on the focus
+   ring and the button, which was the one hue on the page that could not have
+   come from the app it opens.
+
+   The boot log is honest about what it is booting. Fleet Control counts up its
+   broker uplink and its firmware vault; this counts up the three pages behind
+   the sign-in. Not one line reports a plant: no site has been asked about yet,
+   and a front door that opened with a megawatt figure would be inventing the
+   very thing the portal exists to measure.
+   ===================================================================== */
+html,body{height:100%}
+/* ---------- the field ----------
+   It was a lit navy pool: a dark ellipse behind the content, which is exactly
+   right on a black page and reads as a smudge on a white one. It is the same
+   SOLAR wash the site overview carries now - warm from above, cool below - so
+   signing in and arriving are one continuous room rather than two screens that
+   happen to follow each other.
+
+   Note there is only one body background rule on this page, and this is it.
+   There were briefly two, and the second silently won; a page with two
+   backgrounds has one background and one piece of dead code. */
+body{background:
+    radial-gradient(ellipse 90% 55% at 50% -6%,  rgba(240,178,73,.30) 0%, rgba(240,178,73,.10) 45%, transparent 72%),
+    radial-gradient(ellipse 120% 70% at 50% 108%, rgba(26,115,200,.16) 0%, transparent 68%),
+    var(--bg);
+  color:var(--muted);font-family:var(--mono);overflow:hidden}
+
+/* ---------- ambient ---------- */
+.vignette{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 42%, transparent 62%, rgba(150,118,52,.10) 100%)}
+/* the faint horizontal ruling of a CRT, at the edge of visibility - lighter
+   ink and half the strength now that it rules a white page rather than a black
+   one, where the same value read as dirt instead of as texture */
+.grain{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.028;
+  background:repeating-linear-gradient(0deg,transparent 0 2px,#2a3a4d 2px 3px)}
+
+/* framing marks: they say "instrument" in two strokes and cost nothing */
+.corner{position:fixed;width:26px;height:26px;z-index:3;pointer-events:none}
+.corner.tl{top:16px;left:16px;border-top:1px solid rgba(var(--green-rgb),.42);border-left:1px solid rgba(var(--green-rgb),.42)}
+.corner.br{bottom:16px;right:16px;border-bottom:1px solid rgba(var(--green-rgb),.42);border-right:1px solid rgba(var(--green-rgb),.42)}
+
+/* ---------- boot ---------- */
+#boot{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:24px}
+/* one column, form first, log after - see the note on the markup */
+.stack{display:flex;flex-direction:column}
+/* the log is a footnote to the form now, so it steps back: quieter type, and
+   separated by a rule rather than by the weight it used to carry */
+.stack #bootlog{margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
+/* the log sets the scale for the whole screen — the box below is sized off it,
+   so these two numbers are the only ones to touch to make the page read bigger */
+#bootlog{font-family:var(--mono);font-size:12.5px;line-height:1.9;color:var(--faint);
+  min-width:540px;white-space:pre;margin:0}
+#bootlog .bt{color:var(--brand);letter-spacing:.34em;font-size:16px;font-weight:700}
+#bootlog .sub{color:var(--faint);letter-spacing:.16em}
+#bootlog .rule{color:var(--line)}
+#bootlog b{color:var(--green);font-weight:500}
+#bootlog .warm{color:var(--brand)}
+@media (max-width:560px){ #bootlog{min-width:0;font-size:12px;white-space:pre-wrap} }
+
+.skip{position:fixed;bottom:26px;left:0;right:0;text-align:center;z-index:11;
+  font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:var(--dim)}
+
+/* ---------- the login box ----------
+   Fleet Control's exact shape: a label column at a fixed width, the field
+   beside it, and the action under both — aligned to the FIELDS, not to the
+   labels, so the button sits where the answers are rather than where the
+   questions were. */
+.lbox{display:none;margin-top:26px}
+.lbox.on{display:block}
+/* ---------- THE FORM ARRIVES THE WAY THE LOG DID ----------
+   The boot lines come in one at a time, on a fixed beat: monitoring, alarms,
+   analysis, kpi, awaiting operator. The form used to ignore all of that and
+   fade in as a single block the moment the log finished, so the page booted in
+   two different rhythms, one after the other - a machine counting itself up,
+   and then a card appearing.
+
+   It is one rhythm now. The log counts up the pages and the sign-in carries
+   straight on from it on the same beat: operator, passkey, and last of all the
+   button - so the final thing to land is the thing you press. Nothing new is
+   being said. The same arrival is finally told in one voice. */
+.lbox .step{opacity:0;transform:translateY(7px);
+  transition:opacity .34s ease-out,transform .34s cubic-bezier(.2,.7,.3,1)}
+.lbox .step.in{opacity:1;transform:none}
+.lrow{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.lrow label{font-size:10.5px;letter-spacing:.3em;color:var(--faint);width:120px;flex:none;text-transform:uppercase}
+.lfield{position:relative;display:flex;width:282px}
+.lbox input{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--text);
+  font-family:var(--mono);font-size:13.5px;padding:10px 12px;width:100%;outline:none;letter-spacing:.08em;
+  transition:border-color .2s,box-shadow .2s}
+.lbox input::placeholder{color:var(--dim);letter-spacing:.04em}
+.lbox input:focus{border-color:var(--green);box-shadow:0 0 14px rgba(var(--green-rgb),.20)}
+.lbox input.bad{border-color:var(--red);box-shadow:0 0 14px rgba(255,107,107,.18)}
+
+/* ---------- one reveal, and it is the eye ----------
+   Edge and IE draw their OWN eye inside every password field. It sat beside
+   ours and gave the field two controls for one job — and the two do not share
+   state, so the field could show plain text while our button still offered to
+   show it. Theirs goes; ours is the eye. */
+.lfield input::-ms-reveal,
+.lfield input::-ms-clear{display:none;width:0;height:0}
+.lfield.pw input{padding-right:38px}
+/* the icon IS the control, so the label it cannot draw is carried in title and
+   aria-label — and both name what the CLICK will do rather than what the field
+   is doing, because a crossed-out eye is read both ways by different people */
+.reveal{position:absolute;right:3px;top:50%;transform:translateY(-50%);
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:4px;border:none;background:transparent;color:var(--faint)}
+.reveal:hover{color:var(--text)}
+.reveal:focus-visible{outline:1px solid var(--green);outline-offset:1px}
+
+.lact{display:flex;align-items:center;gap:16px;margin-left:132px;margin-top:15px;flex-wrap:wrap}
+.lgo{background:rgba(var(--green-rgb),.10);border:1px solid var(--green);border-radius:6px;color:var(--green);
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.3em;padding:12px 26px;
+  display:inline-flex;align-items:center;gap:9px;transition:box-shadow .25s,background-color .25s}
+.lgo:hover:not(:disabled){background:rgba(var(--green-rgb),.18);box-shadow:0 0 20px rgba(var(--green-rgb),.22)}
+.lgo:disabled{opacity:.5;cursor:default}
+.lalt{background:none;border:none;color:var(--faint);font-family:var(--mono);font-size:10.5px;letter-spacing:.22em}
+.lalt:hover{color:var(--blue)}
+.spin{width:11px;height:11px;border-radius:50%;flex:none;
+  border:1.6px solid rgba(var(--green-rgb),.28);border-top-color:var(--green);animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* the refusal and the warning share one slot under the fields — never a bubble
+   over the field, which covers the thing it is complaining about */
+.lerr{color:var(--red);font-size:11px;letter-spacing:.16em;margin-left:132px;margin-top:10px;
+  min-height:14px;text-transform:uppercase}
+/* Caps Lock is the commonest reason a correct passkey is refused, and the field
+   cannot show it back to you to check. Warned while it is true and taken down
+   the moment it is not — a warning that outlives its condition teaches people
+   to ignore the next one. */
+.lcaps{display:none;color:var(--amber);font-size:11px;letter-spacing:.16em;margin-left:132px;margin-top:6px}
+.lcaps.on{display:block}
+.lhint{color:var(--dim);font-size:10.5px;letter-spacing:.14em;margin-left:132px;margin-top:8px}
+
+@media (prefers-reduced-motion:reduce){
+  /* the sequence still HAPPENS - the script simply stops staggering it - so
+     nothing here has to be re-ordered, only stripped of its motion */
+  .lbox .step{opacity:1;transform:none;transition:none}
+}
+@media (max-width:560px){
+  .lrow{flex-direction:column;align-items:flex-start;gap:5px}
+  .lrow label{width:auto}
+  .lfield{width:100%}
+  .lact,.lerr,.lcaps,.lhint{margin-left:0}
+  .lbox{width:min(100%,320px)}
+}
+</style>
+</head>
+<body>
+
+
+<div class="vignette"></div>
+<div class="grain"></div>
+<div class="corner tl"></div>
+<div class="corner br"></div>
+
+<div id="boot">
+  <!-- THE ORDER IS REVERSED. The boot log used to run down the top of the
+       screen with the sign-in beneath it, which put a status report where the
+       eye lands first and the only control on the page below it. Now the form
+       is first and the log sits underneath, where it belongs: it is the
+       reassurance that the thing you are signing into is up, and reassurance is
+       read after the task, not before it.
+
+       The log still types itself out on arrival and the form still appears when
+       it finishes - the sequence in TIME is unchanged, only the arrangement in
+       SPACE. -->
+  <div class="stack">
+
+    <!-- ---------- SIGN IN ---------- -->
+    <div class="lbox" id="loginbox">
+      <div class="lrow step">
+        <label for="lu">Operator</label>
+        <span class="lfield"><input id="lu" type="email" autocomplete="username"
+              spellcheck="false" autocapitalize="off" placeholder="you@company.com"></span>
+      </div>
+      <div class="lrow step">
+        <label for="lp">Passkey</label>
+        <span class="lfield pw">
+          <input id="lp" type="password" autocomplete="current-password" placeholder="••••••••">
+          <button class="reveal" type="button" data-for="lp" title="Show passkey"
+                  aria-label="Show passkey" aria-pressed="false"></button>
+        </span>
+      </div>
+      <div class="lcaps" id="caps-lp">CAPS LOCK IS ON</div>
+      <div class="lact step">
+        <button class="lgo" id="lgo" type="button">AUTHENTICATE</button>
+        <!-- No mailed link and no second page: you are already at a keyboard on
+             the screen that refused you, so the reset is asked and answered
+             here, in the same box. -->
+        <button class="lalt" type="button" onclick="goStep('reset')">LOST PASSKEY?</button>
+      </div>
+      <div class="lerr" id="loginerr"></div>
+    </div>
+
+    <!-- ---------- RESET, IN THE SAME BOX ---------- -->
+    <div class="lbox" id="resetbox">
+      <div class="lrow step">
+        <label for="ru">Operator</label>
+        <span class="lfield"><input id="ru" type="email" autocomplete="username"
+              spellcheck="false" autocapitalize="off" placeholder="you@company.com"></span>
+      </div>
+      <div class="lrow step">
+        <label for="rp">New passkey</label>
+        <span class="lfield pw">
+          <input id="rp" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+          <button class="reveal" type="button" data-for="rp" title="Show passkey"
+                  aria-label="Show passkey" aria-pressed="false"></button>
+        </span>
+      </div>
+      <div class="lrow step">
+        <label for="rp2">Confirm</label>
+        <span class="lfield pw">
+          <input id="rp2" type="password" autocomplete="new-password" placeholder="Type it again">
+          <button class="reveal" type="button" data-for="rp2" title="Show passkey"
+                  aria-label="Show passkey" aria-pressed="false"></button>
+        </span>
+      </div>
+      <div class="lcaps" id="caps-rp">CAPS LOCK IS ON</div>
+      <div class="lact step">
+        <button class="lgo" id="rgo" type="button">SET PASSKEY</button>
+        <button class="lalt" type="button" onclick="goStep('signin')">CANCEL</button>
+      </div>
+      <div class="lerr" id="reseterr"></div>
+      <div class="lhint">MINIMUM 8 CHARACTERS</div>
+    </div>
+
+    <pre id="bootlog"></pre>
+  </div>
+</div>
+
+<div class="skip" id="skiphint"></div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= BOOT =================
+   Fleet Control's format exactly — a banner, a rule, then timestamped lines
+   counting up what came online. WHAT is counted differs, because what boots
+   here differs: the three pages behind the sign-in, not a broker uplink and a
+   firmware vault. Every line is a fact about this app starting; none of them
+   is a reading from a plant. */
+/* THE BANNER IS GONE, and so is the kernel line.
+
+   The wordmark used to head this log, above a rule, above the boot lines. It
+   was the product introducing itself to somebody who had just opened the
+   product - and it pushed the thing they came here to do, which is sign in,
+   into the lower half of the screen. The brand is on every screen behind this
+   one; the front door does not have to say it twice.
+
+   'kernel init' went with it. It was the one line here that was not about this
+   application: a plant operator has no kernel, and a status line nobody can act
+   on is set dressing pretending to be information. Every line left names a page
+   they are about to be able to open.
+
+   'analysis & kpi' has been split in two. They are separate pages behind the
+   sign-in, they come up separately, and one line covering both was a shortcut
+   in the writing that made the log slightly untrue. */
+const BOOT=[
+  ['',     '[ 0.214 ]  monitoring ...................... ', 'READY'],
+  ['',     '[ 0.395 ]  alarms .......................... ', 'READY'],
+  ['',     '[ 0.611 ]  analysis ........................ ', 'READY'],
+  ['',     '[ 0.742 ]  kpi ............................. ', 'READY']
+];
+/* THE PROMPT IS GONE. The log used to end on '> AWAITING OPERATOR', which was
+   the screen telling the reader it was waiting for them - while the sign-in
+   form sat beside it, focused, with a cursor already in it. The form IS the
+   ask; a line of type restating it is the machine narrating its own state
+   rather than reporting anything. The log now ends on the last thing it
+   actually did, which is what a boot log is. */
+
+function render(a){
+  const div=document.createElement('div');
+  if(a[0]) div.className=a[0];
+  /* the status word is the only part that is coloured, so the eye can run down
+     the right-hand column and read the outcome without re-reading the label */
+  div.appendChild(document.createTextNode(a[1]));
+  if(a[2]){ const b=document.createElement('b'); b.textContent=a[2]; div.appendChild(b); }
+  return div;
+}
+/* the pending step is HELD, because skip() has to be able to stop the run.
+   Without this the chain kept appending into the log skip had just replaced,
+   and the boot came out doubled on screen — a real bug, not a warning. */
+let bootTimer=0;
+function typeLines(lines, done){
+  const log=$('bootlog'); let i=0;
+  (function next(){
+    if(i>=lines.length){ done && done(); return; }
+    log.appendChild(render(lines[i++]));
+    bootTimer=setTimeout(next, reduced ? 15 : (i<3 ? 300 : 165));
+  })();
+}
+
+/* One row at a time, on the beat the log keeps - 165ms, the same interval
+   typeLines settles into once its first few lines are down. */
+const BEAT=165;
+/* whole and at once, for a box that is not arriving as part of the boot */
+function revealAll(box){
+  box.querySelectorAll('.step').forEach(function(el){ el.classList.add('in'); });
+}
+
+/* ---------- THE FORM COMES FIRST, THEN THE LOG ----------
+   The log used to type itself out and the sign-in appeared when it finished.
+   That is the order a machine boots in, and it is the reverse of the order this
+   screen is READ in: the form is at the top, it is the only thing anybody came
+   here to do, and it was the last thing to arrive - so for the first second and
+   a half the screen showed a status report to somebody who had not been offered
+   the box yet.
+
+   So the sign-in assembles itself first, row by row on the beat, and the log
+   picks that beat up underneath it the moment the last row lands. What you came
+   for is in front of you while the reassurance that the thing is up writes
+   itself below. One rhythm, one arrival, and now in reading order. */
+/* DONE means the whole arrival is over, not that the form is up. While the
+   form led the boot those were the same moment; now the form is FIRST, and a
+   flag set when it appears would disarm the skip key a second and a half before
+   there was anything left to skip. */
+let done=false;
+function finish(){ done=true; $('skiphint').textContent=''; }
+
+function showLogin(staggered){
+  const box=$('loginbox');
+  box.classList.add('on');
+  /* focused immediately, not when the row lands: a reader who starts typing
+     during the arrival must not lose the first characters they type */
+  $('lu').focus();
+  if(!staggered || reduced){
+    revealAll(box);
+    typeLines(BOOT, finish);
+    return;
+  }
+  const steps=box.querySelectorAll('.step');
+  steps.forEach(function(el,i){ setTimeout(function(){ el.classList.add('in'); }, 90+i*BEAT); });
+  /* the log picks the beat up where the last row of the form put it down */
+  bootTimer=setTimeout(function(){ typeLines(BOOT, finish); }, 90+steps.length*BEAT);
+}
+/* someone who has seen the boot once should not have to sit through it again */
+function skip(){
+  if(done) return;
+  clearTimeout(bootTimer);            /* stop the run still in flight */
+  const box=$('loginbox');
+  box.classList.add('on');
+  revealAll(box);
+  const log=$('bootlog');
+  log.textContent='';
+  BOOT.forEach(function(a){ log.appendChild(render(a)); });
+  finish();
+  $('lu').focus();
+}
+$('skiphint').textContent = reduced ? '' : 'PRESS ANY KEY TO SKIP';
+addEventListener('keydown', skip, {once:true});
+showLogin(true);
+
+/* ================= THE REVEAL =================
+   One control per field, and it is the eye. The icon flips to the crossed-out
+   eye once the passkey is showing, and title/aria-label always name the ACTION,
+   so what the button does is never left to how a reader reads a glyph. */
+const EYE='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.8 5.4 12 5.4 21.8 12 21.8 12 18.2 18.6 12 18.6 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="3.1"/></svg>';
+const EYE_OFF='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.7A9.6 9.6 0 0 1 12 5.4c6.2 0 9.8 6.6 9.8 6.6a17 17 0 0 1-2.9 3.8M6.2 7.5A17 17 0 0 0 2.2 12S5.8 18.6 12 18.6c1.5 0 2.8-.4 3.9-.9"/><path d="M10 10a2.9 2.9 0 0 0 4 4"/><path d="M3.2 3.2 20.8 20.8"/></svg>';
+
+[].slice.call(document.querySelectorAll('.reveal')).forEach(function(b){
+  b.innerHTML=EYE;
+  b.addEventListener('click',function(){
+    const i=$(b.dataset.for), hidden=i.type==='password';
+    i.type=hidden?'text':'password';
+    b.innerHTML=hidden?EYE_OFF:EYE;
+    b.title=hidden?'Hide passkey':'Show passkey';
+    b.setAttribute('aria-label',b.title);
+    b.setAttribute('aria-pressed',hidden?'true':'false');
+    i.focus();
+  });
+});
+
+/* ================= CAPS LOCK ================= */
+[['lp','caps-lp'],['rp','caps-rp']].forEach(function(pair){
+  const i=$(pair[0]), flag=$(pair[1]);
+  function caps(e){
+    var on=false;
+    try{ on=e.getModifierState&&e.getModifierState('CapsLock'); }catch(err){}
+    flag.classList.toggle('on',!!on);
+  }
+  i.addEventListener('keydown',caps);
+  i.addEventListener('keyup',caps);
+  i.addEventListener('blur',function(){ flag.classList.remove('on'); });
+});
+
+/* ================= STEPS ================= */
+const isEmail=v=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+function mark(id,on){ $(id).classList.toggle('bad',!!on); }
+
+/* Reset carries the operator across, because the reader has usually just typed
+   it into the field above, and being asked for it twice reads as not having
+   been listened to the first time. */
+window.goStep=function(name){
+  const to=name==='reset';
+  if(to && $('lu').value.trim() && !$('ru').value) $('ru').value=$('lu').value.trim();
+  if(!to && $('ru').value.trim() && !$('lu').value) $('lu').value=$('ru').value.trim();
+  ['lu','lp','ru','rp','rp2'].forEach(function(id){ mark(id,false); });
+  $('loginerr').textContent=''; $('reseterr').textContent='';
+  $('loginbox').classList.toggle('on',!to);
+  $('resetbox').classList.toggle('on',to);
+  /* Whole and at once. The staged arrival belongs to the BOOT - it is the
+     machine finishing coming up - and replaying it every time somebody flips
+     between sign-in and reset would turn a one-off into a delay. */
+  revealAll($(to?'resetbox':'loginbox'));
+  document.title='ENEROPS OS · '+(to?'Reset passkey':'Sign in');
+  ($(to?'ru':'lu')).focus();
+};
+
+/* ================= AUTHENTICATE =================
+   A mockup: nothing is checked against anything. The refusals below exist
+   because submitting an empty box is the first thing anyone tries, and a screen
+   that does nothing at all in that case cannot be reviewed. Granting access
+   types its own two lines and then opens the portal — the boot log narrates the
+   way in, which is the whole idea Fleet Control is built on. */
+function run(btn, errId, checks, lines){
+  const bad=checks();
+  if(bad){ mark(bad[0],true); $(errId).textContent=bad[1]; $(bad[0]).focus(); return; }
+  const label=btn.textContent;
+  btn.disabled=true;
+  btn.innerHTML='<span class="spin"></span>'+label;
+  $('loginbox').classList.remove('on');
+  $('resetbox').classList.remove('on');
+  typeLines(lines, function(){ setTimeout(function(){ window.location.href='plants.html'; }, 550); });
+}
+
+$('lgo').addEventListener('click',function(){
+  run($('lgo'),'loginerr',function(){
+    const u=$('lu').value.trim(), p=$('lp').value;
+    if(!u) return ['lu','ENTER YOUR OPERATOR ADDRESS'];
+    if(!isEmail(u)) return ['lu','THAT IS NOT AN EMAIL ADDRESS'];
+    if(!p) return ['lp','ENTER YOUR PASSKEY'];
+    return null;
+  },[
+    ['', '[ auth   ]  access granted · operator ..... ', $('lu').value.trim().toUpperCase()],
+    ['warm', '>  SELECT A SITE']
+  ]);
+});
+
+$('rgo').addEventListener('click',function(){
+  run($('rgo'),'reseterr',function(){
+    const u=$('ru').value.trim(), a=$('rp').value, b=$('rp2').value;
+    if(!u) return ['ru','ENTER YOUR OPERATOR ADDRESS'];
+    if(!isEmail(u)) return ['ru','THAT IS NOT AN EMAIL ADDRESS'];
+    if(!a) return ['rp','CHOOSE A NEW PASSKEY'];
+    if(a.length<8) return ['rp','USE AT LEAST 8 CHARACTERS'];
+    if(!b) return ['rp2','TYPE THE NEW PASSKEY AGAIN'];
+    if(a!==b) return ['rp2','THE TWO PASSKEYS DO NOT MATCH'];
+    return null;
+  },[
+    ['', '[ auth   ]  passkey replaced · operator ... ', $('ru').value.trim().toUpperCase()],
+    ['warm', '>  SELECT A SITE']
+  ]);
+});
+
+/* Enter submits from any field in the box that is showing — a terminal that
+   made you reach for the mouse would not be one. */
+['lu','lp'].forEach(function(id){
+  $(id).addEventListener('keydown',function(e){ if(e.key==='Enter') $('lgo').click(); });
+  $(id).addEventListener('input',function(){ mark(id,false); $('loginerr').textContent=''; });
+});
+['ru','rp','rp2'].forEach(function(id){
+  $(id).addEventListener('keydown',function(e){ if(e.key==='Enter') $('rgo').click(); });
+  $(id).addEventListener('input',function(){ mark(id,false); $('reseterr').textContent=''; });
+});
+})();
+</script>
+</body>
+</html>
