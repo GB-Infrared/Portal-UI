@@ -184,22 +184,38 @@ html,body{height:100%}
    from, said in the background. */
 body{background:
     radial-gradient(circle 38vmax at var(--sun-x,80%) var(--sun-y,12%),
-      rgba(255,216,146,calc(.22*var(--day,1))) 0%,
-      rgba(240,178,73,calc(.07*var(--day,1))) 30%, transparent 62%),
-    radial-gradient(ellipse 72% 62% at 16% 86%, rgba(47,208,122,calc(.055*var(--day,1))) 0%, transparent 62%),
-    radial-gradient(ellipse 82% 70% at 86% 20%, rgba(90,162,240,calc(.02 + .065*var(--day,1))) 0%, transparent 60%),
+      rgba(255,216,146,calc(.26*var(--day,1))) 0%,
+      rgba(240,178,73,calc(.09*var(--day,1))) 30%, transparent 62%),
+    /* THE NEBULAE TRAVEL. They were pinned to two corners of the viewport,
+       which is what a wallpaper does. They are deep sky: they belong to the
+       sky, not to the window. --neb1/--neb2 are those same two points solved
+       back into world coordinates once and then projected through the camera
+       every frame, so they open exactly where they always sat and then sweep
+       when the globe is turned. And they come UP at night rather than going
+       out with the daylight - the same argument the stars are drawn on, which
+       is that the thing hiding them is glare. */
+    radial-gradient(ellipse 72% 62% at var(--neb1-x,16%) var(--neb1-y,86%),
+      rgba(47,208,122,calc((.045 + .035*(1 - var(--day,1)))*var(--neb1-o,1))) 0%, transparent 62%),
+    radial-gradient(ellipse 82% 70% at var(--neb2-x,86%) var(--neb2-y,20%),
+      rgba(90,162,240,calc((.05 + .045*(1 - var(--day,1)))*var(--neb2-o,1))) 0%, transparent 60%),
     /* the wide one, and it is what makes NOON legible. With the sun dead behind
        the reader the tight wash above lands where the globe already is and is
        never seen; this one is 140% of the frame from the same anchor, so a
        fully lit face sits in a field that has been lifted everywhere rather
-       than in the same black it would have at midnight. */
+       than in the same black it would have at midnight.
+
+       It carries most of the day/night swing, and it used to be too polite to
+       do it: at .115 the difference between noon and midnight in the corner of
+       this screen was about eight values out of 255, which is a thing that is
+       true of the markup and not true of the picture. A background keyed to
+       the sun that nobody can see move is not keyed to the sun. */
     radial-gradient(ellipse 150% 130% at var(--sun-x,80%) var(--sun-y,12%),
-      rgba(126,158,214,calc(.115*var(--day,1))) 0%,
-      rgba(90,120,180,calc(.05*var(--day,1))) 45%, transparent 74%),
+      rgba(126,158,214,calc(.30*var(--day,1))) 0%,
+      rgba(90,120,180,calc(.14*var(--day,1))) 45%, transparent 78%),
     /* the night field: deep, cold, and worth exactly what the daylight is not */
     radial-gradient(ellipse 120% 96% at 50% 48%,
-      rgba(6,14,30,calc(.85*(1 - var(--day,1)))) 0%,
-      rgba(1,3,9,calc(1 - var(--day,1))) 100%),
+      rgba(4,10,24,calc(.92*(1 - var(--day,1)))) 0%,
+      rgba(0,1,5,calc(1 - var(--day,1))) 100%),
     #070c14;
   color:var(--muted);font-family:var(--mono);overflow:hidden}
 
@@ -221,7 +237,7 @@ body{background:
    off into the dark, so the eye is handed the middle. */
 .vignette{position:fixed;inset:0;z-index:3;pointer-events:none;
   background:radial-gradient(ellipse at 50% 46%, transparent 54%,
-    rgba(2,5,10,calc(.74 + .16*(1 - var(--day,1)))) 100%)}
+    rgba(2,5,10,calc(.70 + .24*(1 - var(--day,1)))) 100%)}
 /* the faint horizontal ruling of a CRT, at the edge of visibility - it is what
    makes the black read as a screen rather than as absence */
 .grain{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.05;
@@ -1131,6 +1147,110 @@ function sunView(){
            z: sinP*sl + cosP*cl*cd, at:s };
 }
 
+/* ================= WHERE A STAR IS, ON THIS SCREEN =================
+   The sky was wallpaper. Every star was stored as a fraction of the WINDOW, so
+   turning the world spun the planet under a field that never moved - which is
+   the background disagreeing with the subject, the one thing this screen may
+   not do. Dragging orbits the camera around a fixed Earth; from an orbit, the
+   sky sweeps.
+
+   So the deep field gets the treatment the sun already had: a real place on a
+   real sphere, projected through the same camera as the globe. The centre of
+   the screen is the ANTI-CAMERA direction - straight through the middle of the
+   planet and out the far side - and a star's angular distance from that point
+   is its distance from the centre in pixels. That is the sun's own projection
+   with a different constant, which is exactly the point: the sun and the stars
+   sit on the same sphere, so they have to travel at the same rate. If they did
+   not, one of them would be lying.
+
+   SKYK is set so that ninety degrees off the anti-camera axis lands at the
+   corner of the frame. Anything past that is round behind the reader, and is
+   dropped rather than folded back into the picture.
+
+   The result is returned UNLENSED. drawSpace bends it afterwards with warp(),
+   the same gravity the grid is bent by, because a star near the limb is being
+   seen past a planet and this file already knows what that looks like. */
+let SKYK=540;
+function skyXY(lng,lat){
+  const la=lat*D2R, dl=(lng-LAM)*D2R;
+  const cl=Math.cos(la), sl=Math.sin(la), cd=Math.cos(dl);
+  const x=cl*Math.sin(dl),
+        y=cosP*sl - sinP*cl*cd,
+        z=sinP*sl + cosP*cl*cd;
+  /* beta from the point directly behind the planet, which is where -z points */
+  const b=Math.acos(Math.max(-1,Math.min(1,-z)));
+  if(b>1.75) return null;
+  const t=Math.hypot(x,y);
+  if(t<1e-6) return [CX,CY];
+  const r=SKYK*b;
+  return [CX + (x/t)*r, CY - (y/t)*r];
+}
+
+/* ---- the two nebulae, which are deep sky as well ----
+   They were painted at 16%/86% and 86%/20% of the viewport. Those two corners
+   were a good composition and there is no reason to lose them, so rather than
+   invent new coordinates this solves the OLD ones backwards - screen point to
+   direction to (lng,lat) - once, at the camera the page opens on. The field
+   opens looking exactly as it always did, and then it moves.
+
+   inv() is skyXY run in reverse. The only fiddly step is the last one: y and z
+   are the world's sin(lat) and cos(lat)cos(dl) turned by the camera tilt, so
+   untilting them by the same angle hands both back. */
+let NEB=null;
+function nebInit(){
+  const inv=function(fx,fy){
+    const dx=fx*W-CX, dy=fy*H-CY, r=Math.hypot(dx,dy);
+    const b=Math.min(Math.PI*0.92, r/SKYK), sb=Math.sin(b);
+    const ux=r<1e-6?0:dx/r, uy=r<1e-6?0:-dy/r;
+    const x=ux*sb, y=uy*sb, z=-Math.cos(b);
+    const sl=cosP*y + sinP*z, u=-sinP*y + cosP*z;   /* u is cos(lat)cos(dl) */
+    const lat=Math.asin(Math.max(-1,Math.min(1,sl))), cl=Math.cos(lat);
+    const dl=cl<1e-6 ? 0 : Math.atan2(x/cl, u/cl);
+    return { lng: LAM + dl/D2R, lat: lat/D2R };
+  };
+  NEB=[inv(0.16,0.86), inv(0.86,0.20)];
+}
+/* Written only when the rounded pixel actually moves, for the same reason
+   sunCss is: setting a custom property to the value it already holds still
+   costs a style recalculation of the whole document, and this runs sixty times
+   a second. */
+const nebPX=[-1e9,-1e9], nebPY=[-1e9,-1e9];
+const nebO=[-1,-1], nebDir=[[1,0],[1,0]];
+function skyCss(){
+  if(!NEB) nebInit();
+  const st=document.documentElement.style;
+  for(let i=0;i<2;i++){
+    const n=NEB[i];
+    const la=n.lat*D2R, dl=(n.lng-LAM)*D2R;
+    const cl=Math.cos(la), sl=Math.sin(la), cd=Math.cos(dl);
+    const vx=cl*Math.sin(dl),
+          vy=cosP*sl - sinP*cl*cd,
+          vz=sinP*sl + cosP*cl*cd;
+    const b=Math.acos(Math.max(-1,Math.min(1,-vz)));
+    /* THESE DO NOT GET skyXY's CULL, and the reason is the size of them. A star
+       is a dot: the frame edge takes it away cleanly. A nebula is a gradient
+       more than a thousand pixels across, so an anchor that has left the frame
+       is still painting inside it, and dropping the anchor the instant it goes
+       out of bounds pops a wash off the screen. It slides AND fades instead:
+       the position keeps growing, and the opacity goes out over the back
+       hemisphere, which is what a thing passing behind the reader does. */
+    const t=Math.hypot(vx,vy);
+    if(t>1e-6){ nebDir[i][0]=vx/t; nebDir[i][1]=-vy/t; }
+    const r=Math.min(SKYK*b, 2.0*Math.hypot(W/2,H/2));
+    const x=Math.round(CX + nebDir[i][0]*r), y=Math.round(CY + nebDir[i][1]*r);
+    const o=Math.max(0,Math.min(1,(2.8-b)/0.9));
+    if(x!==nebPX[i]||y!==nebPY[i]){
+      nebPX[i]=x; nebPY[i]=y;
+      st.setProperty('--neb'+(i+1)+'-x', x+'px');
+      st.setProperty('--neb'+(i+1)+'-y', y+'px');
+    }
+    if(Math.abs(o-nebO[i])>0.01){
+      nebO[i]=o;
+      st.setProperty('--neb'+(i+1)+'-o', o.toFixed(2));
+    }
+  }
+}
+
 /* ================= THE EARTH, PHOTOGRAPHED =================
    The globe was drawn from vectors: a blue disc, coastlines, a graticule. It was
    honest and it was clearly a diagram. What was asked for instead was the thing
@@ -1972,14 +2092,26 @@ function warp(x,y){
    the same fleet on every load: a background that reshuffles on refresh is one
    people notice moving, and noticing the background is the one thing it is not
    for. The brightness curve is squared, so there are many faint stars and few
-   bright ones, which is what a sky looks like. */
+   bright ones, which is what a sky looks like.
+
+   FIXED now means fixed IN SPACE, not fixed on the glass. Each star is a place
+   on the celestial sphere rather than a fraction of the window, which is what
+   lets skyXY sweep them when the camera orbits. Latitude comes through an asin
+   so the points spread by equal AREA - drawing lat uniformly would pile the sky
+   up at its own poles, and that pile would swing into frame every time the
+   globe was tipped. There are more of them than there were, because only the
+   part of the sphere behind the planet is on screen at any one moment and the
+   count has to survive being cut down to that. 1400 was not chosen by eye: the
+   old field was measured at the same threshold on the same frame, and this is
+   the number that puts the same amount of light back in the void. */
 const STARS=(function(){
   let sd=20260819;
   const rnd=function(){ sd=(sd*1664525+1013904223)>>>0; return sd/4294967296; };
   const out=[];
-  for(let i=0;i<300;i++){
+  for(let i=0;i<1400;i++){
     const b=Math.pow(rnd(),2.4);
-    out.push({u:rnd(), v:rnd(), r:0.45+b*1.7, a:0.16+b*0.78, ph:rnd()*6.283});
+    out.push({lng:rnd()*360-180, lat:Math.asin(rnd()*2-1)/D2R,
+              r:0.45+b*1.7, a:0.16+b*0.78, ph:rnd()*6.283});
   }
   return out;
 })();
@@ -1993,6 +2125,9 @@ var DAYF=1;
 
 function drawSpace(now){
   ox.save();
+  /* ninety degrees off the anti-camera axis lands at the corner of the frame,
+     so the visible sky is exactly the hemisphere standing behind the planet */
+  SKYK=Math.hypot(W/2,H/2)/(Math.PI/2);
 
   /* ---- the grid ----
      Straight lines, walked in short steps and displaced point by point. The pen
@@ -2026,12 +2161,15 @@ function drawSpace(now){
   const tw = reduced ? 0 : now/1000;
   ox.fillStyle='#dce9fb';
   STARS.forEach(function(st){
-    const q=warp(st.u*W, st.v*H);
+    /* the star's real place, projected through the camera, and THEN bent */
+    const p=skyXY(st.lng,st.lat);
+    if(!p) return;
+    const q=warp(p[0],p[1]);
     const rr=Math.hypot(q[0]-CX,q[1]-CY);
     const near=Math.max(0,(R*1.6-rr))/(R*1.6);
     /* brighter on the night side: what hides stars is glare, and with the sun
        round the back of the world there is none */
-    const a=st.a*(1+near*1.5)*(0.82+0.55*(1-DAYF))*
+    const a=st.a*(1+near*1.5)*(0.82+0.62*(1-DAYF))*
       (reduced?1:(0.74+0.26*Math.sin(tw*1.6+st.ph)));
     ox.globalAlpha=Math.min(1,a);
     ox.beginPath(); ox.arc(q[0],q[1], st.r*(1+near*0.5), 0, Math.PI*2); ox.fill();
@@ -2614,6 +2752,8 @@ function frame(now){
   /* the page is lit from where the sun is, and this is the one line that makes
      that true rather than decorative */
   sunCss(s);
+  /* and the deep sky behind it travels, for exactly the same reason */
+  skyCss();
   /* The photograph if the machine can show one, the diagram if it cannot. This
      is the only place the two globes meet, and drawEarth reports whether it
      actually drew - so a WebGL context that exists but has not finished loading
