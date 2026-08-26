@@ -41,6 +41,7 @@
   --blue:#1a73c8;
   --blue-soft:rgba(26,115,200,.12);
   --red:#d92d20;           /* offline / alarms           */
+  --crit:#8c1109;          /* critical — above alarm     */
   --red-soft:rgba(217,45,32,.1);
   --amber:#dc7a06;         /* yield / deviations         */
   --amber-soft:rgba(220,122,6,.12);
@@ -71,8 +72,8 @@ a{color:inherit;text-decoration:none}
 .topbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:20px;
   height:58px;padding:0 22px;border-bottom:1px solid var(--line);
   background:var(--topbar);color:var(--topbar-fg)}
-.brand{display:flex;align-items:center;gap:10px;white-space:nowrap;border-radius:9px;padding:3px 6px;margin-left:-6px}
-.brand:hover{background:var(--hover)}
+.brand{display:flex;align-items:center;gap:8px;white-space:nowrap;border-radius:9px;padding:3px 8px;margin-left:-12px;
+  cursor:pointer}
 .brand .logo{height:34px;width:auto;display:block;flex:none}
 .brand .btext{display:flex;flex-direction:column;justify-content:center;gap:1px}
 .brand .word{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--brand);
@@ -84,13 +85,6 @@ a{color:inherit;text-decoration:none}
 .iconbtn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;
   background:transparent;border:1px solid transparent;color:var(--muted)}
 .iconbtn:hover{color:var(--text);background:var(--hover);border-color:var(--line)}
-
-/* the way back, said in words as well as in the mark — an image that happens to
-   be a link is only a link to someone who has already tried clicking it */
-.backlink{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;
-  font-size:12.5px;font-weight:600;color:var(--muted)}
-.backlink:hover{color:var(--text);background:var(--hover)}
-@media (max-width:700px){ .backlink span{display:none} }
 
 /* ---------- account menu ----------
    The avatar was a dead circle on every page: it named the signed-in user and
@@ -130,14 +124,14 @@ a{color:inherit;text-decoration:none}
 .sidehead{display:flex;align-items:center;justify-content:center;gap:10px;
   height:76px;border-bottom:1px solid var(--line-soft);color:var(--text)}
 .sidehead .t{font-size:19px;font-weight:600;letter-spacing:-.01em}
-.sidehead svg{color:var(--blue)}
+.sidehead svg{color:var(--green)}
 
 .grp{padding:6px 10px 0}
 .grpbtn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:9px;
   border:none;background:transparent;color:var(--text);font-family:inherit;
   font-size:13px;font-weight:600;text-align:left}
 .grpbtn:hover{background:var(--hover)}
-.grpbtn svg.gi{flex:none;color:var(--blue)}
+.grpbtn svg.gi{flex:none;color:var(--green)}
 /* the chevron points at what the click will do: down when the group is shut and
    about to open, up when it is open and about to close */
 .grpbtn .chev{margin-left:auto;flex:none;color:var(--faint);transition:transform .16s ease}
@@ -148,10 +142,13 @@ a{color:inherit;text-decoration:none}
 .item{display:block;padding:7px 12px;border-radius:8px;font-size:12.5px;font-weight:500;
   color:var(--muted);width:100%;border:none;background:transparent;text-align:left;font-family:inherit}
 .item:hover{color:var(--text);background:var(--hover)}
-/* the current screen is stated by weight and a rule down its edge, not by colour
-   alone — this portal spends green on plant state, and a menu is not plant state */
-.item.on{color:var(--text);font-weight:700;background:var(--sel);
-  box-shadow:inset 2px 0 0 var(--blue)}
+/* Weight and a rule down the edge carry it; the wash only agrees with them. And
+   the wash is the SAME green the active tab wears on all five reading pages —
+   Settings spent its accent on blue for a while, which made one screen of the
+   portal look like a different product. Blue in this portal is a data series
+   (simulated CUF), never chrome. */
+.item.on{color:var(--text);font-weight:700;background:var(--green-soft);
+  box-shadow:inset 2px 0 0 var(--green)}
 
 /* ---------- main ---------- */
 .main{padding:22px clamp(16px,2vw,30px) 40px;min-width:0}
@@ -183,7 +180,7 @@ a{color:inherit;text-decoration:none}
 .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 32px;
   padding:4px 20px 24px}
 @media (max-width:760px){ .fields{grid-template-columns:1fr} }
-.f .k{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:3px}
+.f .k{display:block;font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:3px}
 .f .v{font-size:13px;color:var(--muted);word-break:break-word}
 .f .v.none{color:var(--dim);font-style:italic}
 
@@ -192,8 +189,358 @@ a{color:inherit;text-decoration:none}
 .cfoot .k{font-size:12.5px;font-weight:700}
 .cfoot .sp{margin-left:auto}
 .linkbtn{border:none;background:transparent;font-family:inherit;
-  font-size:12.5px;font-weight:600;color:var(--blue);padding:2px 0}
+  font-size:12.5px;font-weight:600;color:var(--green-deep);padding:2px 0}
 .linkbtn:hover{text-decoration:underline}
+
+/* ---------- the device register ----------
+   The legacy screen was select-then-act: tick a checkbox, travel to a button in
+   the far top-right, and be told by a browser alert that you had not ticked
+   anything. Three faults in one gesture — the action sits a screen-width away
+   from the row it acts on, the alert interrupts to report a state the interface
+   should never have allowed, and the button looks ready when it is not.
+
+   So the actions live ON the row. There is nothing to select, nowhere to travel,
+   and no state in which a button can be pressed and refuse. The checkbox column
+   and the top-right pair are gone with the alert that needed them. */
+/* The site is chosen once, in the orbit on Site Control, and every page reads
+   that one choice. So this card states it and does not offer a second way to set
+   it: a picker here would be a second answer to a settled question, and two
+   controls for one fact is how they end up disagreeing.
+
+   The pin sits ON the card rather than in the page header, because this is the
+   only plant-scoped screen in Settings — a header pin would also be claiming the
+   ten account-level sections that have nothing to do with a site. */
+.sitepin{display:inline-flex;align-items:center;gap:6px;color:var(--text)}
+.sitepin svg{color:var(--green);flex:none}
+.sitepin .n{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.02em}
+.chead .count{font-size:11.5px;color:var(--faint)}
+select{appearance:none;background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%238d99a6" stroke-width="1.6" stroke-linecap="round"/></svg>') no-repeat right 10px center;
+  border:1px solid var(--line);color:var(--text);border-radius:var(--r-sm);
+  padding:0 28px 0 11px;font-size:13px;font-family:inherit;outline:none}
+select:hover,select:focus{border-color:var(--line-hi);background-color:var(--hover)}
+
+/* ---------- one-of-many ----------
+   The rule above styles the box. It cannot touch what happens when the box is
+   opened: a native <select> hands its list to the operating system, and the list
+   comes back a grey system menu in a system font, sized and drawn by Windows,
+   matching nothing else on the screen and beyond the reach of every token in
+   this file.
+
+   THIS IS MONITORING'S PICKER, NOT A SECOND ONE. Monitoring already answers
+   "exactly one of these" - a bordered button carrying the current value, and a
+   panel of RADIO rows under it that closes on the pick. Every rule below is
+   that control's, copied by name: .mbtn, .mlab, .colpanel, .mpanel, .colhead,
+   .colrow. A reader who has used the device-type picker has used this one.
+
+   The radio is the reason it is radios and not ticks: exactly one of these is
+   true at a time, and the control should say so BEFORE it is used rather than
+   after, when the tick appears on one row and not the others.
+
+   TWO THINGS DIFFER, and both are forced by where these open rather than by
+   how they look. Monitoring's panel is absolutely positioned inside its
+   trigger's wrapper, which works in a toolbar; here they open inside a dialog
+   that scrolls its own body and inside a table that scrolls sideways, and both
+   of those clip anything positioned within them. So the panel is placed in
+   viewport coordinates instead. And the open state is read from aria-expanded
+   rather than from a wrapper's .open class, so the trigger needs no wrapper.
+
+   The rows-per-page pager keeps the native box, because Monitoring's pager is
+   the same native box. Matching Monitoring means leaving that one alone. */
+.mbtn{display:flex;align-items:center;width:100%;min-width:150px;height:34px;
+  padding:0 28px 0 11px;border-radius:var(--r-sm);border:1px solid var(--line);
+  color:var(--text);font-family:inherit;font-size:13px;font-weight:600;text-align:left;
+  background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%238d99a6" stroke-width="1.6" stroke-linecap="round"/></svg>') no-repeat right 10px center}
+.mbtn:hover,.mbtn[aria-expanded=true]{border-color:var(--line-hi);background-color:var(--hover)}
+.mbtn:focus-visible{outline:none;border-color:var(--line-hi);box-shadow:0 0 0 3px var(--hover-soft)}
+.mbtn .mlab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* "nothing chosen" is a state and not a value, so it is said in the muted voice
+   every filter bar on this portal already says it in */
+.mbtn .mlab.any{color:var(--muted);font-weight:600}
+.fld.bad .mbtn{border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+/* in a table the same control sits in a 30px cell and sizes to its own text */
+.mbtn.mini{width:auto;min-width:158px;height:30px;font-size:12.5px;
+  padding:0 26px 0 9px;background-position:right 9px center}
+
+/* ONE panel, lent to whichever button is open - two of these cannot be open at
+   once, so a panel per control would only be a second thing to keep in step. */
+.colpanel{position:fixed;z-index:200;display:none;flex-direction:column;
+  background:var(--elev);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 18px 44px -16px var(--shadow);padding:8px;overflow-y:auto}
+.colpanel.on{display:flex}
+.colhead{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);padding:4px 8px 8px}
+.colrow{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;
+  font-size:12.5px;font-weight:600;cursor:pointer;width:100%;background:transparent;
+  border:none;color:var(--text);text-align:left}
+.colrow:hover{background:var(--hover)}
+.colrow input{width:14px;height:14px;min-width:0;accent-color:var(--green);flex:none}
+.mpanel{min-width:212px}
+/* the row the keyboard is on, which is not the row that is chosen: the radio
+   says what is true, this says where you are, and they part company the moment
+   an arrow key is pressed */
+.colrow.here{background:var(--row-hover)}
+.colrow .t{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* the faint half is a finding aid - it is what tells INV07 from MET02 while you
+   are still looking for one - so the button does not repeat it afterwards */
+.colrow .s{flex:none;font-size:11px;font-weight:600;color:var(--faint)}
+.colrow.none .t{color:var(--muted)}
+.colnone{padding:9px;font-size:12px;color:var(--faint)}
+
+.tablewrap{overflow-x:auto}
+table{width:100%;min-width:820px;border-collapse:separate;border-spacing:0}
+thead th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  padding:9px 14px;border-bottom:1px solid var(--line-soft);text-align:left;white-space:nowrap}
+thead th.so{cursor:pointer;user-select:none}
+thead th.so:hover{color:var(--text)}
+thead th .ar{margin-left:5px;font-size:8px;color:var(--faint)}
+thead th.on{color:var(--text)}
+thead th.on .ar{color:var(--green)}
+tbody td{padding:9px 14px;font-size:12.5px;border-bottom:1px solid var(--line-soft);
+  color:var(--muted);white-space:nowrap}
+/* the name is the one column a person chose, so it is the one in the reading
+   face; the id is a machine key and stays in the mono column where keys live */
+tbody td.nm{font-weight:700;color:var(--text)}
+tbody td.mono{font-family:var(--mono);font-weight:600}
+/* the dash that means "no end yet" is not a value, so it does not come up to
+   full strength with the readings when the row is hovered */
+tbody td.dim{color:var(--dim)}
+tbody tr{transition:background-color .12s ease,box-shadow .12s ease}
+tbody tr:hover{background:var(--row-hover);position:relative;z-index:1;
+  box-shadow:inset 0 0 0 1px var(--line-hi),0 10px 22px -12px var(--shadow),0 2px 6px -4px var(--shadow)}
+tbody tr:hover td:not(.dim){color:var(--text)}
+/* A retired device is still in the register — it has to be, because every kWh
+   and every alarm it ever raised is filed under its id. It is dimmed and named,
+   not deleted. */
+tbody tr.gone td{color:var(--dim)}
+tbody tr.gone td.nm{color:var(--muted)}
+.empty-note{display:flex;align-items:center;justify-content:center;min-height:170px;
+  color:var(--faint);font-size:12.5px}
+
+/* the actions, on the row they act on */
+.rowacts{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.rowbtn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;
+  border-radius:7px;border:1px solid transparent;background:transparent;color:var(--faint)}
+.rowbtn:hover{color:var(--text);border-color:var(--line);background:var(--panel-2)}
+.rowbtn.warn:hover{color:var(--red);border-color:var(--red-soft);background:var(--red-soft)}
+
+/* ---------- pager ---------- */
+.tfoot{display:flex;align-items:center;gap:14px;padding:11px 20px;font-size:12px;
+  color:var(--muted);flex-wrap:wrap;border-top:1px solid var(--line-soft)}
+.tfoot select{height:30px;min-width:0;font-size:12px;padding:0 26px 0 9px}
+.tfoot .sp{margin-left:auto}
+.tfoot .range{font-family:var(--mono)}
+.pgbtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted)}
+.pgbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi)}
+.pgbtn:disabled{opacity:.35;cursor:default}
+
+/* a dialog that names what it is about, so a single text box is never orphaned */
+.mwho{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:var(--r-sm);
+  background:var(--panel-2);border:1px solid var(--line-soft)}
+.mwho .r{display:flex;gap:8px;font-size:12px}
+.mwho .r b{font-weight:700;color:var(--text);min-width:74px}
+.mwho .r span{color:var(--muted);font-family:var(--mono);font-weight:600}
+.mtext{font-size:12px;color:var(--muted);line-height:1.55}
+.mtext b{color:var(--text);font-weight:700}
+.btn.danger{background:var(--red);border-color:var(--red);color:var(--on-accent)}
+.btn.danger:hover{filter:brightness(.93)}
+.pill.gone{color:var(--faint);background:var(--panel-2)}
+
+/* ---------- access management ----------
+   The sites a role reaches, drawn as chips rather than run together in a
+   sentence. Three site names separated by commas read as one string and get
+   skimmed as one; three chips get counted. */
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;
+  color:var(--muted);background:var(--panel-2);border:1px solid var(--line)}
+.chip.all{color:var(--green-deep);background:var(--green-soft);border-color:transparent}
+/* the role is changed where it is read, so the cell holds the control itself
+   rather than sending the reader to a dialog to do one thing */
+tbody td.pad{padding-top:6px;padding-bottom:6px}
+#p-access-role table{min-width:660px}
+#p-access-user table{min-width:820px}
+#p-access-ctl table{min-width:700px}
+
+/* ---------- who hears about an alarm ----------
+   FOUR levels, and they are the portal's own four, ranked as it ranks them:
+   critical outranks alarm, and an event is a log entry rather than a fault. The
+   legacy screen's fourth column was "status", which nothing in this portal raises;
+   critical, which it raises constantly, was the one missing.
+
+   Subscribed is a filled dot in that level's colour; not subscribed is the same dot
+   hollow. Filled against hollow survives a squint down a column, which a tick
+   against an empty cell does not. */
+.subdot{display:inline-block;width:10px;height:10px;border-radius:50%}
+.subdot.off{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line-hi)}
+.subdot.on.critical{background:var(--crit)}
+.subdot.on.alarm{background:var(--red)}
+.subdot.on.warn{background:var(--amber)}
+.subdot.on.event{background:var(--faint)}
+thead th.sev-h{text-align:center}
+tbody td.sev-c{text-align:center}
+/* the head of a level's column carries that level's colour, so the dots below it
+   are read against a label rather than a legend somewhere else */
+thead th.sev-h.critical{color:var(--crit)}
+thead th.sev-h.alarm{color:var(--red)}
+thead th.sev-h.warn{color:var(--amber)}
+#p-alarms-config table{min-width:800px}
+.subrow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.subbox{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;cursor:pointer}
+.subbox input{width:15px;height:15px;accent-color:var(--green);flex:none}
+
+/* the reason is the one column on this screen that is prose, so it is the one
+   allowed out of the single-line grid and the one given room to be long */
+tbody td.why{white-space:normal;min-width:230px;font-size:12px}
+#p-energy-offset table{min-width:980px}
+
+/* ---------- the company, which is read-only ----------
+   No EDIT and no password row. The company record is what the account was
+   provisioned as and what invoices and reports are issued against — it is not the
+   signed-in person's to rewrite from a settings screen. And a password belongs to
+   a person, never to an organisation, so the row that changes one has no business
+   on this card. The card says so once, quietly, so it reads as a decision rather
+   than a screen somebody forgot to finish.
+
+   No avatar either: the circle beside a name means a person, and reusing it for a
+   company would say something about this record that is not true. */
+.who.co{padding-bottom:18px}
+.cfoot .n{font-size:11.5px;color:var(--faint);line-height:1.45}
+
+/* The one company-level fact that is a STATE rather than a value, so it is
+   coloured the way this portal colours every other state instead of being printed
+   as a word in the same grey as an address. */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;
+  font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.pill.live{color:var(--green-deep);background:var(--green-soft)}
+/* the other answer the backend can give — drawn now so it is not invented later */
+.pill.held{color:var(--red);background:var(--red-soft)}
+/* The unit belongs in the column header. A bare "Rate" is how kg CO2/kWh gets
+   entered as grams and every savings figure downstream comes out a thousand
+   times too big. */
+thead th .u{font-weight:600;letter-spacing:.03em;text-transform:none;color:var(--faint)}
+
+/* ---------- the profile, in edit ----------
+   The same card in both states. EDIT swaps each printed value for an input where
+   the value already sat, so nothing moves: a form that re-flows on EDIT makes the
+   reader find all six values again before they can change one of them.
+
+   And nothing is optimistic. The printed values change when Save is pressed, not
+   while the reader types, so an abandoned edit leaves the profile as it was
+   found. */
+.f .in{display:none}
+.card.editing .f .v{display:none}
+.card.editing .f .in{display:block}
+.card.editing .tbtn.edit{display:none}
+.in input{width:100%;padding:8px 11px;border-radius:var(--r-sm);border:1px solid var(--line);
+  background:var(--panel-2);color:var(--text);font-family:inherit;font-size:13px}
+.in input:hover{border-color:var(--line-hi)}
+/* Controls answer in NEUTRAL — the rule the rest of the portal states on its
+   dropdowns. Green here means producing/healthy, and a caret sitting in a box is
+   neither; a green ring would compete with every reading that uses the colour to
+   mean something. Green is kept for SELECTED state (the menu item), not focus. */
+.in input:focus{outline:none;border-color:var(--line-hi);background-color:var(--hover);
+  box-shadow:0 0 0 3px var(--hover-soft)}
+/* the note sits under the field it qualifies, never in a legend nobody reads —
+   and the error takes its place rather than pushing it down the card */
+.in .hint{font-size:11.5px;color:var(--faint);margin-top:4px;line-height:1.4}
+.in .err{display:none;font-size:11.5px;font-weight:600;color:var(--red);margin-top:4px;line-height:1.4}
+.f.bad .in input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+.f.bad .in .err{display:block}
+.f.bad .in .hint{display:none}
+
+/* the mode is named, not just implied by the boxes */
+.editing-tag{display:none;font-size:8.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--green-deep);background:var(--green-soft);padding:3px 8px;border-radius:5px}
+.card.editing .editing-tag{display:inline-block}
+
+/* the two answers a form owes: commit, or put it back the way it was */
+.editbar{display:none;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:15px 20px;border-top:1px solid var(--line-soft)}
+.card.editing .editbar{display:flex}
+.card.editing .cfoot{display:none}
+.editbar .note{font-size:11.5px;color:var(--faint)}
+.editbar .sp{margin-left:auto}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:8px;
+  font-size:12.5px;font-weight:700;font-family:inherit;
+  border:1px solid var(--line);background:var(--panel);color:var(--text)}
+.btn:hover{border-color:var(--line-hi);background:var(--hover)}
+.btn.primary{background:var(--green);border-color:var(--green);color:var(--on-accent)}
+.btn.primary:hover{background:var(--green-deep);border-color:var(--green-deep)}
+
+/* ---------- changing the password ----------
+   A dialog rather than a seventh field. It needs the old secret and the new one
+   twice, and none of that belongs in a card whose job is to print what is true.
+   The rules are on screen BEFORE they are broken: a password box that only says
+   what was wrong afterwards makes the reader guess twice. */
+body.locked{overflow:hidden}
+.scrim{position:fixed;inset:0;z-index:120;background:rgba(19,38,63,.42);
+  display:none;align-items:center;justify-content:center;padding:20px}
+.scrim.on{display:flex}
+.modal{width:100%;max-width:430px;max-height:calc(100vh - 40px);overflow-y:auto;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 30px 70px -20px var(--shadow);animation:min .16s ease-out}
+@keyframes min{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.mhead{display:flex;align-items:center;gap:12px;padding:16px 20px 14px;border-bottom:1px solid var(--line-soft)}
+.mhead .t{font-size:14.5px;font-weight:700}
+.mhead .x{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:7px;border:none;background:transparent;color:var(--faint)}
+.mhead .x:hover{color:var(--text);background:var(--hover)}
+.mbody{display:flex;flex-direction:column;gap:14px;padding:18px 20px 4px}
+.mfoot{display:flex;align-items:center;gap:10px;padding:16px 20px;border-top:1px solid var(--line-soft)}
+.mfoot .sp{margin-left:auto}
+.lab{display:block;font-size:12.5px;font-weight:700;margin-bottom:5px}
+
+/* reveal is per field: seeing the one you are typing should not put the other
+   two on screen for whoever is standing behind you */
+/* every field in every dialog, then the password ones take the extra right-hand
+   room their reveal button needs — declared in this order so that override lands */
+.fld input:not([type=checkbox]){width:100%;padding:8px 11px;border-radius:var(--r-sm);
+  border:1px solid var(--line);background:var(--panel-2);color:var(--text);
+  font-family:inherit;font-size:13px}
+.fld input:not([type=checkbox]):hover{border-color:var(--line-hi)}
+.fld input:not([type=checkbox]):focus{outline:none;border-color:var(--line-hi);
+  background-color:var(--hover);box-shadow:0 0 0 3px var(--hover-soft)}
+.fld.bad input:not([type=checkbox]){border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+.fld input::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.55}
+.fld input:hover::-webkit-calendar-picker-indicator{opacity:1}
+/* two fields that are read as one answer sit on one line: the date a rate takes
+   effect and the rate itself are not two separate questions */
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:470px){ .mrow{grid-template-columns:1fr} }
+
+.pw{position:relative}
+.pw input{width:100%;padding:8px 40px 8px 11px;border-radius:var(--r-sm);border:1px solid var(--line);
+  background:var(--panel-2);color:var(--text);font-family:inherit;font-size:13px}
+.pw input:hover{border-color:var(--line-hi)}
+.pw input:focus{outline:none;border-color:var(--line-hi);background-color:var(--hover);
+  box-shadow:0 0 0 3px var(--hover-soft)}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;
+  border:none;background:transparent;color:var(--faint)}
+.eye:hover{color:var(--text);background:var(--hover)}
+.eye .e2{display:none}
+.eye.on .e1{display:none}
+.eye.on .e2{display:block}
+.fld .err{display:none;font-size:11.5px;font-weight:600;color:var(--red);margin-top:5px;line-height:1.4}
+.fld.bad .err{display:block}
+.fld.bad .pw input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+.fld .hint{font-size:11.5px;color:var(--faint);margin-top:5px;line-height:1.45}
+.fld.bad .hint{display:none}
+
+/* one place for the answers this screen cannot work out for itself — a backend
+   that says the current password is wrong lands here too */
+.mband{display:none;align-items:flex-start;gap:8px;padding:9px 11px;border-radius:8px;
+  background:var(--red-soft);color:var(--red);font-size:12px;font-weight:600;line-height:1.45}
+.mband.on{display:flex}
+
+.rules{display:flex;flex-direction:column;gap:5px;padding:8px 0 1px}
+.rule{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--faint)}
+.rule svg{flex:none}
+.rule .tick{display:none}
+.rule.ok{color:var(--green)}
+.rule.ok .dot{display:none}
+.rule.ok .tick{display:block}
 
 /* ---------- a screen that is not designed yet ----------
    Named rather than hidden. A menu item that opens an empty card reads as
@@ -205,7 +552,7 @@ a{color:inherit;text-decoration:none}
 .todo .h{font-size:15px;font-weight:700}
 .todo .p{font-size:13px;color:var(--muted);line-height:1.6}
 
-#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
+#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:140}
 .toast{background:var(--elev);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:9px;
   padding:10px 14px;font-size:12.5px;color:var(--text);box-shadow:0 12px 30px -8px var(--shadow);
   animation:tin .18s ease-out}
@@ -227,17 +574,17 @@ a{color:inherit;text-decoration:none}
 
 <!-- ======================= TOP BAR ======================= -->
 <header class="topbar">
-  <a class="brand" href="home.html" title="Back to the portal">
+  <!-- The mark is the way back, and clicking it is the whole of it. No chevron,
+       no panel lighting up underneath: a wordmark in the top-left corner of an
+       application is a place every reader has already tried clicking, and
+       decorating it to say so only makes the header look like a button. The
+       destination is named for anyone who asks - the title, and the line under
+       the wordmark that already reads Site Overview. -->
+  <a class="brand" href="home.html" title="Back to the portal" aria-label="Back to the portal">
     <img class="logo" src="logo/logo-mark.png" alt="EnerOps Data Systems Pvt Ltd">
     <span class="btext"><span class="word">ENEROPS OS</span><span class="sub">Site Overview</span></span>
   </a>
   <div class="right">
-    <a class="backlink" href="home.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
-           stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-      <span>Back to portal</span>
-    </a>
-
     <div class="acct" id="acct">
       <button class="avatar" onclick="toggleAcct(event)" aria-haspopup="menu" aria-expanded="false"
               id="acctbtn" title="Account">V</button>
@@ -247,12 +594,10 @@ a{color:inherit;text-decoration:none}
           <div class="em">vikram.sethi@enerops.example</div>
         </div>
         <div class="acctdiv"></div>
-        <a class="acctitem" role="menuitem" href="settings.html">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-               stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/>
-            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.7 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15.1 4.7a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.09A1.7 1.7 0 0 0 21 10.1a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg>
-          Settings
-        </a>
+        <!-- No Settings item: this IS Settings. A menu that offers you the screen
+             you are standing on spends a row saying nothing, and the one row that
+             matters here has to be found among it. Every other page keeps it —
+             that is where it is the way in. -->
         <a class="acctitem out" role="menuitem" href="login.html">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
                stroke-linecap="round" stroke-linejoin="round">
@@ -336,9 +681,12 @@ a{color:inherit;text-decoration:none}
         <svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg>
       </button>
+      <!-- Role first: a role has to exist before anybody can hold one, and Access
+           Control is the two of them read together. The list is the order the work
+           is done in, not alphabetical and not the order the legacy menu had. -->
       <div class="grpitems">
-        <button class="item" data-p="access-user"   data-g="Access Management">User</button>
         <button class="item" data-p="access-role"   data-g="Access Management">Role</button>
+        <button class="item" data-p="access-user"   data-g="Access Management">User</button>
         <button class="item" data-p="access-ctl"    data-g="Access Management">Access Control</button>
       </div>
     </div>
@@ -354,8 +702,9 @@ a{color:inherit;text-decoration:none}
     <section class="panel on card" id="p-user-profile">
       <div class="chead">
         <div class="title">User Profile</div>
+        <span class="editing-tag">Editing</span>
         <div class="tools">
-          <button class="tbtn" onclick="return T('Editing is not designed yet')">EDIT</button>
+          <button class="tbtn edit" id="editbtn" type="button" onclick="startEdit()">EDIT</button>
         </div>
       </div>
 
@@ -367,100 +716,846 @@ a{color:inherit;text-decoration:none}
         </div>
       </div>
 
-      <div class="fields">
-        <div class="f"><div class="k">First name</div><div class="v">Vikram</div></div>
-        <div class="f"><div class="k">Last name</div><div class="v">Sethi</div></div>
-        <div class="f"><div class="k">Company name</div><div class="v">Sangria Renewables Pvt Ltd</div></div>
-        <div class="f"><div class="k">Address</div><div class="v">2 DLP, Kikarwali Road, Nathwana, Sangria 335073</div></div>
-        <div class="f"><div class="k">Email</div><div class="v">vikram.sethi@enerops.example</div></div>
-        <div class="f"><div class="k">Contact number</div><div class="v">+91 98765 43210</div></div>
-      </div>
+      <form id="pform" onsubmit="return saveProfile(event)">
+        <div class="fields">
+          <div class="f" data-k="first">
+            <label class="k" for="in-first">First name</label>
+            <div class="v">Vikram</div>
+            <div class="in">
+              <input id="in-first" type="text" autocomplete="given-name" spellcheck="false">
+              <div class="err"></div>
+            </div>
+          </div>
+
+          <div class="f" data-k="last">
+            <label class="k" for="in-last">Last name</label>
+            <div class="v">Sethi</div>
+            <div class="in">
+              <input id="in-last" type="text" autocomplete="family-name" spellcheck="false">
+              <div class="err"></div>
+            </div>
+          </div>
+
+          <div class="f" data-k="company">
+            <label class="k" for="in-company">Company name</label>
+            <div class="v">Sangria Renewables Pvt Ltd</div>
+            <div class="in">
+              <input id="in-company" type="text" autocomplete="organization">
+              <div class="hint">The trading name. The registered one belongs in Company Profile.</div>
+              <div class="err"></div>
+            </div>
+          </div>
+
+          <div class="f" data-k="address">
+            <label class="k" for="in-address">Address</label>
+            <div class="v">2 DLP, Kikarwali Road, Nathwana, Sangria 335073</div>
+            <div class="in">
+              <input id="in-address" type="text" autocomplete="street-address">
+              <div class="err"></div>
+            </div>
+          </div>
+
+          <div class="f" data-k="email">
+            <label class="k" for="in-email">Email</label>
+            <div class="v">vikram.sethi@enerops.example</div>
+            <div class="in">
+              <input id="in-email" type="email" autocomplete="email" spellcheck="false">
+              <div class="hint">The address you sign in with.</div>
+              <div class="err"></div>
+            </div>
+          </div>
+
+          <div class="f" data-k="phone">
+            <label class="k" for="in-phone">Contact number</label>
+            <div class="v">+91 98765 43210</div>
+            <div class="in">
+              <input id="in-phone" type="tel" autocomplete="tel">
+              <div class="hint">Leave it empty if there isn&rsquo;t one &mdash; the profile then prints a dash rather than a guess.</div>
+              <div class="err"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="editbar">
+          <span class="note">Nothing changes until you save.</span>
+          <span class="sp"></span>
+          <button class="btn" type="button" onclick="cancelEdit()">Cancel</button>
+          <button class="btn primary" type="submit">Save changes</button>
+        </div>
+      </form>
 
       <div class="cfoot">
         <span class="k">Password</span>
         <span class="sp"></span>
-        <button class="linkbtn" onclick="return T('The change-password screen is not designed yet')">Change password</button>
+        <button class="linkbtn" type="button" onclick="openPw()">Change password</button>
       </div>
     </section>
 
     <!-- ---------- THE SCREENS THAT ARE NAMED BUT NOT DRAWN ---------- -->
+    <!-- ---------- COMPANY PROFILE ----------
+         The legacy screen put the signed-in PERSON's name at the top of this card.
+         The company's name goes there instead: a card titled Company Profile that
+         leads with a person reads as being about the person, and the card beside
+         it already carries that name in exactly this position. -->
     <section class="panel card" id="p-company-profile">
       <div class="chead"><div class="title">Company Profile</div></div>
-      <div class="todo"><span class="badge">Not designed yet</span>
-        <div class="h">The organisation behind the account</div>
-        <div class="p">Registered name, address, tax identifiers and the billing contact — the
-          company-level equivalent of the user profile beside it. Tell me the fields your
-          backend holds and this becomes the next screen.</div></div>
+
+      <div class="who co">
+        <div><div class="nm">Sangria Renewables Pvt Ltd</div></div>
+      </div>
+
+      <!-- Six fields, filled in reading order, same as the card beside it. The
+           legacy screen ran four down the left and stopped the right column after
+           two, which left a hole in the middle and made the pairing look meaningful
+           when it was only what the grid did when it ran out. Reading order also
+           puts the two email addresses next to each other, which is the one place
+           on this card a reader is actually comparing two values. -->
+      <div class="fields">
+        <div class="f"><div class="k">Company name</div><div class="v">Sangria Renewables Pvt Ltd</div></div>
+        <div class="f"><div class="k">Address</div><div class="v">2 DLP, Kikarwali Road, Nathwana, Sangria 335073</div></div>
+        <div class="f"><div class="k">Company email</div><div class="v">accounts@sangriarenewables.example</div></div>
+        <div class="f"><div class="k">Admin email</div><div class="v">vikram.sethi@enerops.example</div></div>
+        <div class="f"><div class="k">Contact number</div><div class="v">+91 141 4002 118</div></div>
+        <div class="f"><div class="k">Customer service status</div>
+          <div class="v"><span class="pill live"><span class="dot"></span>Active</span></div></div>
+      </div>
+
+      <div class="cfoot">
+        <span class="n">Set when the account is provisioned. Nothing on this card is editable from the portal.</span>
+      </div>
     </section>
 
+    <!-- ---------- CUSTOMER DEVICES ----------
+         The register the rest of the portal reads from. Monitoring, Alarms, KPI and
+         Analysis all name devices; this is the one screen that says what they are.
+
+         Sl. is gone. It numbered the rows on screen rather than the devices, so it
+         renumbered itself every time the table was sorted or paged — a column whose
+         value changes when you look at it differently is not an identifier, and
+         there is a real one in the next column along. -->
     <section class="panel card" id="p-customer-devices">
-      <div class="chead"><div class="title">Customer Devices</div></div>
-      <div class="todo"><span class="badge">Not designed yet</span>
-        <div class="h">Every device this account owns, across every plant</div>
-        <div class="p">A table rather than a form: serial, model, plant, commissioning date, the
-          data points it publishes. It is the register the Monitoring page reads from, so the
-          columns here should be the ones that page already names.</div></div>
+      <div class="chead">
+        <div class="title">Customer Devices</div>
+        <div class="tools">
+          <!-- said the way every reading page says it: the same pin, the same mono
+               name, the same sentence about where it is changed -->
+          <span class="sitepin" title="The site every page in this portal is showing. Change it in the orbit on Site Control.">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 21.2s6.8-6 6.8-10.8a6.8 6.8 0 1 0-13.6 0c0 4.8 6.8 10.8 6.8 10.8z"/>
+              <circle cx="12" cy="10.2" r="2.5"/></svg>
+            <span class="n" id="dv-site">&mdash;</span>
+          </span>
+          <span class="count" id="dv-count"></span>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead id="dv-head"></thead>
+          <tbody id="dv-body"></tbody>
+        </table>
+      </div>
+
+      <div class="tfoot">
+        <span>Rows per page</span>
+        <select id="dv-per" onchange="dvDraw(true)">
+          <option>10</option><option selected>25</option><option>50</option><option>100</option>
+        </select>
+        <span class="sp"></span>
+        <span class="range" id="dv-range">0-0 of 0</span>
+        <button class="pgbtn" id="dv-prev" type="button" onclick="dvPage(-1)">&lsaquo;</button>
+        <button class="pgbtn" id="dv-next" type="button" onclick="dvPage(1)">&rsaquo;</button>
+      </div>
+
     </section>
 
+    <!-- ---------- EMISSION RATE ----------
+         A history, not a setting. The grid factor changes; what it was in 2023 is
+         what 2023's reported savings were computed with, and a screen that let you
+         overwrite one number would silently rewrite every figure this portal has
+         ever published.
+
+         So a new rate SUPERSEDES the one before it. Each period keeps its own
+         number, the table reads newest first, and the End Date is never typed —
+         a rate runs until the next one starts, which is why the legacy Add dialog
+         asked for a start date and never for an end. -->
     <section class="panel card" id="p-emission-rate">
-      <div class="chead"><div class="title">Emission Rate</div></div>
-      <div class="todo"><span class="badge">Not designed yet</span>
-        <div class="h">kg CO₂ avoided per kWh generated</div>
-        <div class="p">One rate, versioned by the date it takes effect — a grid factor that
-          changes in April must not silently rewrite last year's reported savings.</div></div>
+      <div class="chead">
+        <div class="title">Emission Rate</div>
+        <div class="tools">
+          <span class="sitepin" title="The site every page in this portal is showing. Change it in the orbit on Site Control.">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 21.2s6.8-6 6.8-10.8a6.8 6.8 0 1 0-13.6 0c0 4.8 6.8 10.8 6.8 10.8z"/>
+              <circle cx="12" cy="10.2" r="2.5"/></svg>
+            <span class="n" id="em-site">&mdash;</span>
+          </span>
+          <button class="tbtn" type="button" onclick="rateAdd('em')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ADD RATE</button>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>From</th>
+              <th>Until</th>
+              <th>Rate <span class="u">kg CO&#8322; / kWh</span></th>
+              <th>Status</th>
+              <th title="When the row was entered, which is not when the rate took effect">Added</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="em-body"></tbody>
+        </table>
+      </div>
     </section>
 
+    <!-- ---------- ELECTRICITY RATE ----------
+         The same table as Emission Rate, for the same reason: a tariff that changes
+         in April must not re-price the energy this portal already reported on last
+         year. Both are built from one board rather than written twice — the day one
+         of them learns something, the other has to learn it too.
+
+         One number per period. If the tariff turns out to have slabs or a
+         peak/off-peak split, that structure belongs here as more columns, not
+         flattened into an average nobody can check. -->
     <section class="panel card" id="p-electricity-rate">
-      <div class="chead"><div class="title">Electricity Rate</div></div>
-      <div class="todo"><span class="badge">Not designed yet</span>
-        <div class="h">The tariff the savings figures are counted against</div>
-        <div class="p">Per plant, and dated like the emission rate. If the tariff has slabs or a
-          peak/off-peak split, that structure belongs here rather than flattened into one number.</div></div>
+      <div class="chead">
+        <div class="title">Electricity Rate</div>
+        <div class="tools">
+          <span class="sitepin" title="The site every page in this portal is showing. Change it in the orbit on Site Control.">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 21.2s6.8-6 6.8-10.8a6.8 6.8 0 1 0-13.6 0c0 4.8 6.8 10.8 6.8 10.8z"/>
+              <circle cx="12" cy="10.2" r="2.5"/></svg>
+            <span class="n" id="el-site">&mdash;</span>
+          </span>
+          <button class="tbtn" type="button" onclick="rateAdd('el')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ADD RATE</button>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>From</th>
+              <th>Until</th>
+              <th>Rate <span class="u">&#8377; / kWh</span></th>
+              <th>Status</th>
+              <th title="When the row was entered, which is not when the rate took effect">Added</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="el-body"></tbody>
+        </table>
+      </div>
     </section>
 
+    <!-- ---------- ENERGY OFFSET ----------
+         A correction applied to metered generation, versioned exactly like the two
+         rate boards: a correction that was right for 2024 must not be re-applied to
+         2026 just because nobody came back to cancel it.
+
+         REASON is not in the legacy screen and is the most important column here.
+         An adjustment nobody can trace is indistinguishable from a meter that is
+         wrong, and the difference between those two is the difference between a
+         report you can defend and one you cannot.
+
+         The legacy screen narrowed by Asset, then Logger, then Device Category,
+         then Device Name — four pickers to reach one device. The site comes from
+         the orbit and the device register already knows every device's category,
+         so the dialog asks once. Logger is dropped entirely: nothing else in this
+         portal has the concept, and inventing an entity here that has no home
+         anywhere else is how a schema grows a limb nobody maintains. -->
     <section class="panel card" id="p-energy-offset">
-      <div class="chead"><div class="title">Energy Offset</div></div>
-      <div class="todo"><span class="badge">Not designed yet</span>
-        <div class="h">A correction applied to metered generation</div>
-        <div class="p">What it offsets and why needs stating on the screen itself — an adjustment
-          nobody can trace is indistinguishable from a meter that is wrong.</div></div>
+      <div class="chead">
+        <div class="title">Energy Offset</div>
+        <div class="tools">
+          <span class="sitepin" title="The site every page in this portal is showing. Change it in the orbit on Site Control.">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 21.2s6.8-6 6.8-10.8a6.8 6.8 0 1 0-13.6 0c0 4.8 6.8 10.8 6.8 10.8z"/>
+              <circle cx="12" cy="10.2" r="2.5"/></svg>
+            <span class="n" id="of-site">&mdash;</span>
+          </span>
+          <button class="tbtn" type="button" onclick="offAdd()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ADD OFFSET</button>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Device</th>
+              <th>From</th>
+              <th>Until</th>
+              <th>Offset <span class="u">kWh</span></th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th title="When the row was entered, which is not when the offset took effect">Added</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="of-body"></tbody>
+        </table>
+      </div>
     </section>
 
+    <!-- ---------- ALARMS CONFIG ----------
+         Who hears about an alarm, and which severities reach them.
+
+         The four columns are the portal's own four levels, in its own order:
+         CRITICAL, ALARM, WARNING, EVENT. The legacy screen's fourth column was
+         "status", which nothing here raises. A recipient list whose headings do not
+         match the events being raised cannot be checked against anything, and the
+         person who most needs the critical ones is the person most likely to have
+         ticked the wrong box.
+
+         Not per site. An alarm reaches a person, and a person does not stop
+         existing when the orbit is pointed somewhere else — so there is no pin on
+         this card and the list is the same wherever you have come from. -->
     <section class="panel card" id="p-alarms-config">
-      <div class="chead"><div class="title">Alarms config</div></div>
-      <div class="todo"><span class="badge">Not designed yet</span>
-        <div class="h">Which conditions raise an alarm, and at what severity</div>
-        <div class="p">The rules behind the Alarms page: threshold, dead-band, how long a
-          condition must hold before it counts, and who is notified. The severities here have to
-          be the same four that page already colours.</div></div>
+      <div class="chead">
+        <div class="title">Alarms config</div>
+        <div class="tools">
+          <span class="count" id="al-count"></span>
+          <button class="tbtn" type="button" onclick="alAdd()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ADD RECIPIENT</button>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Recipient</th>
+              <th>Email</th>
+              <th class="sev-h critical" title="The worst level this portal raises — it outranks an alarm">Critical</th>
+              <th class="sev-h alarm" title="Something is wrong and somebody has to act">Alarm</th>
+              <th class="sev-h warn" title="Worth looking at before it becomes an alarm">Warning</th>
+              <th class="sev-h" title="Something happened and was recorded — a reconnect, a firmware update">Event</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="al-body"></tbody>
+        </table>
+      </div>
     </section>
 
-    <section class="panel card" id="p-access-user">
-      <div class="chead"><div class="title">User</div></div>
-      <div class="todo"><span class="badge">Not designed yet</span>
-        <div class="h">The people who can sign in</div>
-        <div class="p">A table with invite and deactivate — never delete, because an alarm
-          acknowledged by someone who no longer exists still has to say who acknowledged it.</div></div>
-    </section>
+    <!-- ---------- ROLE ----------
+         A role is a name and the sites it reaches. That is the whole of it.
 
+         The legacy screen put a role in a dropdown and then filled the table with
+         twelve columns of PLANT detail — id, area, city, state, country, zip,
+         latitude, longitude, address, description, installation date. None of that
+         is role data. It is the site register, which this portal already draws on
+         Site Control, and repeating it here means two screens that can disagree
+         about where a plant is.
+
+         So the table answers what a role screen is actually asked: what roles
+         exist, where does each one reach, and how many people hold it. -->
     <section class="panel card" id="p-access-role">
-      <div class="chead"><div class="title">Role</div></div>
-      <div class="todo"><span class="badge">Not designed yet</span>
-        <div class="h">Named bundles of permissions</div>
-        <div class="p">Roles are what get assigned; Access Control is where each role's
-          permissions are set. Keeping the two apart is what stops per-user exceptions
-          accumulating until nobody can say who can do what.</div></div>
+      <div class="chead">
+        <div class="title">Role</div>
+        <div class="tools">
+          <span class="count" id="ro-count"></span>
+          <button class="tbtn" type="button" onclick="roEdit()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ADD ROLE</button>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Sites it reaches</th>
+              <th title="How many people currently hold this role">Held by</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ro-body"></tbody>
+        </table>
+      </div>
     </section>
 
+    <!-- ---------- USER ----------
+         The people who can sign in.
+
+         Name, First Name and Last Name were three columns carrying two facts. The
+         split matters in the form, where the two halves are typed separately; in a
+         table that is read by looking for a person, it is one column.
+
+         Address is gone with them. Every row in the legacy screen carried the same
+         string — the company's address, which Company Profile already holds. A
+         column whose value is identical on every row is a column that has stopped
+         asking a question.
+
+         And there is no DELETE. An alarm acknowledged by someone who no longer
+         exists still has to say who acknowledged it, so a person is suspended and
+         keeps their name attached to everything they did. That is what the legacy
+         Add dialog's User Status field was always for. -->
+    <section class="panel card" id="p-access-user">
+      <div class="chead">
+        <div class="title">User</div>
+        <div class="tools">
+          <span class="count" id="us-count"></span>
+          <button class="tbtn" type="button" onclick="usEdit()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ADD USER</button>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Contact number</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="us-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---------- ACCESS CONTROL ----------
+         Who holds which role, all of it on one screen.
+
+         The legacy flow was: pick a role from a dropdown, look at the people who
+         hold it, press ASSIGN ROLES. That answers "who holds THIS role" one role at
+         a time and never answers the question anybody actually arrives with — can
+         this person see that site. Checking one user meant cycling every role in
+         the dropdown until they turned up in one.
+
+         Every user, every role, one table. The role is changed in the cell where it
+         is read, so there is nothing to select first and no dialog to open, and the
+         sites it grants are printed beside it because a role name is not something
+         anyone should have to remember the meaning of. -->
     <section class="panel card" id="p-access-ctl">
-      <div class="chead"><div class="title">Access Control</div></div>
-      <div class="todo"><span class="badge">Not designed yet</span>
-        <div class="h">What each role may do, and to which plants</div>
-        <div class="p">A grid of roles against permissions. The plant dimension matters as much
-          as the verb: read-everywhere and write-on-one-site is the common case, not the exception.</div></div>
+      <div class="chead">
+        <div class="title">Access Control</div>
+        <div class="tools">
+          <span class="count" id="ac-count"></span>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Which gives them</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="ac-body"></tbody>
+        </table>
+      </div>
     </section>
 
   </main>
+</div>
+
+
+<!-- ======================= CHANGE PASSWORD =======================
+     A dialog, opened from the one row in the card that is not a value. Everything
+     it asks for is a secret, so none of it can sit in a card whose job is to print
+     what is true — and the rules are stated under the field rather than sprung
+     after the fact. -->
+<div class="scrim" id="pwscrim" role="dialog" aria-modal="true" aria-labelledby="pwtitle">
+  <div class="modal">
+    <div class="mhead">
+      <div class="t" id="pwtitle">Change password</div>
+      <button class="x" type="button" onclick="closePw()" title="Close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <form onsubmit="return savePw(event)">
+      <div class="mbody">
+        <div class="mband" id="pwband"></div>
+        <div class="fld">
+          <label class="lab" for="pw-cur">Current password</label>
+          <div class="pw">
+            <input id="pw-cur" type="password" autocomplete="current-password">
+            <button class="eye" type="button" onclick="reveal(this,'pw-cur')" aria-label="Show password" title="Show password"><svg class="e1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.6 5.8 12 5.8 21.8 12 21.8 12 18.4 18.2 12 18.2 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="e2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.9A9.7 9.7 0 0 1 12 5.8c6.4 0 9.8 6.2 9.8 6.2a17.2 17.2 0 0 1-3.4 4.2M6.3 7.9A17.2 17.2 0 0 0 2.2 12S5.6 18.2 12 18.2c1.4 0 2.6-.3 3.7-.8"/><path d="M10.1 10.2a2.7 2.7 0 0 0 3.8 3.8"/><path d="M3.6 3.6l16.8 16.8"/></svg></button>
+          </div>
+          <div class="err"></div>
+        </div>
+        <div class="fld">
+          <label class="lab" for="pw-new">New password</label>
+          <div class="pw">
+            <input id="pw-new" type="password" autocomplete="new-password">
+            <button class="eye" type="button" onclick="reveal(this,'pw-new')" aria-label="Show password" title="Show password"><svg class="e1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.6 5.8 12 5.8 21.8 12 21.8 12 18.4 18.2 12 18.2 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="e2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.9A9.7 9.7 0 0 1 12 5.8c6.4 0 9.8 6.2 9.8 6.2a17.2 17.2 0 0 1-3.4 4.2M6.3 7.9A17.2 17.2 0 0 0 2.2 12S5.6 18.2 12 18.2c1.4 0 2.6-.3 3.7-.8"/><path d="M10.1 10.2a2.7 2.7 0 0 0 3.8 3.8"/><path d="M3.6 3.6l16.8 16.8"/></svg></button>
+          </div>
+          <div class="err"></div>
+          <div class="rules">
+          <div class="rule" id="r-len">
+            <svg class="dot" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="3.4"/></svg>
+            <svg class="tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5 9.4 17.5 4 12.2"/></svg>
+            At least 10 characters
+          </div>
+          <div class="rule" id="r-mix">
+            <svg class="dot" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="3.4"/></svg>
+            <svg class="tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5 9.4 17.5 4 12.2"/></svg>
+            A letter and a number
+          </div>
+          <div class="rule" id="r-new">
+            <svg class="dot" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="3.4"/></svg>
+            <svg class="tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5 9.4 17.5 4 12.2"/></svg>
+            Different from your current password
+          </div>
+          </div>
+        </div>
+
+        <div class="fld">
+          <label class="lab" for="pw-cf">Confirm new password</label>
+          <div class="pw">
+            <input id="pw-cf" type="password" autocomplete="new-password">
+            <button class="eye" type="button" onclick="reveal(this,'pw-cf')" aria-label="Show password" title="Show password"><svg class="e1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.6 5.8 12 5.8 21.8 12 21.8 12 18.4 18.2 12 18.2 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="e2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.9A9.7 9.7 0 0 1 12 5.8c6.4 0 9.8 6.2 9.8 6.2a17.2 17.2 0 0 1-3.4 4.2M6.3 7.9A17.2 17.2 0 0 0 2.2 12S5.6 18.2 12 18.2c1.4 0 2.6-.3 3.7-.8"/><path d="M10.1 10.2a2.7 2.7 0 0 0 3.8 3.8"/><path d="M3.6 3.6l16.8 16.8"/></svg></button>
+          </div>
+          <div class="err"></div>
+        </div>
+      </div>
+
+      <div class="mfoot">
+        <span class="sp"></span>
+        <button class="btn" type="button" onclick="closePw()">Cancel</button>
+        <button class="btn primary" type="submit">Update password</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ======================= RENAME A DEVICE =======================
+     The legacy dialog was one unlabelled text box. With seven inverters called
+     INV01 to INV07 — and the same seven names again on every other plant — a box
+     holding "INV04" cannot tell you WHICH INV04 you are about to rename. So the
+     dialog states the device first, by the one thing that is unique about it, and
+     the field comes second. It also says where the new name will show up, because
+     this is not a label on this screen: it is the name Monitoring, Alarms, KPI and
+     Analysis will all use tomorrow. -->
+<div class="scrim" id="rnscrim" role="dialog" aria-modal="true" aria-labelledby="rntitle">
+  <div class="modal">
+    <div class="mhead">
+      <div class="t" id="rntitle">Rename device</div>
+      <button class="x" type="button" onclick="closeRn()" title="Close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form onsubmit="return saveRn(event)">
+      <div class="mbody">
+        <div class="mwho">
+          <div class="r"><b>Id</b><span id="rn-id">&mdash;</span></div>
+          <div class="r"><b>Plant</b><span id="rn-plant">&mdash;</span></div>
+          <div class="r"><b>Type</b><span id="rn-type">&mdash;</span></div>
+        </div>
+        <div class="fld">
+          <label class="lab" for="rn-name">Device name</label>
+          <input id="rn-name" type="text" maxlength="24" autocomplete="off" spellcheck="false">
+          <div class="err"></div>
+        </div>
+        <div class="mtext">This is the name Monitoring, Alarms, the KPI table and Analysis will
+          all show. The id above never changes, so history stays attached to it either way.</div>
+      </div>
+      <div class="mfoot">
+        <span class="sp"></span>
+        <button class="btn" type="button" onclick="closeRn()">Cancel</button>
+        <button class="btn primary" type="submit">Save name</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= ARE YOU SURE =======================
+     ONE confirm dialog, for every irreversible-looking thing on this screen.
+     Three dialogs that ask the same question drift into asking it three slightly
+     different ways, and the one that matters most ends up phrased the worst.
+
+     It names the record first and states the consequence second, because "are you
+     sure" is not a question anybody can answer without both. -->
+<div class="scrim" id="askdlg" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+  <div class="modal">
+    <div class="mhead">
+      <div class="t" id="ask-title">Are you sure</div>
+      <button class="x" type="button" onclick="askShut()" title="Close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="mbody">
+      <div class="mwho" id="ask-who"></div>
+      <div class="mtext" id="ask-text"></div>
+    </div>
+    <div class="mfoot">
+      <span class="sp"></span>
+      <button class="btn" type="button" onclick="askShut()">Cancel</button>
+      <button class="btn danger" type="button" id="ask-go" onclick="askYes()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= ADD A RATE =======================
+     ONE dialog, used by both rate boards. Two rates that are asked for in two
+     different dialogs drift apart in wording and in what they check; asked for in
+     the same one, they cannot.
+
+     Two fields, because a new rate has only two answers: when it starts and what
+     it is. No end date — the next rate ends this one. No site picker — it goes to
+     the site the portal is showing, which the dialog names, because behind a
+     scrim that is the only place the site is legible. -->
+<div class="scrim" id="ratedlg" role="dialog" aria-modal="true" aria-labelledby="rd-title">
+  <div class="modal">
+    <div class="mhead">
+      <div class="t" id="rd-title">Add rate</div>
+      <button class="x" type="button" onclick="rateShut()" title="Close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form onsubmit="return rateSave(event)">
+      <div class="mbody">
+        <div class="mwho">
+          <div class="r"><b>Site</b><span id="rd-for">&mdash;</span></div>
+          <div class="r"><b>Replaces</b><span id="rd-prev">&mdash;</span></div>
+        </div>
+        <div class="mrow">
+          <div class="fld">
+            <label class="lab" for="rd-from">Takes effect</label>
+            <input id="rd-from" type="date">
+            <div class="err"></div>
+          </div>
+          <div class="fld">
+            <label class="lab" for="rd-rate">Rate</label>
+            <input id="rd-rate" type="number" min="0">
+            <div class="hint" id="rd-unit">&mdash;</div>
+            <div class="err"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mfoot">
+        <span class="sp"></span>
+        <button class="btn" type="button" onclick="rateShut()">Cancel</button>
+        <button class="btn primary" type="submit">Add rate</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= ADD AN ENERGY OFFSET =======================
+     One device, one date, one number and the reason for it. The reason is
+     required: this dialog is the only moment anyone will ever be able to say why
+     the generation figure was moved, and a blank there turns a defensible
+     correction into an unexplained discrepancy the following year. -->
+<div class="scrim" id="offdlg" role="dialog" aria-modal="true" aria-labelledby="of-title">
+  <div class="modal">
+    <div class="mhead">
+      <div class="t" id="of-title">Add energy offset</div>
+      <button class="x" type="button" onclick="offShut()" title="Close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form onsubmit="return offSave(event)">
+      <div class="mbody">
+        <div class="mwho">
+          <div class="r"><b>Site</b><span id="of-for">&mdash;</span></div>
+        </div>
+        <div class="fld">
+          <label class="lab" for="of-dev">Device</label>
+          <button class="mbtn" type="button" id="of-dev" data-ss="offdev"
+                  data-any="Choose a device" value=""
+                  aria-haspopup="true" aria-expanded="false"
+                  aria-controls="sspanel"><span class="mlab any">Choose a device</span></button>
+          <div class="err"></div>
+        </div>
+        <div class="mrow">
+          <div class="fld">
+            <label class="lab" for="of-from">Takes effect</label>
+            <input id="of-from" type="date">
+            <div class="err"></div>
+          </div>
+          <div class="fld">
+            <label class="lab" for="of-kwh">Offset</label>
+            <input id="of-kwh" type="number" step="1" placeholder="-1250">
+            <div class="hint">kWh, negative to subtract</div>
+            <div class="err"></div>
+          </div>
+        </div>
+        <div class="fld">
+          <label class="lab" for="of-why">Reason</label>
+          <input id="of-why" type="text" maxlength="120" placeholder="What is being corrected, and why">
+          <div class="err"></div>
+        </div>
+      </div>
+      <div class="mfoot">
+        <span class="sp"></span>
+        <button class="btn" type="button" onclick="offShut()">Cancel</button>
+        <button class="btn primary" type="submit">Add offset</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= A RECIPIENT =======================
+     Add and edit are the same dialog, because they ask for exactly the same four
+     things. The legacy screen used a dialog for one and an inline row of
+     checkboxes in the table for the other, which meant two places to keep the
+     rules and two chances to disagree about them. -->
+<div class="scrim" id="aldlg" role="dialog" aria-modal="true" aria-labelledby="al-title">
+  <div class="modal">
+    <div class="mhead">
+      <div class="t" id="al-title">Add recipient</div>
+      <button class="x" type="button" onclick="alShut()" title="Close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form onsubmit="return alSave(event)">
+      <div class="mbody">
+        <div class="mrow">
+          <div class="fld">
+            <label class="lab" for="al-who">Name</label>
+            <input id="al-who" type="text" maxlength="60" autocomplete="off">
+            <div class="err"></div>
+          </div>
+          <div class="fld">
+            <label class="lab" for="al-mail">Email</label>
+            <input id="al-mail" type="email" autocomplete="off" spellcheck="false">
+            <div class="err"></div>
+          </div>
+        </div>
+        <div class="fld">
+          <label class="lab">Send them</label>
+          <div class="subrow">
+            <label class="subbox"><input id="al-critical" type="checkbox">Critical</label>
+            <label class="subbox"><input id="al-alarm" type="checkbox">Alarm</label>
+            <label class="subbox"><input id="al-warn" type="checkbox">Warning</label>
+            <label class="subbox"><input id="al-event" type="checkbox">Event</label>
+          </div>
+          <div class="err"></div>
+        </div>
+      </div>
+      <div class="mfoot">
+        <span class="sp"></span>
+        <button class="btn" type="button" onclick="alShut()">Cancel</button>
+        <button class="btn primary" type="submit" id="al-go">Add recipient</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= A USER =======================
+     Add and edit are one dialog: they ask for the same five things, and two places
+     holding the same rules is two places for them to drift apart. -->
+<div class="scrim" id="usdlg" role="dialog" aria-modal="true" aria-labelledby="us-title">
+  <div class="modal">
+    <div class="mhead">
+      <div class="t" id="us-title">Add user</div>
+      <button class="x" type="button" onclick="usShut()" title="Close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form onsubmit="return usSave(event)">
+      <div class="mbody">
+        <div class="mrow">
+          <div class="fld">
+            <label class="lab" for="us-first">First name</label>
+            <input id="us-first" type="text" maxlength="40" autocomplete="off">
+            <div class="err"></div>
+          </div>
+          <div class="fld">
+            <label class="lab" for="us-last">Last name</label>
+            <input id="us-last" type="text" maxlength="40" autocomplete="off">
+            <div class="err"></div>
+          </div>
+        </div>
+        <div class="fld">
+          <label class="lab" for="us-mail">Email</label>
+          <input id="us-mail" type="email" autocomplete="off" spellcheck="false">
+          <div class="hint">This is what they sign in with.</div>
+          <div class="err"></div>
+        </div>
+        <div class="mrow">
+          <div class="fld">
+            <label class="lab" for="us-phone">Contact number</label>
+            <input id="us-phone" type="tel" autocomplete="off">
+            <div class="err"></div>
+          </div>
+          <div class="fld">
+            <label class="lab" for="us-role">Role</label>
+            <button class="mbtn" type="button" id="us-role" data-ss="usrole"
+                    data-any="No role" value=""
+                    aria-haspopup="true" aria-expanded="false"
+                    aria-controls="sspanel"><span class="mlab any">No role</span></button>
+            <div class="err"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mfoot">
+        <span class="sp"></span>
+        <button class="btn" type="button" onclick="usShut()">Cancel</button>
+        <button class="btn primary" type="submit" id="us-go">Add user</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= A ROLE =======================
+     A name, and the sites it reaches. There is no permission list because this
+     portal has no permission to grant beyond reach: a role either takes you to a
+     site or it does not. If read-only ever becomes a distinction, it belongs here
+     as a second row of boxes, not as a separate screen. -->
+<div class="scrim" id="rodlg" role="dialog" aria-modal="true" aria-labelledby="ro-title">
+  <div class="modal">
+    <div class="mhead">
+      <div class="t" id="ro-title">Add role</div>
+      <button class="x" type="button" onclick="roShut()" title="Close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form onsubmit="return roSave(event)">
+      <div class="mbody">
+        <div class="fld">
+          <label class="lab" for="ro-name">Role name</label>
+          <input id="ro-name" type="text" maxlength="40" autocomplete="off">
+          <div class="hint">What it lets someone reach, said in a few words.</div>
+          <div class="err"></div>
+        </div>
+        <div class="fld">
+          <label class="lab">Sites it reaches</label>
+          <div class="subrow" id="ro-sites"></div>
+          <div class="err"></div>
+        </div>
+      </div>
+      <div class="mfoot">
+        <span class="sp"></span>
+        <button class="btn" type="button" onclick="roShut()">Cancel</button>
+        <button class="btn primary" type="submit" id="ro-go">Add role</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <div id="toasts"></div>
@@ -526,6 +1621,1381 @@ function show(name,push){
 items.forEach(function(it){ it.addEventListener('click',function(){ show(it.dataset.p,true); }); });
 window.addEventListener('hashchange',function(){ show(location.hash.slice(1),false); });
 show(location.hash.slice(1)||'user-profile',false);
+
+/* ---------- editing the profile ----------
+   EDIT swaps each printed value for an input where the value already sat, and the
+   two answers a form owes — commit, or put it back the way it was — appear under
+   the fields. Nothing on screen changes while the reader types: the values are
+   written on Save, so an abandoned edit leaves the profile as it was found. */
+const FIELDS=['first','last','company','address','email','phone'];
+const pcard=$('p-user-profile');
+const cell=k=>pcard.querySelector('.f[data-k="'+k+'"]');
+const box=k=>cell(k).querySelector('input');
+
+/* an em-dash, never a plausible-looking placeholder — the same bargain every
+   chart in this portal makes with a reading it does not have */
+function setVal(k,val){
+  const v=cell(k).querySelector('.v'), empty=!val;
+  v.textContent = empty ? '\u2014' : val;
+  v.classList.toggle('none', empty);
+}
+function getVal(k){
+  const v=cell(k).querySelector('.v');
+  return v.classList.contains('none') ? '' : v.textContent.trim();
+}
+/* the complaint goes under the field it is about, never in a summary at the top
+   that makes the reader match six sentences to six boxes */
+function fieldErr(k,msg){
+  const c=cell(k);
+  c.classList.toggle('bad',!!msg);
+  c.querySelector('.err').textContent=msg||'';
+  box(k).setAttribute('aria-invalid', msg?'true':'false');
+}
+
+window.startEdit=function(){
+  FIELDS.forEach(function(k){ box(k).value=getVal(k); fieldErr(k,''); });
+  pcard.classList.add('editing');
+  box('first').focus(); box('first').select();
+};
+window.cancelEdit=function(){
+  pcard.classList.remove('editing');
+  FIELDS.forEach(function(k){ fieldErr(k,''); });
+  $('editbtn').focus();
+};
+
+const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+window.saveProfile=function(e){
+  e.preventDefault();
+  const val={}; FIELDS.forEach(function(k){ val[k]=box(k).value.trim(); fieldErr(k,''); });
+
+  /* Required is only what the account cannot work without: a name to address the
+     reader by and the address they sign in with. A missing phone number is a fact
+     about the account, not a mistake — it prints as a dash. */
+  let bad=null;
+  const stop=function(k,msg){ fieldErr(k,msg); bad=bad||k; };
+  if(!val.first) stop('first','A first name is required.');
+  if(!val.last)  stop('last','A last name is required.');
+  if(!val.email) stop('email','An email address is required \u2014 it is how you sign in.');
+  else if(!EMAIL.test(val.email)) stop('email','That does not look like an email address.');
+  if(val.phone && val.phone.replace(/\D/g,'').length<7)
+    stop('phone','That does not look like a phone number.');
+  if(bad){ box(bad).focus(); return false; }
+
+  FIELDS.forEach(function(k){ setVal(k,val[k]); });
+
+  /* The header names who is signed in, so it has to change when the name does.
+     Two places showing two different names is worse than either being wrong. */
+  const name=(val.first+' '+val.last).trim();
+  const initial=(val.first||val.email||'?').charAt(0).toUpperCase();
+  pcard.querySelector('.who .nm').textContent=name;
+  pcard.querySelector('.who .big').textContent=initial;
+  $('acctbtn').textContent=initial;
+  document.querySelector('.acctwho .nm').textContent=name;
+  document.querySelector('.acctwho .em').textContent=val.email;
+
+  pcard.classList.remove('editing');
+  T('Profile updated');
+  return false;
+};
+
+/* ---------- changing the password ----------
+   The rules are on screen before they are broken, and they tick as they are met:
+   a box that only says what was wrong after the fact makes the reader guess
+   twice. What this screen CANNOT check is whether the current password is right —
+   only the backend knows that, and its answer lands in the band at the top. */
+const band=$('pwband');
+const PW={cur:$('pw-cur'), nw:$('pw-new'), cf:$('pw-cf')};
+
+function gauge(){
+  const n=PW.nw.value, c=PW.cur.value;
+  $('r-len').classList.toggle('ok', n.length>=10);
+  $('r-mix').classList.toggle('ok', /[A-Za-z]/.test(n) && /\d/.test(n));
+  $('r-new').classList.toggle('ok', !!n && n!==c);
+}
+Object.keys(PW).forEach(function(k){ PW[k].addEventListener('input',gauge); });
+
+function pwErr(k,msg){
+  const w=PW[k].closest('.fld');
+  w.classList.toggle('bad',!!msg);
+  w.querySelector('.err').textContent=msg||'';
+  PW[k].setAttribute('aria-invalid', msg?'true':'false');
+}
+function bandSay(msg){ band.textContent=msg||''; band.classList.toggle('on',!!msg); }
+function pwReset(){
+  Object.keys(PW).forEach(function(k){ PW[k].value=''; PW[k].type='password'; pwErr(k,''); });
+  [].slice.call(document.querySelectorAll('.eye')).forEach(function(b){ b.classList.remove('on'); });
+  bandSay(''); gauge();
+}
+
+window.openPw=function(){
+  pwReset();
+  scrimOn('pwscrim');
+  /* the field is inside an ancestor that was display:none a moment ago, so the
+     focus waits for the frame that draws it */
+  requestAnimationFrame(function(){ PW.cur.focus(); });
+};
+window.closePw=function(){
+  scrimOff('pwscrim');
+  pwReset();
+};
+
+window.savePw=function(e){
+  e.preventDefault();
+  Object.keys(PW).forEach(function(k){ pwErr(k,''); }); bandSay('');
+  const cur=PW.cur.value, n=PW.nw.value, cf=PW.cf.value;
+  let bad=null;
+  const stop=function(k,msg){ pwErr(k,msg); bad=bad||k; };
+
+  if(!cur) stop('cur','Enter your current password.');
+  if(n.length<10 || !/[A-Za-z]/.test(n) || !/\d/.test(n))
+    stop('nw','This one does not meet all three rules below.');
+  else if(n===cur) stop('nw','Choose one you are not already using.');
+  if(cf!==n) stop('cf','The two do not match.');
+  if(bad){ PW[bad].focus(); return false; }
+
+  /* the mockup stops here. The backend is the only thing that can accept or
+     refuse the current password, and its refusal belongs in bandSay(). */
+  closePw();
+  T('Password changed');
+  return false;
+};
+
+/* reveal is per field: seeing the one you are typing should not put the other two
+   on screen for whoever is standing behind you */
+window.reveal=function(btn,id){
+  const el=$(id), show=el.type==='password';
+  el.type = show ? 'text' : 'password';
+  btn.classList.toggle('on',show);
+  btn.title = show ? 'Hide password' : 'Show password';
+  btn.setAttribute('aria-label', btn.title);
+  el.focus();
+};
+
+
+/* Opening a dialog is three statements and closing it is two, repeated once per
+   dialog until one of them quietly forgets the scroll lock. Said once instead. */
+function scrimOn(id){ $(id).classList.add('on'); document.body.classList.add('locked'); }
+function scrimOff(id){ $(id).classList.remove('on'); document.body.classList.remove('locked'); }
+
+/* ---------- one-of-many ----------
+   Monitoring's picker, with Monitoring's markup: a .mbtn carrying the current
+   value, a .colpanel of radio .colrow rows, and the panel closing on the pick
+   because there is only one choice to make.
+
+   Every control of this kind on the page is a <button class="mbtn"> carrying
+   data-ss, which names the KIND: what the list holds, and what to do once a row
+   is picked. The button's own value property carries the answer, so everything
+   that used to read .value off a <select> still reads it here.
+
+   The panel is one element, lent to whichever button is open, because two of
+   these cannot be open at once. Focus stays on the button; the radios say which
+   row is true and .here says which row the keyboard is on. */
+const SSK={};
+let ssPan=null, ssBtn=null, ssRows=[], ssHere=-1, ssTyped='', ssTypeAt=0;
+
+function ssKind(btn){ return btn&&btn.dataset ? SSK[btn.dataset.ss] : null; }
+
+function ssPanel(){
+  if(ssPan) return ssPan;
+  ssPan=document.createElement('div');
+  ssPan.className='colpanel mpanel'; ssPan.id='sspanel';
+  document.body.appendChild(ssPan);
+  /* the pointer must not pull focus off the trigger on the way down */
+  ssPan.addEventListener('mousedown',function(e){ e.preventDefault(); });
+  /* the radio is a real input, so a click on the row reaches it on its own and
+     the CHANGE is what the pick is read from - the same way Monitoring reads it */
+  ssPan.addEventListener('change',function(e){
+    const r=e.target;
+    if(r && r.type==='radio') ssPick(+r.dataset.i);
+  });
+  ssPan.addEventListener('mousemove',function(e){
+    const r=e.target.closest('.colrow'); if(r) ssMark(+r.dataset.i,false);
+  });
+  return ssPan;
+}
+
+/* what the button wears. The faint half of a row is a finding aid, so it is not
+   repeated here: once INV07 is chosen, that it is an inverter has done its job. */
+function ssShow(btn,o){
+  const lab=btn.querySelector('.mlab');
+  btn.value = o ? String(o.v) : '';
+  lab.textContent = o ? o.t : (btn.dataset.any||'Choose');
+  lab.classList.toggle('any', !o || o.v==='');
+}
+
+/* set from the record: the value a row already holds, said the way the list says
+   it. A value the list no longer offers falls back to the empty state rather
+   than printing an id nobody can read. */
+function ssValue(id,v){
+  const btn=$(id), k=ssKind(btn);
+  const want=String(v==null?'':v);
+  const o=(k?k.list(btn):[]).filter(function(x){ return String(x.v)===want; })[0];
+  ssShow(btn,o||null);
+}
+
+function ssOpen(btn){
+  const k=ssKind(btn); if(!k) return;
+  const pan=ssPanel();
+  ssBtn=btn; ssRows=k.list(btn); ssTyped='';
+  const rows=ssRows.map(function(o,i){
+    const on=String(o.v)===String(btn.value);
+    return '<label class="colrow'+(o.none?' none':'')+'" id="ssrow'+i+'">'
+      +'<input type="radio" name="ss-'+btn.dataset.ss+'" data-i="'+i+'"'
+      +(on?' checked':'')+'>'
+      +'<span class="t">'+esc(o.t)+'</span>'
+      +(o.s?'<span class="s">'+esc(o.s)+'</span>':'')+'</label>';
+  }).join('');
+  pan.innerHTML='<div class="colhead">'+esc(k.label||'Options')+'</div>'
+    +(rows || '<div class="colnone">'+esc(k.empty||'Nothing to choose from')+'</div>');
+  pan.classList.add('on');
+  btn.setAttribute('aria-expanded','true');
+  ssPlace();
+  /* open ON the current answer, so the list starts where the reader left it */
+  let at=-1;
+  ssRows.forEach(function(o,i){ if(at<0 && String(o.v)===String(btn.value)) at=i; });
+  ssMark(at,true);
+}
+
+/* Placed against the viewport, and flipped above the button when what is below
+   it is the shorter half. A panel that opens downward into 40px of room is a
+   panel with one row showing. */
+function ssPlace(){
+  if(!ssBtn) return;
+  const r=ssBtn.getBoundingClientRect(), gap=6, edge=10;
+  ssPan.style.minWidth=Math.max(r.width,150)+'px';
+  ssPan.style.maxWidth=Math.max(r.width,300)+'px';
+  ssPan.style.maxHeight='none';
+  const want=ssPan.offsetHeight;
+  const under=window.innerHeight-r.bottom-edge, over=r.top-edge;
+  const up = want>under && over>under;
+  ssPan.style.maxHeight=Math.max(96,(up?over:under)-gap)+'px';
+  const h=ssPan.offsetHeight, w=ssPan.offsetWidth;
+  ssPan.style.top=(up ? Math.max(edge, r.top-gap-h) : r.bottom+gap)+'px';
+  ssPan.style.left=Math.max(edge, Math.min(r.left, window.innerWidth-edge-w))+'px';
+}
+
+function ssClose(back){
+  if(!ssBtn) return;
+  const btn=ssBtn;
+  ssPan.classList.remove('on');
+  btn.setAttribute('aria-expanded','false');
+  btn.removeAttribute('aria-activedescendant');
+  ssBtn=null; ssRows=[]; ssHere=-1;
+  if(back && btn.isConnected) btn.focus();
+}
+
+/* the keyboard cursor. It is not the selection: moving it changes nothing until
+   the row is picked, which is why Escape can put the list away untouched. */
+function ssMark(i,scroll){
+  if(!ssPan) return;
+  [].slice.call(ssPan.querySelectorAll('.colrow.here')).forEach(function(el){
+    el.classList.remove('here');
+  });
+  ssHere = (i==null||i<0) ? -1 : i;
+  const el = ssHere>=0 ? ssPan.querySelector('#ssrow'+ssHere) : null;
+  if(!el){ if(ssBtn) ssBtn.removeAttribute('aria-activedescendant'); return; }
+  el.classList.add('here');
+  if(ssBtn) ssBtn.setAttribute('aria-activedescendant',el.id);
+  if(scroll!==false) el.scrollIntoView({block:'nearest'});
+}
+/* the ends hold rather than wrap: arriving back at the top by pressing Down is
+   how a reader loses their place in a list of thirty devices */
+function ssStep(dir){
+  const i=(ssHere<0 ? (dir>0?-1:ssRows.length) : ssHere)+dir;
+  if(i>=0 && i<ssRows.length) ssMark(i,true);
+}
+function ssEnd(dir){
+  if(ssRows.length) ssMark(dir>0 ? 0 : ssRows.length-1, true);
+}
+function ssPick(i){
+  const o=ssRows[i]; if(!o) return;
+  const btn=ssBtn, k=ssKind(btn);
+  const r=ssPan.querySelector('#ssrow'+i+' input');
+  if(r) r.checked=true;
+  ssShow(btn,o);
+  ssClose(true);
+  if(k&&k.pick) k.pick(btn,o.v,o);
+}
+/* typing the first letters is the one habit worth keeping from the native list:
+   a run of keystrokes inside a second is one word, and it moves the cursor
+   rather than choosing, so a mistyped letter costs nothing */
+function ssType(ch){
+  const now=Date.now();
+  ssTyped=((now-ssTypeAt<900 ? ssTyped : '')+ch).toLowerCase();
+  ssTypeAt=now;
+  const n=ssRows.length;
+  const from=(ssHere<0?0:ssHere)+(ssTyped.length>1?0:1);
+  for(let hop=0;hop<n;hop++){
+    const i=((from+hop)%n+n)%n;
+    if(String(ssRows[i].t).toLowerCase().indexOf(ssTyped)===0){ ssMark(i,true); return; }
+  }
+}
+
+document.addEventListener('click',function(e){
+  const b=e.target.closest ? e.target.closest('.mbtn') : null;
+  if(!b) return;
+  e.stopPropagation();
+  if(ssBtn===b) ssClose(true); else ssOpen(b);
+});
+/* Closing on a click ELSEWHERE has to happen on the way DOWN, in the capture
+   phase. A handler that waits its turn on the way up never hears about the
+   clicks other controls stop for themselves — the avatar stops its own — and the
+   list would be left hanging open behind whatever that click opened. */
+document.addEventListener('mousedown',function(e){
+  if(!ssBtn) return;
+  if(ssPan && ssPan.contains(e.target)) return;
+  /* the trigger itself is left alone: its own click is what toggles it shut */
+  if(e.target.closest && e.target.closest('.mbtn')===ssBtn) return;
+  ssClose(false);
+},true);
+/* CAPTURE, so that Escape closes the list and stops there. The dialogs listen
+   for Escape too, and a first press that shuts the whole dialog would throw away
+   a form because someone changed their mind about one field. */
+document.addEventListener('keydown',function(e){
+  const focused=document.activeElement;
+  const btn = ssBtn || (focused && focused.classList && focused.classList.contains('mbtn') ? focused : null);
+  if(!btn) return;
+  if(!ssBtn){
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'||e.key==='Enter'||e.key===' '){
+      e.preventDefault(); ssOpen(btn);
+    }
+    return;
+  }
+  if(e.key==='Escape'||e.key==='Tab'){
+    if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); }
+    ssClose(e.key==='Escape');
+    return;
+  }
+  if(e.key==='Enter'||e.key===' '){ e.preventDefault(); e.stopPropagation(); ssPick(ssHere); return; }
+  if(e.key==='ArrowDown'){ e.preventDefault(); ssStep(1); return; }
+  if(e.key==='ArrowUp'){ e.preventDefault(); ssStep(-1); return; }
+  if(e.key==='Home'){ e.preventDefault(); ssEnd(1); return; }
+  if(e.key==='End'){ e.preventDefault(); ssEnd(-1); return; }
+  if(e.key.length===1 && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); ssType(e.key); }
+},true);
+/* the panel is placed in viewport coordinates, so anything that moves the button
+   under it has to move it too - the dialog body and the tables both scroll */
+window.addEventListener('resize',function(){ if(ssBtn) ssPlace(); });
+window.addEventListener('scroll',function(){ if(ssBtn) ssPlace(); },true);
+/* the moment a row is written, which is not the moment it takes effect */
+function stamp(){
+  const n=new Date(), z=v=>String(v).padStart(2,'0');
+  return n.getFullYear()+'-'+z(n.getMonth()+1)+'-'+z(n.getDate())+' '+z(n.getHours())+':'+z(n.getMinutes());
+}
+
+/* ---------- the device register ----------
+   Thirty devices over three plants, because the case that matters only appears at
+   that size: INV01 exists on all three sites. The NAME is not an identifier here,
+   which is why the id column and the plant column are both doing work - and why a
+   rename checks for a clash within the plant rather than across the fleet. */
+const DEV=[
+  {id:'31076873',nm:'INV01',ty:'Inverter',       pl:'Sangria',cm:'2021-03-12',live:true},
+  {id:'72578863',nm:'INV02',ty:'Inverter',       pl:'Sangria',cm:'2021-03-12',live:true},
+  {id:'87408079',nm:'INV03',ty:'Inverter',       pl:'Sangria',cm:'2021-03-12',live:true},
+  {id:'22592824',nm:'INV04',ty:'Inverter',       pl:'Sangria',cm:'2021-03-12',live:true},
+  {id:'95312461',nm:'INV05',ty:'Inverter',       pl:'Sangria',cm:'2021-03-19',live:true},
+  {id:'17865686',nm:'INV06',ty:'Inverter',       pl:'Sangria',cm:'2021-03-19',live:true},
+  {id:'98649459',nm:'INV07',ty:'Inverter',       pl:'Sangria',cm:'2021-03-19',live:true},
+  {id:'77332195',nm:'MET01',ty:'MFM',            pl:'Sangria',cm:'2021-03-12',live:true},
+  {id:'23638739',nm:'MET02',ty:'MFM',            pl:'Sangria',cm:'2021-03-12',live:true},
+  {id:'46331597',nm:'MET03',ty:'MFM',            pl:'Sangria',cm:'2021-03-12',live:false},
+  {id:'58420913',nm:'INV01',ty:'Inverter',       pl:'Rioja',  cm:'2019-11-08',live:true},
+  {id:'60117544',nm:'INV02',ty:'Inverter',       pl:'Rioja',  cm:'2019-11-08',live:true},
+  {id:'49883270',nm:'INV03',ty:'Inverter',       pl:'Rioja',  cm:'2019-11-08',live:true},
+  {id:'15206798',nm:'INV04',ty:'Inverter',       pl:'Rioja',  cm:'2019-11-15',live:true},
+  {id:'83971026',nm:'INV05',ty:'Inverter',       pl:'Rioja',  cm:'2019-11-15',live:true},
+  {id:'27604158',nm:'MET01',ty:'MFM',            pl:'Rioja',  cm:'2019-11-08',live:true},
+  {id:'91338472',nm:'MET02',ty:'MFM',            pl:'Rioja',  cm:'2019-11-08',live:true},
+  {id:'34790615',nm:'WMS01',ty:'Weather station',pl:'Rioja',  cm:'2019-11-15',live:true},
+  {id:'62815904',nm:'INV01',ty:'Inverter',       pl:'Mendoza',cm:'2022-06-21',live:true},
+  {id:'10473652',nm:'INV02',ty:'Inverter',       pl:'Mendoza',cm:'2022-06-21',live:true},
+  {id:'88526137',nm:'INV03',ty:'Inverter',       pl:'Mendoza',cm:'2022-06-21',live:true},
+  {id:'39140788',nm:'INV04',ty:'Inverter',       pl:'Mendoza',cm:'2022-06-21',live:true},
+  {id:'55302914',nm:'INV05',ty:'Inverter',       pl:'Mendoza',cm:'2022-06-28',live:true},
+  {id:'74619203',nm:'INV06',ty:'Inverter',       pl:'Mendoza',cm:'2022-06-28',live:true},
+  {id:'20857463',nm:'INV07',ty:'Inverter',       pl:'Mendoza',cm:'2022-06-28',live:true},
+  {id:'43928170',nm:'INV08',ty:'Inverter',       pl:'Mendoza',cm:'2022-06-28',live:true},
+  {id:'96201385',nm:'INV09',ty:'Inverter',       pl:'Mendoza',cm:'2022-06-28',live:true},
+  {id:'51674029',nm:'MET01',ty:'MFM',            pl:'Mendoza',cm:'2022-06-21',live:true},
+  {id:'68035741',nm:'MET02',ty:'MFM',            pl:'Mendoza',cm:'2022-06-21',live:true},
+  {id:'12459836',nm:'WMS01',ty:'Weather station',pl:'Mendoza',cm:'2022-06-21',live:true}
+];
+const byDev=id=>DEV.filter(function(d){return d.id===id;})[0];
+
+/* The device name is typed by a person and printed straight back into the table
+   as markup, so it is escaped on the way out. It is the one value on this screen
+   that crosses from a field into HTML. */
+function esc(v){
+  return String(v).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  });
+}
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+/* held as ISO, printed long: ISO sorts correctly as a plain string, and
+   "12 Mar 2021" cannot be read as a day and a month the wrong way round */
+function fmtDate(iso){ const q=iso.split('-'); return q[2]+' '+MON[+q[1]-1]+' '+q[0]; }
+
+/* No Plant column: the table is one plant's register, and a column repeating the
+   same value on every row is a column that has stopped saying anything. The pin
+   in the card head says it once. */
+const DVCOL=[{k:'nm',t:'Device'},{k:'id',t:'Id'},{k:'ty',t:'Type'},
+             {k:'cm',t:'Commissioned'},{k:'live',t:'Status'}];
+let dvSort='nm', dvDir=1, dvPg=0;
+
+/* The site comes from the orbit, through the one key every reading page already
+   reads and writes. Settings follows that choice rather than keeping its own. */
+function dvSite(){
+  let v=null; try{ v=localStorage.getItem('enerops-plant'); }catch(e){}
+  /* falling back to a name typed in here would print an empty table for a site
+     that is not in the register, and an empty table reads as a fault */
+  return DEV.some(function(d){return d.pl===v;}) ? v : DEV[0].pl;
+}
+
+function dvRows(){
+  const pl=dvSite();
+  const r=DEV.filter(function(d){ return d.pl===pl; });
+  const k=dvSort;
+  r.sort(function(a,b){
+    let x=a[k], y=b[k];
+    if(k==='live'){ x=x?0:1; y=y?0:1; }
+    if(x<y) return -dvDir;
+    if(x>y) return dvDir;
+    /* a stable tail, so two rows that tie never swap places between two draws */
+    return a.nm<b.nm ? -1 : 1;
+  });
+  return r;
+}
+
+function dvRowHtml(d){
+  const acts = d.live
+    ? '<button class="rowbtn warn" type="button" title="Retire this device"'
+      +' aria-label="Retire '+esc(d.nm)+'" onclick="openRt(\''+d.id+'\')">'+I_BOX+'</button>'
+    : '<button class="rowbtn" type="button" title="Bring back into service"'
+      +' aria-label="Bring '+esc(d.nm)+' back into service" onclick="openRt(\''+d.id+'\')">'+I_BACK+'</button>';
+  return '<tr'+(d.live?'':' class="gone"')+'>'
+    +'<td class="nm">'+esc(d.nm)+'</td>'
+    +'<td class="mono">'+d.id+'</td>'
+    +'<td>'+d.ty+'</td>'
+    +'<td class="mono">'+fmtDate(d.cm)+'</td>'
+    +'<td>'+(d.live
+        ? '<span class="pill live"><span class="dot"></span>Live</span>'
+        : '<span class="pill gone"><span class="dot"></span>Retired</span>')+'</td>'
+    +'<td><div class="rowacts">'
+    +'<button class="rowbtn" type="button" title="Rename this device"'
+    +' aria-label="Rename '+esc(d.nm)+'" onclick="openRn(\''+d.id+'\')">'+I_PEN+'</button>'
+    +acts+'</div></td></tr>';
+}
+
+window.dvDraw=function(reset){
+  if(reset) dvPg=0;
+  const rows=dvRows(), per=+$('dv-per').value;
+  const pages=Math.max(1,Math.ceil(rows.length/per));
+  if(dvPg>=pages) dvPg=pages-1;
+  if(dvPg<0) dvPg=0;
+  const from=dvPg*per, slice=rows.slice(from,from+per);
+
+  $('dv-head').innerHTML='<tr>'+DVCOL.map(function(c){
+    const on=c.k===dvSort;
+    return '<th class="so'+(on?' on':'')+'" onclick="dvSortBy(\''+c.k+'\')">'+c.t
+          +'<span class="ar">'+(on?(dvDir>0?'▲':'▼'):'')+'</span></th>';
+  }).join('')+'<th></th></tr>';
+
+  $('dv-body').innerHTML = slice.length
+    ? slice.map(dvRowHtml).join('')
+    : '<tr><td colspan="6"><div class="empty-note">No devices on this site yet</div></td></tr>';
+
+  $('dv-site').textContent = dvSite();
+  const gone=rows.filter(function(d){return !d.live;}).length;
+  $('dv-count').textContent = rows.length+' device'+(rows.length===1?'':'s')
+    +(gone? ' · '+gone+' retired' : '');
+  $('dv-range').textContent = rows.length
+    ? (from+1)+'-'+Math.min(from+per,rows.length)+' of '+rows.length : '0-0 of 0';
+  $('dv-prev').disabled = dvPg<=0;
+  $('dv-next').disabled = dvPg>=pages-1;
+};
+window.dvSortBy=function(k){
+  if(dvSort===k) dvDir=-dvDir; else { dvSort=k; dvDir=1; }
+  dvPg=0; dvDraw(false);
+};
+window.dvPage=function(n){ dvPg+=n; dvDraw(false); };
+
+/* ---------- rename ---------- */
+let rnId=null;
+function rnErr(msg){
+  const w=$('rn-name').closest('.fld');
+  w.classList.toggle('bad',!!msg);
+  w.querySelector('.err').textContent=msg||'';
+  $('rn-name').setAttribute('aria-invalid', msg?'true':'false');
+}
+window.openRn=function(id){
+  const d=byDev(id); if(!d) return;
+  rnId=id;
+  $('rn-id').textContent=d.id; $('rn-plant').textContent=d.pl; $('rn-type').textContent=d.ty;
+  $('rn-name').value=d.nm; rnErr('');
+  scrimOn('rnscrim');
+  requestAnimationFrame(function(){ $('rn-name').focus(); $('rn-name').select(); });
+};
+window.closeRn=function(){
+  scrimOff('rnscrim'); rnId=null;
+};
+window.saveRn=function(e){
+  e.preventDefault();
+  const d=byDev(rnId); if(!d) return false;
+  const v=$('rn-name').value.trim();
+  if(!v){ rnErr('A device needs a name.'); $('rn-name').focus(); return false; }
+  /* Two devices called INV04 on one site is not a naming preference - it is an
+     ambiguity every other page inherits, because an alarm raised on INV04 stops
+     saying which one raised it. Across plants it is fine: the plant tells them
+     apart, which is why all three sites can have an INV01. */
+  const clash=DEV.some(function(x){
+    return x!==d && x.pl===d.pl && x.nm.toLowerCase()===v.toLowerCase();
+  });
+  if(clash){ rnErr(d.pl+' already has a device called that.'); $('rn-name').focus(); return false; }
+  d.nm=v;
+  closeRn(); dvDraw(false); T('Renamed to '+v);
+  return false;
+};
+
+/* ---------- one confirm, asked the same way every time ----------
+   rows: the record, named before the question is put. text: what will actually
+   happen. go: the word on the button, which says the ACTION rather than "OK" -
+   nobody has ever misread a button that says Retire device. */
+let askThen=null;
+window.ask=function(o){
+  $('ask-title').textContent=o.title;
+  $('ask-who').innerHTML=o.rows.map(function(r){
+    return '<div class="r"><b>'+r[0]+'</b><span>'+esc(r[1])+'</span></div>';
+  }).join('');
+  $('ask-text').innerHTML=o.text;
+  const go=$('ask-go');
+  go.textContent=o.go;
+  go.className='btn '+(o.kind||'danger');
+  askThen=o.then;
+  scrimOn('askdlg');
+  requestAnimationFrame(function(){ go.focus(); });
+};
+window.askShut=function(){ scrimOff('askdlg'); askThen=null; };
+window.askYes=function(){ const f=askThen; askShut(); if(f) f(); };
+
+/* ---------- retire, which is not delete ---------- */
+window.openRt=function(id){
+  const d=byDev(id); if(!d) return;
+  ask({
+    title: d.live ? 'Retire device' : 'Bring back into service',
+    rows: [['Device',d.nm],['Id',d.id],['Plant',d.pl]],
+    text: d.live
+      ? '<b>'+esc(d.nm)+'</b> stops appearing on Monitoring, in the KPI table and in '
+        +'Analysis. Everything it has already reported stays where it is and stays filed '
+        +'under its id, so nothing that cites it becomes unreadable. This can be undone.'
+      : '<b>'+esc(d.nm)+'</b> starts appearing on the live screens again from now on. '
+        +'Nothing is invented to fill the time it spent retired.',
+    go: d.live ? 'Retire device' : 'Bring it back',
+    kind: d.live ? 'danger' : 'primary',
+    then: function(){
+      d.live=!d.live;
+      dvDraw(false);
+      T(d.live ? d.nm+' is back in service' : d.nm+' retired');
+    }
+  });
+};
+
+/* ---------- rates, which are histories ----------
+   Emission and Electricity are the same board twice: one number per site,
+   versioned by the date it takes effect, superseded rather than edited. They share
+   one set of functions and one pair of dialogs, because the day one of them learns
+   something the other has to learn it too — and two copies of a rule are two rules
+   that drift.
+
+   Nothing stores an END date. A rate runs until the next one starts, so Until is
+   DERIVED. Storing it would let the two disagree, and then nobody could say which
+   was right — which is also why the legacy Add dialog asked for a start date and
+   never for an end. */
+const EMI={
+  Sangria:[{from:'2021-04-01',rate:0.710,added:'2021-03-24 11:20'},
+           {from:'2023-04-01',rate:0.716,added:'2023-03-28 09:41'},
+           {from:'2025-04-01',rate:0.727,added:'2025-03-19 16:05'}],
+  Rioja:  [{from:'2019-11-01',rate:0.710,added:'2019-10-22 14:08'},
+           {from:'2025-04-01',rate:0.727,added:'2025-03-19 16:06'}],
+  Mendoza:[{from:'2022-06-01',rate:0.716,added:'2022-05-27 10:33'},
+           {from:'2025-04-01',rate:0.727,added:'2025-03-19 16:07'}]
+};
+const ELE={
+  Sangria:[{from:'2021-04-01',rate:6.20,added:'2021-03-24 11:22'},
+           {from:'2023-04-01',rate:7.15,added:'2023-03-28 09:44'},
+           {from:'2025-04-01',rate:7.85,added:'2025-03-19 16:12'}],
+  Rioja:  [{from:'2019-11-01',rate:6.05,added:'2019-10-22 14:10'},
+           {from:'2025-04-01',rate:7.85,added:'2025-03-19 16:13'}],
+  Mendoza:[{from:'2022-06-01',rate:6.90,added:'2022-05-27 10:36'},
+           {from:'2025-04-01',rate:7.85,added:'2025-03-19 16:14'}]
+};
+
+const RATE={
+  em:{store:EMI, noun:'emission rate', unit:'kg CO₂ per kWh', dp:3, step:'0.001', ph:'0.727',
+      /* An Indian grid factor is around 0.7. A three-figure number here is grams
+         typed into a kilograms field, and it would multiply every reported saving
+         by a thousand with nothing else on the screen looking wrong. */
+      hi:5, hiSay:'That looks like grams. This field is kg CO₂ per kWh.',
+      empty:'savings cannot be reported until there is one'},
+  el:{store:ELE, noun:'electricity rate', unit:'₹ per kWh', dp:2, step:'0.01', ph:'7.85',
+      hi:100, hiSay:'That looks like paise. This field is ₹ per kWh.',
+      empty:'the savings figures have nothing to be priced against until there is one'}
+};
+
+/* today, read at draw time rather than pinned. A mockup with a hard-coded date
+   starts lying the day after it is written, and "in force" is exactly the kind of
+   claim that must not go stale. */
+function emToday(){ const t=new Date(); t.setHours(0,0,0,0); return t; }
+function emDate(iso){ const q=iso.split('-'); return new Date(+q[0],+q[1]-1,+q[2]); }
+function emDayBefore(iso){
+  const d=emDate(iso); d.setDate(d.getDate()-1);
+  return d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear();
+}
+function isoPlusDay(iso){
+  const d=emDate(iso); d.setDate(d.getDate()+1);
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  return d.getFullYear()+'-'+mm+'-'+dd;
+}
+function rateList(k){
+  const st=RATE[k].store, site=dvSite();
+  return st[site] || (st[site]=[]);
+}
+/* TWO states. The newest row is what is being used; every row behind it is what
+   was being used. Nothing can be dated ahead — see rateSave — so the newest row is
+   always the one in effect and there is never a period with no honest label.
+
+   Worked out, never stored. A stored status is a second copy of a fact, and the
+   two copies disagree the first time somebody adds a row without updating both. */
+function periodState(list,i){ return i===list.length-1 ? 'live' : 'held'; }
+
+/* today, as the picker wants it */
+function todayISO(){
+  const n=new Date(), z=v=>String(v).padStart(2,'0');
+  return n.getFullYear()+'-'+z(n.getMonth()+1)+'-'+z(n.getDate());
+}
+/* ACTIVE and SUSPENDED, the same pair the Company Profile uses, and the same two
+   colours. One row per table is green; everything else is the history behind it. */
+const EMWORD={live:'Active', held:'Suspended'};
+const periodPill=st=>'<span class="pill '+st+'"><span class="dot"></span>'+EMWORD[st]+'</span>';
+/* the dash that means "still running" - an empty cell would read as missing data
+   rather than as a period nothing has ended yet */
+const periodUntil=(list,i)=> (i+1<list.length) ? emDayBefore(list[i+1].from) : '—';
+
+function rateDraw(k){
+  const c=RATE[k], list=rateList(k);
+  $(k+'-site').textContent=dvSite();
+  const rows=list.map(function(r,i){
+    const st=periodState(list,i), open=(i+1>=list.length);
+    return '<tr>'
+      +'<td class="mono nm">'+fmtDate(r.from)+'</td>'
+      +'<td class="mono'+(open?' dim':'')+'">'+periodUntil(list,i)+'</td>'
+      +'<td class="mono nm">'+r.rate.toFixed(c.dp)+'</td>'
+      +'<td>'+periodPill(st)+'</td>'
+      +'<td class="mono">'+r.added+'</td>'
+      /* Only the ACTIVE row can be removed, and removing it simply hands the period
+         back to the rate before it. A row further down cannot go: taking one out of
+         the middle would leave a stretch of time priced by nothing, and every figure
+         this portal published for that stretch would quietly lose its basis. */
+      +'<td><div class="rowacts">'+(st==='live'
+          ? '<button class="rowbtn warn" type="button" title="Remove this rate"'
+            +' aria-label="Remove the rate dated '+fmtDate(r.from)+'"'
+            +' onclick="rateRm(\''+k+'\',\''+r.from+'\')">'+I_BIN+'</button>'
+          : '')
+      +'</div></td></tr>';
+  });
+  $(k+'-body').innerHTML = rows.length ? rows.reverse().join('')
+    : '<tr><td colspan="6"><div class="empty-note">No '+c.noun+' set for '+esc(dvSite())
+      +' — '+c.empty+'</div></td></tr>';
+}
+
+/* ---------- adding one ---------- */
+let rateK=null;
+function rdErr(id,msg){
+  const w=$(id).closest('.fld');
+  w.classList.toggle('bad',!!msg);
+  w.querySelector('.err').textContent=msg||'';
+  $(id).setAttribute('aria-invalid', msg?'true':'false');
+}
+window.rateAdd=function(k){
+  rateK=k;
+  const c=RATE[k], list=rateList(k), last=list[list.length-1];
+  $('rd-title').textContent='Add '+c.noun;
+  $('rd-for').textContent=dvSite();
+  $('rd-prev').textContent = last ? last.rate.toFixed(c.dp)+' from '+fmtDate(last.from) : '—';
+  $('rd-unit').textContent=c.unit;
+  $('rd-rate').value=''; $('rd-rate').placeholder=c.ph; $('rd-rate').step=c.step;
+  $('rd-from').value='';
+  /* the earliest date this rate could start is the day after the last one, and the
+     picker is told so rather than letting the form refuse afterwards */
+  $('rd-from').min = last ? isoPlusDay(last.from) : '';
+  $('rd-from').max = todayISO();
+  rdErr('rd-from',''); rdErr('rd-rate','');
+  scrimOn('ratedlg');
+  requestAnimationFrame(function(){ $('rd-from').focus(); });
+};
+window.rateShut=function(){ scrimOff('ratedlg'); };
+window.rateSave=function(e){
+  e.preventDefault();
+  rdErr('rd-from',''); rdErr('rd-rate','');
+  const c=RATE[rateK], list=rateList(rateK), last=list[list.length-1];
+  const from=$('rd-from').value, typed=$('rd-rate').value.trim(), rate=parseFloat(typed);
+  let bad=null;
+  const stop=function(id,msg){ rdErr(id,msg); bad=bad||id; };
+
+  if(!from) stop('rd-from','A rate needs a date it takes effect.');
+  /* Later than every rate before it, and never ahead of today. Back-dating would
+     re-price a period this portal has already reported on; forward-dating would put
+     a row in the table that is neither active nor was ever active, which is a state
+     this board deliberately does not have. */
+  else if(last && emDate(from)<=emDate(last.from))
+    stop('rd-from','Must be after '+fmtDate(last.from)+', the rate it replaces.');
+  else if(emDate(from)>emToday())
+    stop('rd-from','A rate takes effect from a date that has arrived, not a future one.');
+
+  if(!typed) stop('rd-rate','A rate is required.');
+  else if(isNaN(rate) || rate<=0) stop('rd-rate','A rate has to be greater than zero.');
+  else if(rate>c.hi) stop('rd-rate',c.hiSay);
+
+  if(bad){ $(bad).focus(); return false; }
+
+  list.push({from:from, rate:rate, added:stamp()});
+  const k=rateK;
+  rateShut(); rateDraw(k);
+  T('Rate added, active from '+fmtDate(from));
+  return false;
+};
+
+/* ---------- removing a scheduled one ---------- */
+window.rateRm=function(k,from){
+  const c=RATE[k], list=rateList(k);
+  const r=list.filter(function(x){return x.from===from;})[0];
+  if(!r) return;
+  const prev=list[list.length-2];
+  ask({
+    title:'Remove '+c.noun,
+    rows:[['Rate',r.rate.toFixed(c.dp)],['Active from',fmtDate(r.from)],['Site',dvSite()]],
+    text:'This is the rate <b>'+esc(dvSite())+'</b> is being costed at now. '
+        +(prev
+           ? 'Removing it hands the period back to <b>'+prev.rate.toFixed(c.dp)+'</b>, active '
+             +'from '+fmtDate(prev.from)+', and everything from '+fmtDate(r.from)
+             +' onwards is re-costed at that number.'
+           : 'It is the only one on record, so removing it leaves the site with no rate at '
+             +'all and nothing to report savings against until another is added.'),
+    go:'Remove rate',
+    then:function(){
+      const i=list.findIndex(function(x){return x.from===from;});
+      if(i<0) return;
+      list.splice(i,1); rateDraw(k);
+      T('Rate dated '+fmtDate(from)+' removed');
+    }
+  });
+};
+
+/* ---------- energy offsets, versioned per DEVICE ----------
+   Keyed by device id, never by device name: the name is renameable on the screen
+   above this one, and an offset that stopped pointing at anything the moment
+   somebody tidied a label would be worse than no offset at all.
+
+   Versioned like the rate boards, but each device carries its OWN series - INV04's
+   second correction supersedes INV04's first and has nothing to do with MET01's.
+   Setting an offset of 0 is how a correction is ended, which is why zero is a
+   legal value here and an empty field is not. */
+const OFF={
+  Sangria:[
+    {dev:'22592824',from:'2024-02-01',kwh:-1250,added:'2024-02-03 09:12',
+     why:'Meter replaced 31 Jan; the new unit restarted its lifetime counter'},
+    {dev:'22592824',from:'2025-07-01',kwh:0,added:'2025-07-02 15:40',
+     why:'Counter caught up at the June close, so the correction is no longer needed'},
+    {dev:'98649459',from:'2026-05-18',kwh:840,added:'2026-05-20 11:05',
+     why:'String 3 feeds through a sub-meter that was not being polled'}
+  ],
+  Rioja:[
+    {dev:'27604158',from:'2023-09-01',kwh:-320,added:'2023-09-04 10:18',
+     why:'Export double-counted during the CT swap'}
+  ],
+  Mendoza:[]
+};
+function offList(){ const st=OFF, site=dvSite(); return st[site] || (st[site]=[]); }
+function devName(id){ const d=byDev(id); return d ? d.nm : id; }
+
+/* signed, always. An offset of 840 and an offset of -1,250 are opposite
+   corrections, and the sign is the whole of the difference between them. */
+function offNum(v){
+  const sign = v>0 ? '+' : v<0 ? '−' : '';
+  return sign + Math.abs(v).toLocaleString('en-IN');
+}
+
+function offRows(){
+  const groups={};
+  offList().forEach(function(r){ (groups[r.dev]=groups[r.dev]||[]).push(r); });
+  const out=[];
+  Object.keys(groups).forEach(function(id){
+    const g=groups[id].slice().sort(function(a,b){ return a.from<b.from?-1:1; });
+    g.forEach(function(r,i){
+      out.push({r:r, st:periodState(g,i), until:periodUntil(g,i), open:(i+1>=g.length)});
+    });
+  });
+  /* by device name, then newest first inside each device */
+  out.sort(function(a,b){
+    const an=devName(a.r.dev), bn=devName(b.r.dev);
+    if(an!==bn) return an<bn ? -1 : 1;
+    return a.r.from<b.r.from ? 1 : -1;
+  });
+  return out;
+}
+
+function offDraw(){
+  $('of-site').textContent=dvSite();
+  const rows=offRows().map(function(x){
+    const r=x.r;
+    return '<tr>'
+      +'<td class="nm">'+esc(devName(r.dev))+'</td>'
+      +'<td class="mono">'+fmtDate(r.from)+'</td>'
+      +'<td class="mono'+(x.open?' dim':'')+'">'+x.until+'</td>'
+      +'<td class="mono nm">'+offNum(r.kwh)+'</td>'
+      +'<td class="why">'+esc(r.why)+'</td>'
+      +'<td>'+periodPill(x.st)+'</td>'
+      +'<td class="mono">'+r.added+'</td>'
+      +'<td><div class="rowacts">'+(x.st==='live'
+          ? '<button class="rowbtn warn" type="button" title="Remove this offset"'
+            +' aria-label="Remove the offset dated '+fmtDate(r.from)+' on '+esc(devName(r.dev))+'"'
+            +' onclick="offRm(\''+r.dev+'\',\''+r.from+'\')">'+I_BIN+'</button>'
+          : '')
+      +'</div></td></tr>';
+  });
+  $('of-body').innerHTML = rows.length ? rows.join('')
+    : '<tr><td colspan="8"><div class="empty-note">Nothing is being corrected on '
+      +esc(dvSite())+' &mdash; metered generation is reported as the devices report it</div></td></tr>';
+}
+
+/* ---------- adding one ---------- */
+function offErr(id,msg){
+  const w=$(id).closest('.fld');
+  w.classList.toggle('bad',!!msg);
+  w.querySelector('.err').textContent=msg||'';
+  $(id).setAttribute('aria-invalid', msg?'true':'false');
+}
+/* the latest offset already on this device, which the next one has to follow */
+function offLast(devId){
+  const g=offList().filter(function(r){return r.dev===devId;})
+                   .sort(function(a,b){ return a.from<b.from?-1:1; });
+  return g[g.length-1] || null;
+}
+/* Only devices in service are offered: an offset on a retired device would
+   correct a figure nothing is producing. The type is the faint half of the row
+   because INV against MET is how the right one is found in a list of thirty. */
+SSK.offdev={
+  label:'Device',
+  empty:'No devices in service at this site',
+  list:function(){
+    return DEV.filter(function(d){ return d.pl===dvSite() && d.live; })
+              .sort(function(a,b){ return a.nm<b.nm?-1:1; })
+              .map(function(d){ return {v:d.id, t:d.nm, s:d.ty}; });
+  },
+  pick:function(){ offDevPicked(); }
+};
+/* which device is chosen is what decides the earliest date this offset may take
+   effect, because it has to follow the last one already on that device */
+function offDevPicked(){
+  const last=offLast($('of-dev').value);
+  $('of-from').min = last ? isoPlusDay(last.from) : '';
+  $('of-from').max = todayISO();
+  offErr('of-from',''); offErr('of-dev','');
+}
+window.offAdd=function(){
+  $('of-for').textContent=dvSite();
+  ssValue('of-dev','');
+  $('of-from').value=''; $('of-from').min=''; $('of-from').max=todayISO();
+  $('of-kwh').value=''; $('of-why').value='';
+  ['of-dev','of-from','of-kwh','of-why'].forEach(function(id){ offErr(id,''); });
+  scrimOn('offdlg');
+  requestAnimationFrame(function(){ $('of-dev').focus(); });
+};
+window.offShut=function(){ scrimOff('offdlg'); };
+window.offSave=function(e){
+  e.preventDefault();
+  ['of-dev','of-from','of-kwh','of-why'].forEach(function(id){ offErr(id,''); });
+  const dev=$('of-dev').value, from=$('of-from').value;
+  const typed=$('of-kwh').value.trim(), kwh=parseFloat(typed), why=$('of-why').value.trim();
+  let bad=null;
+  const stop=function(id,msg){ offErr(id,msg); bad=bad||id; };
+
+  if(!dev) stop('of-dev','Choose the device this corrects.');
+  if(!from) stop('of-from','An offset needs a date it takes effect.');
+  else if(dev){
+    const last=offLast(dev);
+    if(last && emDate(from)<=emDate(last.from))
+      stop('of-from','Must be after '+fmtDate(last.from)+', this device’s last offset.');
+    else if(emDate(from)>emToday())
+      stop('of-from','An offset takes effect from a date that has arrived, not a future one.');
+  }
+  if(!typed) stop('of-kwh','An offset is required — use 0 to end a correction.');
+  else if(isNaN(kwh)) stop('of-kwh','That is not a number.');
+  /* An offset is a correction, not a second meter. A number this size is being
+     typed into the wrong field or in the wrong unit. */
+  else if(Math.abs(kwh)>1e7) stop('of-kwh','That is larger than any correction should be.');
+  if(!why) stop('of-why','Say what is being corrected — an untraceable adjustment reads as a broken meter.');
+  else if(why.length<8) stop('of-why','A few more words: this is the only record of why.');
+
+  if(bad){ $(bad).focus(); return false; }
+
+  offList().push({dev:dev, from:from, kwh:kwh, why:why, added:stamp()});
+  offShut(); offDraw();
+  T('Offset added to '+devName(dev));
+  return false;
+};
+
+window.offRm=function(devId,from){
+  const list=offList();
+  const r=list.filter(function(x){return x.dev===devId && x.from===from;})[0];
+  if(!r) return;
+  const mine=list.filter(function(x){return x.dev===devId;})
+                 .sort(function(a,b){ return a.from<b.from?-1:1; });
+  const prev=mine[mine.length-2];
+  ask({
+    title:'Remove offset',
+    rows:[['Device',devName(devId)],['Offset',offNum(r.kwh)+' kWh'],['Active from',fmtDate(r.from)]],
+    text:'This is the correction <b>'+esc(devName(devId))+'</b> is being reported with now. '
+        +(prev
+           ? 'Removing it hands the period back to '+offNum(prev.kwh)+' kWh, active from '
+             +fmtDate(prev.from)+'.'
+           : 'Removing it means '+esc(devName(devId))+' is reported exactly as it meters, '
+             +'with no correction at all.'),
+    go:'Remove offset',
+    then:function(){
+      const i=list.findIndex(function(x){return x.dev===devId && x.from===from;});
+      if(i<0) return;
+      list.splice(i,1); offDraw(); T('Offset removed');
+    }
+  });
+};
+
+/* ---------- who hears about an alarm ----------
+   The four levels are the portal's own, under the same keys it files them by and in
+   the same order it ranks them (critical 0, alarm 1, warn 2, event 3). Same keys
+   means the two can never drift into meaning different things by the same word. */
+const SEVS=[{k:'critical',t:'Critical'},{k:'alarm',t:'Alarm'},
+            {k:'warn',t:'Warning'},{k:'event',t:'Event'}];
+const NOTIF=[
+  {who:'Vikram Sethi', mail:'vikram.sethi@enerops.example',
+   on:{critical:true, alarm:true,  warn:true,  event:false}},
+  {who:'Priya Nair',   mail:'priya.nair@enerops.example',
+   on:{critical:true, alarm:false, warn:false, event:false}},
+  {who:'Site office',  mail:'ops@sangriarenewables.example',
+   on:{critical:true, alarm:true,  warn:true,  event:true}}
+];
+
+function alDraw(){
+  const rows=NOTIF.map(function(r,i){
+    return '<tr>'
+      +'<td class="nm">'+esc(r.who)+'</td>'
+      +'<td>'+esc(r.mail)+'</td>'
+      +SEVS.map(function(sv){
+        const on=!!r.on[sv.k];
+        return '<td class="sev-c"><span class="subdot '+(on?'on ':'off ')+sv.k+'" '
+          +'title="'+esc(r.who)+(on?' is sent ':' is not sent ')+sv.t.toLowerCase()+'s"'
+          +' role="img" aria-label="'+sv.t+': '+(on?'yes':'no')+'"></span></td>';
+      }).join('')
+      +'<td><div class="rowacts">'
+      +'<button class="rowbtn" type="button" title="Edit this recipient"'
+      +' aria-label="Edit '+esc(r.who)+'" onclick="alAdd('+i+')">'+I_PEN+'</button>'
+      +'<button class="rowbtn warn" type="button" title="Remove this recipient"'
+      +' aria-label="Remove '+esc(r.who)+'" onclick="alRm('+i+')">'+I_BIN+'</button>'
+      +'</div></td></tr>';
+  });
+  $('al-body').innerHTML = rows.length ? rows.join('')
+    : '<tr><td colspan="6"><div class="empty-note">Nobody is being told about alarms on this account</div></td></tr>';
+  /* the count that matters is not how many people are listed but whether anyone is
+     actually being sent the worst level the portal raises */
+  const crit=NOTIF.filter(function(r){return r.on.critical;}).length;
+  $('al-count').textContent = NOTIF.length+' recipient'+(NOTIF.length===1?'':'s')
+    +' · '+(crit? crit+' sent criticals' : 'nobody is sent criticals');
+}
+
+let alIx=null;
+function alErr(id,msg){
+  const w=$(id).closest('.fld');
+  w.classList.toggle('bad',!!msg);
+  w.querySelector('.err').textContent=msg||'';
+  $(id).setAttribute('aria-invalid', msg?'true':'false');
+}
+window.alAdd=function(ix){
+  alIx = (typeof ix==='number') ? ix : null;
+  const r = alIx===null ? {who:'',mail:'',on:{}} : NOTIF[alIx];
+  $('al-title').textContent = alIx===null ? 'Add recipient' : 'Edit recipient';
+  $('al-go').textContent   = alIx===null ? 'Add recipient' : 'Save changes';
+  $('al-who').value=r.who; $('al-mail').value=r.mail;
+  SEVS.forEach(function(sv){ $('al-'+sv.k).checked=!!r.on[sv.k]; });
+  ['al-who','al-mail','al-critical'].forEach(function(id){ alErr(id,''); });
+  scrimOn('aldlg');
+  requestAnimationFrame(function(){ $('al-who').focus(); $('al-who').select(); });
+};
+window.alShut=function(){ scrimOff('aldlg'); alIx=null; };
+window.alSave=function(e){
+  e.preventDefault();
+  ['al-who','al-mail','al-critical'].forEach(function(id){ alErr(id,''); });
+  const who=$('al-who').value.trim(), mail=$('al-mail').value.trim();
+  const on={}; SEVS.forEach(function(sv){ on[sv.k]=$('al-'+sv.k).checked; });
+  let bad=null;
+  const stop=function(id,msg){ alErr(id,msg); bad=bad||id; };
+
+  if(!who) stop('al-who','A name is required.');
+  if(!mail) stop('al-mail','An email address is required.');
+  else if(!EMAIL.test(mail)) stop('al-mail','That does not look like an email address.');
+  else {
+    /* the same address twice means the same alarm twice, and a person who gets
+       every alarm in duplicate stops reading them */
+    const dupe=NOTIF.some(function(x,i){
+      return i!==alIx && x.mail.toLowerCase()===mail.toLowerCase(); });
+    if(dupe) stop('al-mail','That address is already on the list.');
+  }
+  /* A recipient subscribed to nothing is a row that looks like coverage and is
+     not. Either they hear about something or they should not be on the list. */
+  if(!SEVS.some(function(sv){ return on[sv.k]; }))
+    stop('al-critical','Pick at least one — a recipient sent nothing is not a recipient.');
+
+  if(bad){ $(bad).focus(); return false; }
+
+  if(alIx===null) NOTIF.push({who:who, mail:mail, on:on});
+  else { NOTIF[alIx].who=who; NOTIF[alIx].mail=mail; NOTIF[alIx].on=on; }
+  const added=(alIx===null);
+  alShut(); alDraw();
+  T(added ? who+' will be told' : who+' updated');
+  return false;
+};
+
+window.alRm=function(ix){
+  const r=NOTIF[ix]; if(!r) return;
+  const alone = r.on.critical && NOTIF.filter(function(x){return x.on.critical;}).length===1;
+  ask({
+    title:'Remove recipient',
+    rows:[['Name',r.who],['Email',r.mail]],
+    text:'<b>'+esc(r.who)+'</b> stops being sent anything from this account. Alarms already '
+        +'raised are not affected — this changes who hears about the next one.'
+        +(alone? ' <b>They are the only person currently sent criticals.</b>' : ''),
+    go:'Remove recipient',
+    then:function(){ NOTIF.splice(ix,1); alDraw(); T(r.who+' removed'); }
+  });
+};
+
+/* ---------- access management ----------
+   Three screens, ONE model. User lists the people, Role lists the named reaches,
+   and Access Control is the join between them. Nothing is stored twice: the Role
+   column on the user table and the site chips on the assignment table are both
+   read back through the same role record, so there is no arrangement of these
+   three screens in which two of them can disagree about who can reach what.
+
+   A user holds exactly one role, or none. That is the legacy model and it is worth
+   keeping: the moment a person can hold two, the answer to "what can they reach"
+   becomes a union nobody computes in their head. */
+const ROLES=[
+  {id:'r-sangria',nm:'Sangria only',    sites:['Sangria']},
+  {id:'r-north',  nm:'Rioja & Mendoza', sites:['Rioja','Mendoza']},
+  {id:'r-all',    nm:'All sites',       sites:['Sangria','Rioja','Mendoza']}
+];
+const USERS=[
+  {id:'u1',first:'Vikram',last:'Sethi',mail:'vikram.sethi@enerops.example',
+   phone:'+91 98765 43210',role:'r-all',    live:true},
+  {id:'u2',first:'Priya', last:'Nair', mail:'priya.nair@enerops.example',
+   phone:'+91 98190 22417',role:'r-sangria',live:true},
+  {id:'u3',first:'Arun',  last:'Menon',mail:'arun.menon@enerops.example',
+   phone:'+91 90032 71845',role:'r-north',  live:false}
+];
+const ALLSITES=['Sangria','Rioja','Mendoza'];
+const roleById=id=>ROLES.filter(function(r){return r.id===id;})[0];
+const userName=u=>(u.first+' '+u.last).trim();
+const holders=id=>USERS.filter(function(u){return u.role===id;}).length;
+
+/* a role that reaches everywhere is worth saying in one chip rather than three -
+   the reader is checking scope, and "all" is the answer they are checking for */
+function siteChips(sites){
+  if(!sites.length) return '<span class="chip">No sites</span>';
+  if(sites.length===ALLSITES.length) return '<span class="chip all">All sites</span>';
+  return '<div class="chips">'+sites.map(function(x){
+    return '<span class="chip">'+esc(x)+'</span>'; }).join('')+'</div>';
+}
+const livePill=on=>on
+  ? '<span class="pill live"><span class="dot"></span>Active</span>'
+  : '<span class="pill held"><span class="dot"></span>Suspended</span>';
+
+/* ---------- User ---------- */
+function usDraw(){
+  const rows=USERS.map(function(u){
+    const role=roleById(u.role);
+    return '<tr'+(u.live?'':' class="gone"')+'>'
+      +'<td class="nm">'+esc(userName(u))+'</td>'
+      +'<td>'+esc(u.mail)+'</td>'
+      +'<td class="mono">'+esc(u.phone)+'</td>'
+      +'<td>'+(role? esc(role.nm) : '<span class="chip">No role</span>')+'</td>'
+      +'<td>'+livePill(u.live)+'</td>'
+      +'<td><div class="rowacts">'
+      +'<button class="rowbtn" type="button" title="Edit this user"'
+      +' aria-label="Edit '+esc(userName(u))+'" onclick="usEdit(\''+u.id+'\')">'+I_PEN+'</button>'
+      +(u.live
+         ? '<button class="rowbtn warn" type="button" title="Suspend this user"'
+           +' aria-label="Suspend '+esc(userName(u))+'" onclick="usHold(\''+u.id+'\')">'+I_BOX+'</button>'
+         : '<button class="rowbtn" type="button" title="Let them sign in again"'
+           +' aria-label="Reactivate '+esc(userName(u))+'" onclick="usHold(\''+u.id+'\')">'+I_BACK+'</button>')
+      +'</div></td></tr>';
+  });
+  $('us-body').innerHTML = rows.length ? rows.join('')
+    : '<tr><td colspan="6"><div class="empty-note">Nobody can sign in to this account</div></td></tr>';
+  const on=USERS.filter(function(u){return u.live;}).length;
+  $('us-count').textContent = USERS.length+' user'+(USERS.length===1?'':'s')
+    +(on<USERS.length ? ' · '+(USERS.length-on)+' suspended' : '');
+}
+
+let usId=null;
+function usErr(id,msg){
+  const w=$(id).closest('.fld');
+  w.classList.toggle('bad',!!msg);
+  w.querySelector('.err').textContent=msg||'';
+  $(id).setAttribute('aria-invalid', msg?'true':'false');
+}
+/* Role, while a person is being added. Every row says what it costs the person
+   in reach — what "no role" means, and how far each role goes — because reach is
+   the only thing that makes one role different from another, and this is the
+   moment it is being decided. */
+SSK.usrole={
+  label:'Role',
+  list:function(){
+    return [{v:'', t:'No role', s:'cannot reach any site', none:true}].concat(
+      ROLES.map(function(r){
+        return {v:r.id, t:r.nm,
+                s:r.sites.length===1 ? '1 site' : r.sites.length+' sites'};
+      }));
+  }
+};
+window.usEdit=function(id){
+  usId = id || null;
+  const u = usId ? USERS.filter(function(x){return x.id===usId;})[0] : null;
+  $('us-title').textContent = u ? 'Edit user' : 'Add user';
+  $('us-go').textContent    = u ? 'Save changes' : 'Add user';
+  $('us-first').value = u?u.first:''; $('us-last').value = u?u.last:'';
+  $('us-mail').value  = u?u.mail :''; $('us-phone').value= u?u.phone:'';
+  ssValue('us-role', u?u.role:'');
+  ['us-first','us-last','us-mail','us-phone'].forEach(function(x){ usErr(x,''); });
+  scrimOn('usdlg');
+  requestAnimationFrame(function(){ $('us-first').focus(); $('us-first').select(); });
+};
+window.usShut=function(){ scrimOff('usdlg'); usId=null; };
+window.usSave=function(e){
+  e.preventDefault();
+  ['us-first','us-last','us-mail','us-phone'].forEach(function(x){ usErr(x,''); });
+  const first=$('us-first').value.trim(), last=$('us-last').value.trim();
+  const mail=$('us-mail').value.trim(), phone=$('us-phone').value.trim();
+  const role=$('us-role').value;
+  let bad=null;
+  const stop=function(id,msg){ usErr(id,msg); bad=bad||id; };
+
+  if(!first) stop('us-first','A first name is required.');
+  if(!last)  stop('us-last','A last name is required.');
+  if(!mail)  stop('us-mail','An email address is required — it is how they sign in.');
+  else if(!EMAIL.test(mail)) stop('us-mail','That does not look like an email address.');
+  else {
+    /* Two people signing in as the same address is not two people. */
+    const dupe=USERS.some(function(x){
+      return x.id!==usId && x.mail.toLowerCase()===mail.toLowerCase(); });
+    if(dupe) stop('us-mail','Somebody already signs in with that address.');
+  }
+  if(phone && phone.replace(/\D/g,'').length<7)
+    stop('us-phone','That does not look like a phone number.');
+  if(bad){ $(bad).focus(); return false; }
+
+  if(usId){
+    const u=USERS.filter(function(x){return x.id===usId;})[0];
+    u.first=first; u.last=last; u.mail=mail; u.phone=phone; u.role=role;
+  } else {
+    USERS.push({id:'u'+(Date.now().toString(36)), first:first, last:last,
+                mail:mail, phone:phone, role:role, live:true});
+  }
+  const said=(usId? userName({first:first,last:last})+' updated'
+                  : userName({first:first,last:last})+' can now sign in');
+  usShut(); accessDraw(); T(said);
+  return false;
+};
+
+/* Suspended, never deleted. An alarm acknowledged by somebody who no longer
+   exists still has to say who acknowledged it. */
+window.usHold=function(id){
+  const u=USERS.filter(function(x){return x.id===id;})[0]; if(!u) return;
+  if(!u.live){ u.live=true; accessDraw(); T(userName(u)+' can sign in again'); return; }
+  ask({
+    title:'Suspend user',
+    rows:[['Name',userName(u)],['Email',u.mail]],
+    text:'<b>'+esc(userName(u))+'</b> stops being able to sign in. Everything they have '
+        +'already done keeps their name on it, and this can be undone.',
+    go:'Suspend user',
+    then:function(){ u.live=false; accessDraw(); T(userName(u)+' suspended'); }
+  });
+};
+
+/* ---------- Role ---------- */
+function roDraw(){
+  const rows=ROLES.map(function(r){
+    const n=holders(r.id);
+    return '<tr>'
+      +'<td class="nm">'+esc(r.nm)+'</td>'
+      +'<td class="pad">'+siteChips(r.sites)+'</td>'
+      +'<td class="mono'+(n?'':' dim')+'">'+(n||'—')+'</td>'
+      +'<td><div class="rowacts">'
+      +'<button class="rowbtn" type="button" title="Edit this role"'
+      +' aria-label="Edit '+esc(r.nm)+'" onclick="roEdit(\''+r.id+'\')">'+I_PEN+'</button>'
+      /* A role somebody holds cannot be removed: taking it away would leave that
+         person pointing at nothing, and "no role" is a decision somebody should
+         make on the Access Control screen rather than a side effect here. */
+      +(n ? '' : '<button class="rowbtn warn" type="button" title="Remove this role"'
+                 +' aria-label="Remove '+esc(r.nm)+'" onclick="roRm(\''+r.id+'\')">'+I_BIN+'</button>')
+      +'</div></td></tr>';
+  });
+  $('ro-body').innerHTML = rows.length ? rows.join('')
+    : '<tr><td colspan="4"><div class="empty-note">No roles yet, so nobody can reach a site</div></td></tr>';
+  $('ro-count').textContent = ROLES.length+' role'+(ROLES.length===1?'':'s');
+}
+
+let roId=null;
+function roErr(id,msg){
+  const w=$(id).closest('.fld');
+  w.classList.toggle('bad',!!msg);
+  w.querySelector('.err').textContent=msg||'';
+}
+window.roEdit=function(id){
+  roId = id || null;
+  const r = roId ? roleById(roId) : null;
+  $('ro-title').textContent = r ? 'Edit role' : 'Add role';
+  $('ro-go').textContent    = r ? 'Save changes' : 'Add role';
+  $('ro-name').value = r?r.nm:'';
+  $('ro-sites').innerHTML = ALLSITES.map(function(x,i){
+    const on = r && r.sites.indexOf(x)>=0;
+    return '<label class="subbox"><input type="checkbox" id="ro-s'+i+'" value="'+esc(x)+'"'
+      +(on?' checked':'')+'>'+esc(x)+'</label>';
+  }).join('');
+  roErr('ro-name',''); roErr('ro-s0','');
+  scrimOn('rodlg');
+  requestAnimationFrame(function(){ $('ro-name').focus(); $('ro-name').select(); });
+};
+window.roShut=function(){ scrimOff('rodlg'); roId=null; };
+window.roSave=function(e){
+  e.preventDefault();
+  roErr('ro-name',''); roErr('ro-s0','');
+  const nm=$('ro-name').value.trim();
+  const sites=ALLSITES.filter(function(x,i){ return $('ro-s'+i).checked; });
+  let bad=null;
+  const stop=function(id,msg){ roErr(id,msg); bad=bad||id; };
+
+  if(!nm) stop('ro-name','A role needs a name.');
+  else if(ROLES.some(function(r){ return r.id!==roId && r.nm.toLowerCase()===nm.toLowerCase(); }))
+    stop('ro-name','There is already a role called that.');
+  /* A role reaching nowhere is a role that looks like access and is not. */
+  if(!sites.length) stop('ro-s0','Pick at least one site — a role that reaches nothing grants nothing.');
+  if(bad){ $(bad).focus(); return false; }
+
+  if(roId){ const r=roleById(roId); r.nm=nm; r.sites=sites; }
+  else ROLES.push({id:'r'+(Date.now().toString(36)), nm:nm, sites:sites});
+  const said=(roId? nm+' updated' : nm+' added');
+  roShut(); accessDraw(); T(said);
+  return false;
+};
+
+window.roRm=function(id){
+  const r=roleById(id); if(!r) return;
+  ask({
+    title:'Remove role',
+    rows:[['Role',r.nm],['Reaches',r.sites.join(', ')||'nothing']],
+    text:'Nobody holds this role, so no one loses access by removing it.',
+    go:'Remove role',
+    then:function(){
+      const i=ROLES.findIndex(function(x){return x.id===id;});
+      if(i<0) return;
+      ROLES.splice(i,1); accessDraw(); T(r.nm+' removed');
+    }
+  });
+};
+
+/* ---------- Access Control ---------- */
+/* Role, on the row it belongs to. No site count in these rows: the column to the
+   right already prints the sites as chips, and a fact said twice in one row is
+   two facts to keep in step. */
+SSK.acrole={
+  label:'Role',
+  list:function(){
+    return [{v:'',t:'No role',none:true}].concat(
+      ROLES.map(function(r){ return {v:r.id, t:r.nm}; }));
+  },
+  pick:function(btn,v){ acSet(btn.dataset.u,v); }
+};
+function acDraw(){
+  const rows=USERS.map(function(u){
+    const role=roleById(u.role);
+    return '<tr'+(u.live?'':' class="gone"')+'>'
+      +'<td class="nm">'+esc(userName(u))+'</td>'
+      +'<td class="pad"><button class="mbtn mini" type="button" data-ss="acrole"'
+      +' data-u="'+u.id+'" value="'+(u.role||'')+'"'
+      +' aria-haspopup="true" aria-expanded="false" aria-controls="sspanel"'
+      +' aria-label="Role for '+esc(userName(u))+'">'
+      +'<span class="mlab'+(role?'':' any')+'">'+esc(role?role.nm:'No role')+'</span>'
+      +'</button></td>'
+      +'<td class="pad">'+(role? siteChips(role.sites) : '<span class="chip">No sites</span>')+'</td>'
+      +'<td>'+livePill(u.live)+'</td></tr>';
+  });
+  $('ac-body').innerHTML = rows.length ? rows.join('')
+    : '<tr><td colspan="4"><div class="empty-note">There is nobody to give access to</div></td></tr>';
+  /* the number worth surfacing is how many people can reach nothing, because that
+     is the one that looks like an account with users and behaves like an empty one */
+  const none=USERS.filter(function(u){ return u.live && !roleById(u.role); }).length;
+  $('ac-count').textContent = none
+    ? none+' active user'+(none===1?'':'s')+' with no role'
+    : 'every active user has a role';
+}
+window.acSet=function(id,roleId){
+  const u=USERS.filter(function(x){return x.id===id;})[0]; if(!u) return;
+  u.role=roleId;
+  const r=roleById(roleId);
+  accessDraw();
+  T(r ? userName(u)+' → '+r.nm : userName(u)+' has no role');
+};
+
+/* One redraw for all three, because one change touches all three: renaming a role
+   changes the user table, reassigning a user changes the role table's count. */
+function accessDraw(){ usDraw(); roDraw(); acDraw(); }
+
+/* ---------- the marks the tables draw with ----------
+   Declared together and BEFORE anything that draws with them. A const is not
+   hoisted into a usable state, so a draw call placed above one of these throws -
+   and it throws at load, which takes down every screen after it. */
+const I_PEN='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.2 8.8a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14.8 5.4l3.8 3.8"/></svg>';
+const I_BOX='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4.2" rx="1.2"/><path d="M5 8.2V19a1.6 1.6 0 0 0 1.6 1.6h10.8A1.6 1.6 0 0 0 19 19V8.2"/><path d="M10 12.4h4"/></svg>';
+const I_BACK='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5a8 8 0 1 1 2.4 5.7"/><path d="M4 5.4v6.1h6.1"/></svg>';
+const I_BIN='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V5a1.4 1.4 0 0 1 1.4-1.4h2.2A1.4 1.4 0 0 1 14.5 5v1.5"/><path d="M6.6 6.5 7.4 19a1.6 1.6 0 0 0 1.6 1.5h6a1.6 1.6 0 0 0 1.6-1.5l.8-12.5"/><path d="M10.4 10v6.6M13.6 10v6.6"/></svg>';
+
+/* ---------- first paint ---------- */
+dvDraw(true);
+rateDraw('em');
+rateDraw('el');
+offDraw();
+alDraw();
+accessDraw();
+
+/* ---------- one way out, for every dialog ----------
+   The x, the backdrop and Escape, listed once. A dialog added later that is not
+   in this list is a dialog you cannot Escape out of, and that is exactly the kind
+   of omission nobody notices until they are stuck in it.
+
+   This runs LAST on purpose. The list names the close functions by value, so it
+   has to be built after every one of them has been assigned - built any earlier
+   and the newest dialog silently gets no backdrop and no Escape. */
+const CLOSERS={pwscrim:closePw, rnscrim:closeRn, ratedlg:rateShut, askdlg:askShut,
+               offdlg:offShut, aldlg:alShut, usdlg:usShut, rodlg:roShut};
+Object.keys(CLOSERS).forEach(function(id){
+  const el=$(id);
+  el.addEventListener('click',function(e){ if(e.target===el) CLOSERS[id](); });
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape') return;
+  const open=document.querySelector('.scrim.on');
+  if(open && CLOSERS[open.id]) CLOSERS[open.id]();
+});
+
 })();
 </script>
 </body>
