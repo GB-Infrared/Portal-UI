@@ -39,12 +39,12 @@ export default function Plants() {
   const canvasRef = useRef(null);
   const chipRefs = useRef([]);
 
-  /* 'hot' is the site under the pointer; 'pin' is one held open by a double
-     click. They are separate because a pinned card must survive the pointer
-     wandering off, and a hover must not overwrite a card somebody asked to hold. */
+  /* 'hot' is the site under the pointer, and it is the whole of the state this
+     screen keeps about what is being read. There used to be a 'pin' beside it -
+     a card held open by a double click - and it is gone with the gesture that
+     set it; see the note on open() below. */
   const [hot, setHot] = useState(null);
-  const [pin, setPin] = useState(null);
-  const shown = pin || hot;
+  const shown = hot;
 
   const [clock, setClock] = useState('');
   useEffect(() => {
@@ -78,43 +78,59 @@ export default function Plants() {
     return { ac, kw, e, pk, dev, up, crit, warn, anyAc, anyKw, anyE, anyPk, anyDev };
   }, [list]);
 
+  /* ONE CLICK OPENS, AT ONCE, AND EXACTLY ONCE.
+     A click used to be ARMED rather than acted on: it waited 260ms in case a
+     second one arrived, because a double click was the gesture that pinned the
+     card. That put a delay on the one thing this screen exists to do, in order
+     to keep a gesture nobody needed - the card can already be reached without
+     pinning, because hovering opens it and it stays while the pointer is on it.
+     So the pin is gone and the wait went with it.
+
+     LEAVING IS A LATCH. A double click is still two click events even with
+     nothing listening for the pair, and both used to reach here. That looked
+     right - the second asked for the same place the first did - but it cost the
+     way BACK: two assignments to the history is two entries, so a double click
+     meant pressing Back twice to return to the fleet, with the first press
+     appearing to do nothing. The first click sets the latch and every click
+     after it is ignored, including one aimed at a different site while the page
+     is already on its way somewhere. */
+  const leaving = useRef(false);
   const open = useCallback(p => {
+    if (leaving.current) return;
+    leaving.current = true;
     /* the portal opens ON the site that was picked — the whole point of the
        screen. Home reads ?plant= and selects it. */
     navigate('/?plant=' + encodeURIComponent(p.id));
   }, [navigate]);
 
-  /* A single click opens the site, but it cannot open it IMMEDIATELY: the second
-     half of a double click would never arrive, because the first half had already
-     navigated away. So a mouse click arms the open and a double click disarms it
-     and pins instead. A keyboard Enter arrives as a click with no click count and
-     no double coming, so that one opens at once. */
-  const clickT = useRef(0);
-  const armOpen = useCallback(p => {
-    clearTimeout(clickT.current);
-    clickT.current = setTimeout(() => open(p), 260);
-  }, [open]);
-  useEffect(() => () => clearTimeout(clickT.current), []);
-
-  const pinTo = useCallback(p => {
-    clearTimeout(clickT.current);
-    setPin(cur => (cur && cur.id === p.id ? null : p));
+  /* THE CROSSING. The card stands at the foot of the screen and the ring is in
+     the middle of it, so reaching the card means leaving the chip that opened
+     it - and closing on mouseleave alone would shut it during the journey. The
+     chip and the card are treated as ONE region and the wait covers the gap
+     between them, which is what makes the card's own OPEN control reachable at
+     all. Without this it is visible and inert, which is worse than absent. */
+  const hotT = useRef(0);
+  const showCard = useCallback(p => { clearTimeout(hotT.current); setHot(p); }, []);
+  const holdCard = useCallback(() => clearTimeout(hotT.current), []);
+  const armClose = useCallback(() => {
+    clearTimeout(hotT.current);
+    hotT.current = setTimeout(() => setHot(null), 260);
   }, []);
-  const unpin = useCallback(() => setPin(null), []);
+  const closeCard = useCallback(() => { clearTimeout(hotT.current); setHot(null); }, []);
+  useEffect(() => () => clearTimeout(hotT.current), []);
 
-  /* Stepping the ring is a change of subject, so it releases a pinned card
-     rather than walking a focus ring the readout has stopped following. A typed
-     character is left alone: nothing here takes text, but a browser find bar
-     does, and stealing the arrow keys from it would be rude. */
+  /* Stepping the ring moves the focus, and the focused chip lights its own card
+     on the way. A typed character is left alone: nothing here takes text, but a
+     browser find bar does, and stealing the arrow keys from it would be rude. */
   useEffect(() => {
     const onKey = e => {
-      if (e.key === 'Escape') { unpin(); return; }
+      if (e.key === 'Escape') { closeCard(); return; }
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       if (e.altKey || e.ctrlKey || e.metaKey) return;
       const n = list.length;
       if (!n) return;
       e.preventDefault();
-      unpin();
+      closeCard();
       const at = chipRefs.current.indexOf(document.activeElement);
       const step = e.key === 'ArrowRight' ? 1 : -1;
       const next = at < 0 ? (step > 0 ? 0 : n - 1) : (at + step + n) % n;
@@ -123,7 +139,7 @@ export default function Plants() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [list.length, unpin]);
+  }, [list.length, closeCard]);
 
   /* ================= THE CANVAS =================
      The picture is drawn; the CONTROLS are HTML buttons laid over it. A canvas
@@ -287,7 +303,7 @@ export default function Plants() {
         className={'theatre' + (hot ? ' hot' : '') + (list.length > 9 ? ' dense' : '')}
         ref={theatreRef}
         aria-label="Portfolio orbital map"
-        onClick={e => { if (!e.target.closest('.chip')) unpin(); }}
+        onClick={e => { if (!e.target.closest('.chip')) closeCard(); }}   /* clicking off puts the card away */
       >
         <canvas ref={canvasRef} />
 
@@ -309,12 +325,11 @@ export default function Plants() {
               aria-label={`${p.name || p.id} — ${STATE_TEXT[st]}${
                 p.livePower != null ? ', ' + num(p.livePower) + ' kilowatts' : ''}, ${
                 n ? n + ' open alarm' + (n > 1 ? 's' : '') : 'no open alarms'}. Open this site.`}
-              onClick={e => { if (e.detail === 0) open(p); else armOpen(p); }}
-              onDoubleClick={e => { e.preventDefault(); pinTo(p); }}
-              onMouseEnter={() => { if (!pin) setHot(p); }}
-              onFocus={() => { if (!pin) setHot(p); }}
-              onMouseLeave={() => { if (!pin) setHot(null); }}
-              onBlur={() => { if (!pin) setHot(null); }}
+              onClick={() => open(p)}
+              onMouseEnter={() => showCard(p)}
+              onFocus={() => showCard(p)}
+              onMouseLeave={armClose}
+              onBlur={armClose}
             >
               <span className="lbl">
                 <span className="nm">{p.name || p.id}</span>
@@ -326,6 +341,12 @@ export default function Plants() {
                   <span className={'alm' + (n ? ' on' : '') + (p.criticalAlarms ? ' crit' : '')}>
                     {n || ''}
                   </span>
+                  {/* printed, not revealed on hover: a control that only admits
+                      to being one once the pointer is on it has already failed
+                      the reader who was looking for it */}
+                  <svg className="go" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8.5 4.5 16 12l-7.5 7.5" />
+                  </svg>
                 </span>
               </span>
             </button>
@@ -334,7 +355,8 @@ export default function Plants() {
       </section>
 
       <Rail list={list} alarms={alarms} totals={totals} />
-      <Detail site={shown} pinned={!!pin} onOpen={open} onUnpin={unpin} />
+      <Detail site={shown} onOpen={open} onClose={closeCard}
+              onHold={holdCard} onLeave={armClose} />
 
       {/* the same sites, without the picture, for narrow screens */}
       <div className="fallback">
@@ -533,16 +555,17 @@ function Rail({ list, alarms, totals }) {
  * describing. Double-clicking a node pins it — a card that vanishes the moment
  * the pointer leaves can be glanced at and nothing else.
  */
-function Detail({ site, pinned, onOpen, onUnpin }) {
+function Detail({ site, onOpen, onClose, onHold, onLeave }) {
   const p = site;
   const st = p ? stateOf(p) : 'off';
   const n = p ? openAlarms(p) : 0;
   const f = p && p.acCapacity && p.livePower != null
     ? Math.round(p.livePower / p.acCapacity * 100) : null;
   return (
-    <div className={'detail' + (p ? ' on' : '') + (pinned ? ' pin' : '')} aria-live="polite">
+    <div className={'detail' + (p ? ' on' : '')} aria-live="polite"
+         onMouseEnter={onHold} onMouseLeave={onLeave}>
       <button className="x" type="button" title="Close" aria-label="Close"
-              onClick={onUnpin}>×</button>
+              onClick={onClose}>×</button>
       <div className="t">{p ? (p.name || p.id) : '—'}</div>
       <div className="a">{(p && p.address) || ''}</div>
       <div className="sep" />
@@ -558,7 +581,10 @@ function Detail({ site, pinned, onOpen, onUnpin }) {
           : '—'} />
         <Row k="ALARMS" v={n} cls={p && p.criticalAlarms ? 'crit' : n ? 'warn' : 'ok'} />
       </div>
-      <button className="go" type="button" onClick={() => { if (pinned && p) onOpen(p); }}>
+      {/* the card's own way in, and it no longer waits to be pinned before it
+          will work - it is reachable because hovering keeps it open, and a
+          control that is visible but inert is worse than one that is absent */}
+      <button className="go" type="button" onClick={() => { if (p) onOpen(p); }}>
         ↵ OPEN THIS SITE
       </button>
     </div>
