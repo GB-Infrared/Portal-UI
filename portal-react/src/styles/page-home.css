@@ -36,7 +36,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .page-home .chead .title{font-size:14.5px;font-weight:700;white-space:nowrap;flex:none}
 /* date pickers - floating label above a native month/day input */
 .page-home .field{position:relative;display:inline-flex;flex-direction:column;justify-content:flex-end}
-.page-home .field .fl{position:absolute;top:-6px;left:9px;padding:0 4px;background:var(--panel);
+/* z-index, and it is not decoration. The label is absolutely positioned and so
+   is the .msel that can now sit beside it, so with both at z-index:auto they
+   paint in DOM order and the CONTROL lands on top of its own label - the button
+   border ruled straight through the middle of METRIC. .mpick .fl has carried
+   this since the month picker was built; the plain field only escaped it while
+   everything inside it was an unpositioned <input>. */
+.page-home .field .fl{position:absolute;top:-6px;left:9px;padding:0 4px;background:var(--panel);z-index:1;
   font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
 .page-home .field input{appearance:none;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
   border-radius:var(--r-sm);padding:8px 10px;font-size:12.5px;font-family:var(--mono);font-weight:600;
@@ -47,6 +53,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .page-home .field input:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .page-home .field input::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.55}
 .page-home .field input:hover::-webkit-calendar-picker-indicator{opacity:1}
+/* ---------- a panel dropdown standing in a field ----------
+   The rule above is written for the date box and reaches ANY input inside a
+   .field - including the radios in a PanelSelect's panel, which are three
+   elements deeper but still inside it. controls.css already gives .mrow input a
+   min-width:0 for exactly this reason, but `.page-home .field input` is the
+   more specific selector and wins, so the radios came back as 132px slabs with
+   appearance:none stripping them of a control to draw. Handed back explicitly.
+
+   The button is stated at 36px so it stands level with the .mpick-btn beside
+   it: .mbtn was drawn for a 34px filter bar, and a picker two pixels shorter
+   than the one next to it is the mismatch this change set out to remove. */
+.page-home .field .mbtn{height:36px;min-width:132px;font-family:var(--mono)}
+.page-home .field .mrow input{appearance:auto;-webkit-appearance:auto;
+  min-width:0;width:14px;height:14px;padding:0;border:none;background:none;
+  border-radius:0;accent-color:var(--green);flex:none}
 .page-home .chead .tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
 /* ---------- plant header ---------- */
 /* The card is a block; the name/capacity line is the flex row inside it. The

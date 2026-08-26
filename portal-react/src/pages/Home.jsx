@@ -6,6 +6,7 @@ import { useToast } from '../components/Toasts';
 import { daysInMonth } from '../lib/format';
 import { MONTHS_LONG, PLOT_COLORS } from '../data/constants';
 import { MonthPicker } from '../components/MonthPicker';
+import { PanelSelect } from '../components/PanelSelect';
 import { PowerIrradianceChart } from '../components/charts/PowerIrradianceChart';
 import { DailyBarChart } from '../components/charts/DailyBarChart';
 import { GroupedBarChart } from '../components/charts/GroupedBarChart';
@@ -271,9 +272,23 @@ export default function Home() {
                         hidden={kpiHidden} onToggle={kpiToggle} />
                 </div>
                 <div className="tools">
-                  <select value={query.kpiMetric} onChange={e => setQuery({ kpiMetric: e.target.value })}>
-                    {KPI_METRICS.map(m => <option key={m}>{m}</option>)}
-                  </select>
+                  {/* The portal's own dropdown rather than the browser's. This was a
+                      bare <select> standing beside a MonthPicker this app draws
+                      itself: no label, a shorter box, and the operating system's
+                      menu instead of the panel every other list on this page
+                      opens. PanelSelect without `multiple` is already the right
+                      shape for it - radios, no All/None foot, and a close on the
+                      pick, because exactly one metric is true at a time. */}
+                  <div className="field">
+                    {/* .fl, not <label>: the floating notch is the chart-header
+                        idiom the MonthPicker beside it uses. The filter bar's
+                        plain <label> belongs to a bar that labels its columns. */}
+                    <span className="fl">Metric</span>
+                    <PanelSelect head="Metric" id="kpi-met" right
+                                 options={KPI_METRICS.map(m => ({ value: m }))}
+                                 value={query.kpiMetric}
+                                 onChange={m => setQuery({ kpiMetric: m })} />
+                  </div>
                   <MonthPicker year={query.year} month={query.month}
                                onPick={(y, m) => setQuery({ year: y, month: m })} />
                 </div>
