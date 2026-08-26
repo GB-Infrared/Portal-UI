@@ -156,7 +156,13 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .chead .title{font-size:14.5px;font-weight:700;white-space:nowrap;flex:none}
 /* date pickers - floating label above a native month/day input */
 .field{position:relative;display:inline-flex;flex-direction:column;justify-content:flex-end}
-.field .fl{position:absolute;top:-6px;left:9px;padding:0 4px;background:var(--panel);
+/* z-index, and it is not decoration. The label is absolutely positioned and so
+   is the .msel beside it, so with both at z-index:auto they paint in DOM order
+   and the CONTROL lands on top of its own label - the button border ruled
+   straight through the middle of METRIC. .mpick .fl has carried this for the
+   same reason since the month picker was built; the plain field only escaped it
+   while everything inside it was an unpositioned <input>. */
+.field .fl{position:absolute;top:-6px;left:9px;padding:0 4px;background:var(--panel);z-index:1;
   font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
 .field input{appearance:none;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
   border-radius:var(--r-sm);padding:8px 10px;font-size:12.5px;font-family:var(--mono);font-weight:600;
@@ -164,6 +170,34 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .field input:hover{border-color:var(--line-hi);background-color:var(--hover)}
 .field input:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .field input::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.55}
+/* ---------- a PANEL dropdown inside a field ----------
+   The KPI metric picker was a bare <select>: no label, a shorter box, and the
+   operating system's own menu - beside a MONTH & YEAR control that is a panel
+   this page draws itself. One header carrying two generations of the same idea,
+   with the older one first in reading order.
+
+   It is the .msel panel now - the same control the alarms severity filter opens
+   forty lines above it, so a list is chosen the same way everywhere on this
+   page. SINGLE select, though, and that is the whole difference: a metric is
+   one of three, never two at once. So the rows carry radios rather than tick
+   boxes, choosing closes the panel because the choice is complete the moment it
+   is made, and there is no All / None foot - "all metrics" is not a chart.
+
+   The height is stated because .mbtn was drawn for a 30px filter bar and this
+   header's controls are 36px; a picker half a step shorter than the one beside
+   it is exactly the mismatch this change set out to remove. */
+.field .mbtn{height:36px;font-family:var(--mono);min-width:132px}
+/* AND THE PANEL IS NOT A FIELD, even though it hangs inside one.
+   .field input is written for the date box beside this - appearance:none, a
+   surface, a border, and min-width:132px - and a radio in the panel below is an
+   input inside a .field, so every one of those reached it. The radios came out
+   as 132-pixel white slabs with the metric name stranded to the right of them,
+   and width:14px cannot undo it because a width does not override a min-width.
+   Each property is handed back explicitly; the same trap is documented on the
+   Alarms filter panel, which is the same control. */
+.field .mrow input{appearance:auto;-webkit-appearance:auto;
+  min-width:0;width:14px;height:14px;padding:0;border:none;background:none;
+  border-radius:0;accent-color:var(--green);flex:none}
 .field input:hover::-webkit-calendar-picker-indicator{opacity:1}
 /* The field reads as a button, so it must not look like text to be dragged
    over. user-select handles a real drag-selection, but the blue block on the
@@ -240,21 +274,6 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .anone .clr:hover{border-color:var(--line-hi);background:var(--hover)}
 /* all clear is the one empty state that is good news, so it is allowed the colour */
 .anone.ok svg{color:var(--green);opacity:1}
-
-/* ---------- plant header ---------- */
-/* ---------- capacity, in a chart header ----------
-   What is left of the plant header. Sized DOWN from the tiles it used to be:
-   in a card of its own a capacity could be 15px and 108px wide, but in a chart
-   header it stands beside a title and a month picker, and a static figure that
-   out-shouts the control next to it is a figure in the wrong place. It is the
-   scale the bars are read against, not a headline. */
-.caps{display:flex;gap:8px;flex:none}
-.cap{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:8px;
-  padding:4px 10px}
-.cap .k{font-size:8px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--faint)}
-.cap .v{font-family:var(--mono);font-weight:800;font-size:13px;letter-spacing:-.3px;margin-top:1px;
-  white-space:nowrap}
-.cap .v .u{font-size:9px;color:var(--muted);margin-left:3px}
 
 /* ---------- KPI cards ---------- */
 /* left rail + main column, mirroring the Monitoring shell */
@@ -539,9 +558,6 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
   .topbar{gap:12px;padding:0 14px}
   .page{padding:12px 14px 30px}
   .clock{display:none}
-  /* the numbers go before the picker does: at this width the month control is
-     the thing you came to the header to use */
-  .caps{display:none}
   .g-half{grid-template-columns:1fr}
   .chead{flex-wrap:wrap}
   .chead .title{white-space:normal}
@@ -760,16 +776,13 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
         <div class="chead">
           <div class="title">Plant Energy Generation</div>
           <div class="tools">
-            <!-- CAPACITY BELONGS TO THIS CHART. On the old header it was two
-                 tiles of static plant data sitting above a screen of live
-                 readings, with nothing next to them to be read against. Here it
-                 is the denominator of the bars beside it: a month of kWh means
-                 one thing at 2.5 MW and another at 25, and the figure that
-                 settles it is now in the same header. -->
-            <div class="caps">
-              <div class="cap"><div class="k">AC capacity</div><div class="v"><span id="p-ac">2500.00</span><span class="u">kW</span></div></div>
-              <div class="cap"><div class="k">DC capacity</div><div class="v"><span id="p-dc">2500.00</span><span class="u">kWp</span></div></div>
-            </div>
+            <!-- THE CAPACITY PAIR IS GONE from this header. It was moved here
+                 to be the denominator of the bars beside it, which was a fair
+                 argument - but it is STATIC plant data, it never changed while
+                 anybody watched it, and it sat in the one row of this card that
+                 is otherwise all control. Two boxed figures beside a month
+                 picker read as two more things to press. The nameplate is still
+                 on the site card on the overview, where a site is chosen. -->
             <div class="mpick" id="en-pick">
               <span class="fl">Month &amp; year</span>
               <button class="mpick-btn" type="button">
@@ -802,7 +815,10 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
             <span class="lg" data-k="simulated" onclick="cufToggle('simulated')" title="Click to hide or show"><i style="background:var(--blue)"></i><span class="n">Simulated</span></span>
           </div>
           <div class="tools">
-            <select id="kpi-metric"><option>CUF</option><option>PR</option><option>Availability</option></select>
+            <div class="field">
+              <span class="fl">Metric</span>
+              <div class="msel" id="kpi-metric"></div>
+            </div>
             <div class="mpick" id="kpi-pick">
               <span class="fl">Month &amp; year</span>
               <button class="mpick-btn" type="button">
@@ -1359,7 +1375,49 @@ function buildBars3(){
     tip.style.opacity=1;
   });
   svg.addEventListener('mouseleave',hide);})();
-$('kpi-metric').addEventListener('change',e=>T(e.target.value+' — sample data shown for CUF in this mockup'));
+/* ---- the metric picker ----
+   Built the same way the severity panel above is built, and deliberately so:
+   one construction, one set of classes, one way to open and close a list on
+   this page. What differs is only what a single choice implies - a radio group
+   rather than tick boxes, a close on pick, and no footer. */
+(function(){
+  const mount=$('kpi-metric');
+  const OPTS=[{v:'CUF',t:'CUF'},{v:'PR',t:'PR'},{v:'Availability',t:'Availability'}];
+  let CUR='CUF';
+  const btn=document.createElement('button');
+  btn.type='button'; btn.className='mbtn'; btn.setAttribute('aria-expanded','false');
+  /* never the muted 'any' voice: a metric is always chosen, so this label is
+     always a value and never a placeholder standing in for one */
+  const lab=document.createElement('span'); lab.className='mlab'; btn.appendChild(lab);
+  const pan=document.createElement('div'); pan.className='mpanel'; pan.hidden=true;
+  mount.appendChild(btn); mount.appendChild(pan);
+
+  function label(){ lab.textContent=(OPTS.filter(o=>o.v===CUR)[0]||{t:CUR}).t; }
+  function draw(){
+    pan.innerHTML='<div class="mhead">Metric</div>'+
+      OPTS.map(function(o){
+        return '<label class="mrow"><input type="radio" name="kpi-metric-opt" value="'+o.v+'"'+
+               (o.v===CUR?' checked':'')+'>'+o.t+'</label>';
+      }).join('');
+  }
+  function open(on){
+    if(on) draw();
+    pan.hidden=!on; mount.classList.toggle('open',on);
+    btn.setAttribute('aria-expanded',on?'true':'false');
+  }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); open(pan.hidden); });
+  /* the panel swallows its own clicks, or the document handler below would
+     close it on the way to the row being picked */
+  pan.addEventListener('click',function(e){ e.stopPropagation(); });
+  pan.addEventListener('change',function(e){
+    const r=e.target; if(r.type!=='radio') return;
+    CUR=r.value; label(); open(false);
+    T(CUR+' — sample data shown for CUF in this mockup');
+  });
+  document.addEventListener('click',function(){ open(false); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') open(false); });
+  label();
+})();
 
 /* ---------- alarms ----------
    Built FROM the plant's fleet state, never listed separately. Two lists would
@@ -1685,8 +1743,6 @@ window.pickPlant=function(id){
   /* the day belongs to this plant's curves, so walk them again */
   eTotal=p.etot; seedDay();
 
-  $('p-ac').textContent=num(p.ac,2);
-  $('p-dc').textContent=num(p.dc,2);
   $('k-cap').textContent=p.ac;
 
   /* the day's peak belongs to this plant's curve, so walk it again */
