@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { usePortal } from '../data/PortalData';
 import { PanelSelect } from '../components/PanelSelect';
-import { PlantPicker } from '../components/PlantPicker';
 import { MonthPicker } from '../components/MonthPicker';
 import { KpiBarChart, KPI_SERIES } from '../components/charts/KpiBarChart';
 import { KpiTable } from './kpi/KpiTable';
 import { MONTHS_LONG } from '../data/constants';
-import { num } from '../lib/format';
 
 /** Three buckets, three questions — how to READ a period, not a fact about the site. */
 const BUCKETS = ['Daily', 'Weekly', 'Monthly'];
@@ -26,7 +24,7 @@ const BUCKETS = ['Daily', 'Weekly', 'Monthly'];
  * describe what the bar says.
  */
 export default function Kpi() {
-  const { plants, kpiMetrics, kpi, query, setQuery, status } = usePortal();
+  const { kpiMetrics, kpi, query, setQuery, status } = usePortal();
   const [hidden, setHidden] = useState(() => new Set());
 
   const metric = (kpiMetrics || []).filter(m => m.value === query.kpiPageMetric)[0] || null;
@@ -46,13 +44,14 @@ export default function Kpi() {
       {/* ===================== FILTER BAR ===================== */}
       <div className="toprow">
         <div className="filters">
-          <div className="field"><label>Plant</label>
-            <PlantPicker plants={plants} value={query.plantId}
-                         onChange={id => setQuery({ plantId: id, kpiPage: 1 })}
-                         wide anyLabel="No plants"
-                         renderState={p => (p.acCapacity != null
-                           ? <span className="cap">{num(p.acCapacity)} kW AC</span> : null)} />
-          </div>
+          {/* NO PLANT FIELD. Which site this page is showing is stated in the
+              bar at the top and changed in exactly one place, Site Control.
+              Four pages used to carry a picker of their own - four answers to a
+              question that has one, with nothing keeping them in step: you
+              could walk from Monitoring to Alarms and be reading two different
+              plants without either page saying so. The query value stays, and
+              everything downstream still reads the site from it; only the
+              second, third and fourth ways of setting it are gone. */}
 
           <div className="field"><label>KPI metric</label>
             {/* the options are the site's, not the app's: a plant that publishes

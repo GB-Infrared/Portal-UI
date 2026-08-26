@@ -15,7 +15,7 @@ function useClock() {
   return now;
 }
 
-export function TopBar({ subtitle, refreshSeconds, onRefreshChange,
+export function TopBar({ subtitle, plantName, refreshSeconds, onRefreshChange,
                          theme, onToggleTheme, user, onSignOut }) {
   const now = useClock();
   const live = refreshSeconds !== 'off';
@@ -32,8 +32,32 @@ export function TopBar({ subtitle, refreshSeconds, onRefreshChange,
         </span>
       </div>
 
+      {/* ---------- WHICH SITE THE PORTAL IS ON ----------
+          A READOUT, NOT A CONTROL. Every page is showing one site, and until now
+          only Home said which — so walking to Monitoring or Alarms meant reading
+          a screenful of numbers with no statement anywhere of what they were
+          numbers ABOUT. It is the same words in the same spot on every page.
+
+          A pin and a name, with no "SITE" label in front of it: the wordmark
+          beside it already says SITE OVERVIEW and the tab beside that says Site
+          Control, and a third would be the bar saying the word three times
+          before saying anything. */}
+      <div className="sitenow" title="The site every page in this portal is showing. Change it on Site Control.">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 21.2s6.8-6 6.8-10.8a6.8 6.8 0 1 0-13.6 0c0 4.8 6.8 10.8 6.8 10.8z" />
+          <circle cx="12" cy="10.2" r="2.5" />
+        </svg>
+        <span className="n">{plantName || '—'}</span>
+      </div>
+
       <nav className="tabs">
-        <NavLink className={({ isActive }) => 'tab' + (isActive ? ' active' : '')} to="/">Home</NavLink>
+        {/* the way to the overview, from every page rather than from Home's
+            plant name alone — choosing a site is one screen's job, and a screen
+            you can only reach from one other screen is a screen people forget */}
+        <NavLink className={({ isActive }) => 'tab' + (isActive ? ' active' : '')}
+                 to="/plants" title="Every site, on the globe">Site Control</NavLink>
+        <NavLink end className={({ isActive }) => 'tab' + (isActive ? ' active' : '')} to="/">Home</NavLink>
         <NavLink className={({ isActive }) => 'tab' + (isActive ? ' active' : '')} to="/monitoring">Monitoring</NavLink>
         <NavLink className={({ isActive }) => 'tab' + (isActive ? ' active' : '')} to="/alarms">Alarms</NavLink>
         <NavLink className={({ isActive }) => 'tab' + (isActive ? ' active' : '')} to="/analysis">Analysis</NavLink>

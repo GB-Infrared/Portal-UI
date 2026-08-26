@@ -22,6 +22,18 @@
   font-weight:600;line-height:1}
 @media (max-width:820px){ .brand .sub{display:none} }
 
+/* ---------- the site readout ----------
+   Sized and spaced to sit between the wordmark and the tabs without competing
+   with either: mono, because it is a value, and separated by a rule rather than
+   by a gap so it reads as its own field in the bar. */
+.sitenow{display:flex;align-items:center;gap:7px;flex:none;white-space:nowrap;
+  padding-left:16px;border-left:1px solid var(--line);color:var(--topbar-fg)}
+.sitenow svg{color:var(--green);flex:none}
+.sitenow .n{font-family:var(--mono);font-size:13.5px;font-weight:600;letter-spacing:.02em}
+/* the pin goes before the name does: at this width the NAME is the thing the
+   bar exists to say, and an icon is the affordable half of it */
+@media (max-width:900px){ .sitenow{padding-left:10px} .sitenow svg{display:none} }
+
 nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
 nav.tabs::-webkit-scrollbar{display:none}
 .tab{position:relative;padding:8px 13px;border-radius:9px;color:var(--topbar-tab);

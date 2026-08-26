@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react';
 import { usePortal } from '../data/PortalData';
 import { PanelSelect } from '../components/PanelSelect';
-import { PlantPicker } from '../components/PlantPicker';
 import { DateTimeField } from '../components/DateTimeField';
 import { AnalysisChart } from '../components/charts/AnalysisChart';
 import { AnalysisTable } from './analysis/AnalysisTable';
 import { devicePairs, paramOf, labelOf } from './analysis/pairs';
 import { PLOT_COLORS } from '../data/constants';
-import { num } from '../lib/format';
 
 /** "None" is a real answer for the second axis, so it is a real option. */
 const NONE = '— None —';
@@ -29,7 +27,7 @@ const PLOTCAP = 4;
  * forty parameters.
  */
 export default function Analysis() {
-  const { plants, paramCategories, analysis, query, setQuery, status } = usePortal();
+  const { paramCategories, analysis, query, setQuery, status } = usePortal();
   const [off, setOff] = useState(() => new Set());          /* legend, keyed id|axis */
   const [cols, setCols] = useState(null);                   /* null = follow the bar */
 
@@ -95,13 +93,14 @@ export default function Analysis() {
       {/* ===================== FILTER BAR ===================== */}
       <div className="toprow">
         <div className="filters">
-          <div className="field"><label>Plant</label>
-            <PlantPicker plants={plants} value={query.plantId}
-                         onChange={id => setQuery({ plantId: id, analysisPage: 1 })}
-                         wide anyLabel="No plants"
-                         renderState={p => (p.acCapacity != null
-                           ? <span className="cap">{num(p.acCapacity)} kW AC</span> : null)} />
-          </div>
+          {/* NO PLANT FIELD. Which site this page is showing is stated in the
+              bar at the top and changed in exactly one place, Site Control.
+              Four pages used to carry a picker of their own - four answers to a
+              question that has one, with nothing keeping them in step: you
+              could walk from Monitoring to Alarms and be reading two different
+              plants without either page saying so. The query value stays, and
+              everything downstream still reads the site from it; only the
+              second, third and fourth ways of setting it are gone. */}
 
           <div className="field"><label>Device</label>
             <PanelSelect multiple head="Devices" anyLabel="All devices" id="an-dev"

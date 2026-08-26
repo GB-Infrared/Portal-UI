@@ -6,13 +6,12 @@ import { PLOT_COLORS, RANGE_TABS } from '../data/constants';
 import { fixed, num } from '../lib/format';
 import { DevicePowerChart } from '../components/charts/DevicePowerChart';
 import { PanelSelect } from '../components/PanelSelect';
-import { PlantPicker } from '../components/PlantPicker';
 import { DeviceRail } from './monitoring/DeviceRail';
 import { DevicePanel } from './monitoring/DevicePanel';
 import { HistoryTable } from './monitoring/HistoryTable';
 
 export default function Monitoring() {
-  const { plants, deviceTypes, dataPoints, devices, live, devicePower,
+  const { deviceTypes, dataPoints, devices, live, devicePower,
           history, query, setQuery } = usePortal();
 
   const dateRef = useDateField();
@@ -76,24 +75,14 @@ export default function Monitoring() {
           <span className="live-chip"><span className="dot" style={{ width: 5, height: 5 }} />LIVE</span>
         </div>
         <div className="filters">
-          <div className="field">
-            <label>Plant</label>
-            {/* the same card picker Home opens, one site at a time: the chart,
-                the rail and the table all read ONE plant, and two merged would
-                not be a reading. The card states what the rail is about to be
-                filled with rather than only naming the site. */}
-            <PlantPicker plants={plants} value={query.plantId}
-                         onChange={id => setQuery({ plantId: id })}
-                         wide anyLabel="No plants"
-                         renderState={p => (
-                           <>
-                             {p.acCapacity != null &&
-                               <span className="cap">{num(p.acCapacity)} kW AC</span>}
-                             {p.deviceCount != null &&
-                               <span className="dv">{p.deviceCount} DEVICES</span>}
-                           </>
-                         )} />
-          </div>
+          {/* NO PLANT FIELD. Which site this page is showing is stated in the
+              bar at the top and changed in exactly one place, Site Control.
+              Four pages used to carry a picker of their own - four answers to a
+              question that has one, with nothing keeping them in step: you
+              could walk from Monitoring to Alarms and be reading two different
+              plants without either page saying so. The query value stays, and
+              everything downstream still reads the site from it; only the
+              second, third and fourth ways of setting it are gone. */}
           <div className="field">
             <label>Device type</label>
             {/* the options are the plant's, not the app's — an empty list says so

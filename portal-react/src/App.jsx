@@ -74,7 +74,9 @@ const PAGE_SUBTITLE = {
 };
 
 function Shell() {
-  const { plants, user, query, setQuery } = usePortal();
+  const { plant, plants, user, query, setQuery } = usePortal();
+  const chosen = plant || (plants || []).filter(p => p.id === query.plantId)[0];
+  const plantName = chosen && (chosen.name || chosen.id);
   const [theme, toggleTheme] = useTheme();
   const toast = useToast();
   const navigate = useNavigate();
@@ -92,6 +94,14 @@ function Shell() {
           plant in the filter bar above the grid. */}
       <TopBar
         subtitle={PAGE_SUBTITLE[pathname] || 'SITE OVERVIEW'}
+        /* Resolved rather than read straight off `plant`. That field is one the
+           backend sends, and this readout has to be able to answer "which site"
+           on EVERY page — so when the payload names a plant we use it, and when
+           it only sends the list and the chosen id, which is all the selectors
+           downstream need, we look the name up ourselves. A bar that says "—"
+           because a redundant object was not supplied is a bar that has stopped
+           doing the one job it was added for. */
+        plantName={plantName}
         refreshSeconds={query.refreshSeconds}
         onRefreshChange={v => {
           setQuery({ refreshSeconds: v });

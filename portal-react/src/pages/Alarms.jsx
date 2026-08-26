@@ -1,9 +1,8 @@
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
 import { usePortal } from '../data/PortalData';
 import { useToast } from '../components/Toasts';
 import { PanelSelect } from '../components/PanelSelect';
 import { RowPop } from '../components/RowPop';
-import { PlantPicker } from '../components/PlantPicker';
 import { DateTimeField } from '../components/DateTimeField';
 import { SEVERITY_BANDS, ALARM_STATUS, ROWS_PER_PAGE } from '../data/constants';
 import { ALARM_COLUMNS } from '../data/alarmColumns';
@@ -21,7 +20,7 @@ import { downloadCsv } from '../lib/csv';
  * what is on screen, and on an alarm page that gap is the dangerous kind.
  */
 export default function Alarms() {
-  const { plants, alarmsPage, query, setQuery, status } = usePortal();
+  const { alarmsPage, query, setQuery, status } = usePortal();
   const toast = useToast();
 
   const page = alarmsPage || null;
@@ -42,12 +41,6 @@ export default function Alarms() {
      actually have, and what each plant has open over this same window. An app
      that kept its own list would go stale the first time a site added a meter. */
   const devices = (page && page.devices) || [];
-  const counts = useMemo(() => {
-    const m = new Map();
-    ((page && page.plantCounts) || []).forEach(p => m.set(p.id, p.activeAlarms));
-    return m;
-  }, [page]);
-
   const active = rows.filter(a => a.status === 'active');
   const bandCount = k => active.filter(a => a.sev === k).length;
 
@@ -76,19 +69,14 @@ export default function Alarms() {
       {/* ===================== FILTER BAR ===================== */}
       <div className="toprow">
         <div className="filters">
-          <div className="field"><label>Plant</label>
-            {/* several sites at once: an alarm desk watches a portfolio, and
-                "what is open across these three" is the question this page is
-                for. Each card is costed before it is offered. */}
-            <PlantPicker plants={plants} multiple value={query.alarmPlants}
-                         onChange={v => setQuery({ alarmPlants: v, alarmPage: 1 })}
-                         renderState={p => {
-                           const n = counts.has(p.id) ? counts.get(p.id) : p.activeAlarms;
-                           if (n == null) return null;
-                           return <span className={'alm ' + (n ? 'hot' : 'cold')}>
-                             {n ? `${n} ACTIVE` : 'ALL CLEAR'}</span>;
-                         }} />
-          </div>
+          {/* NO PLANT FIELD. Which site this page is showing is stated in the
+              bar at the top and changed in exactly one place, Site Control.
+              Four pages used to carry a picker of their own - four answers to a
+              question that has one, with nothing keeping them in step: you
+              could walk from Monitoring to Alarms and be reading two different
+              plants without either page saying so. The query value stays, and
+              everything downstream still reads the site from it; only the
+              second, third and fourth ways of setting it are gone. */}
 
           <div className="field"><label>Device</label>
             <PanelSelect multiple head="Devices" anyLabel="All devices" id="a-dev"
