@@ -140,7 +140,7 @@ export default function Login({ onSignIn, onResetPassword, to = '/' }) {
       ['', kind === 'signin'
         ? '[ auth   ]  access granted · operator ..... '
         : '[ auth   ]  passkey replaced · operator ... ', who.toUpperCase()],
-      ['warm', '>  OPENING SITE OVERVIEW']
+      ['warm', '>  SELECT A SITE']
     ], () => {
       timer.current = setTimeout(() => navigate(to, { replace: true }), 550);
     });
@@ -157,15 +157,34 @@ export default function Login({ onSignIn, onResetPassword, to = '/' }) {
   return (
     <div className="page-login">
       <div className="stars" />
-      <div className="aurora" />
-      <div className="aurora two" />
+      <Limb />
       <div className="vignette" />
       <div className="grain" />
       <div className="corner tl" />
       <div className="corner br" />
 
       <div className="boot">
-        <div>
+        {/* ONE PANEL, AND IT IS THE OVERVIEW'S OWN. The sign-in used to stand
+            bare on the field: type on a background, with nothing bounding it.
+            That is why it read as plain — not because anything was missing from
+            it, but because nothing on the screen said where it ENDED. This is
+            the same glass the site overview's detail card stands on, with the
+            same blur, hairline and radius, so brand, log and form are one
+            object on one surface in front of one picture. */}
+        <div className="stack">
+          {/* THE MARK IS BACK, AND IT IS SMALL. A sign-in box floating on a
+              photograph of Earth with no name on it is not restrained, it is
+              unidentified — this is the one screen a person reaches before they
+              have any other way of knowing what they are signing into. It heads
+              the panel; it does not announce the product. */}
+          <div className="brand">
+            <img src="/logo-mark.png" alt="EnerOps Data Systems Pvt Ltd" />
+            <span>
+              <span className="word">ENEROPS OS</span>
+              <span className="sub">Site Control</span>
+            </span>
+          </div>
+
           <pre className="bootlog">
             {lines.map((l, i) => (
               <div key={i} className={l[0] || undefined}>
@@ -232,21 +251,154 @@ export default function Login({ onSignIn, onResetPassword, to = '/' }) {
   );
 }
 
-/* Fleet Control's format exactly — a banner, a rule, then timestamped lines
-   counting up what came online. WHAT is counted differs, because what boots
-   here differs: the three pages behind the sign-in, not a broker uplink and a
-   firmware vault. Every line is a fact about this app starting; none of them is
-   a reading from a plant. */
+/* Fleet Control's format — timestamped lines counting up what came online.
+   WHAT is counted differs, because what boots here differs: the pages behind
+   the sign-in, not a broker uplink and a firmware vault. Every line is a fact
+   about this app starting; none of them is a reading from a plant.
+
+   THE BANNER IS GONE, and it had to go the moment the mark arrived at the head
+   of the panel: the wordmark was being printed twice on one screen, once in
+   type and once in the log underneath it. It was always the product introducing
+   itself to somebody who had just opened the product.
+
+   'kernel init' went with it. It was the one line here that was not about this
+   application: a plant operator has no kernel, and a status line nobody can act
+   on is set dressing pretending to be information. Every line left names a page
+   they are about to be able to open.
+
+   'analysis & kpi' is split in two. They are separate pages behind the sign-in,
+   they come up separately, and one line covering both was a shortcut in the
+   writing that made the log slightly untrue.
+
+   AND THE PROMPT IS GONE. The log used to end on '> AWAITING OPERATOR', which
+   was the screen telling the reader it was waiting for them — while the form
+   sat beside it with a cursor already in it. The form IS the ask; a line of
+   type restating it is the machine narrating its own state rather than
+   reporting anything. The log ends on the last thing it actually did. */
 const BOOT = [
-  ['bt',   'E N E R O P S   O S'],
-  ['sub',  'ENEROPS DATA SYSTEMS — SITE OVERVIEW'],
-  ['rule', '─'.repeat(44)],
-  ['',     '[ 0.001 ]  kernel init ..................... ', 'OK'],
   ['',     '[ 0.214 ]  monitoring ...................... ', 'READY'],
   ['',     '[ 0.395 ]  alarms .......................... ', 'READY'],
-  ['',     '[ 0.611 ]  analysis & kpi .................. ', 'READY'],
-  ['warm', '>  AWAITING OPERATOR']
+  ['',     '[ 0.611 ]  analysis ........................ ', 'READY'],
+  ['',     '[ 0.742 ]  kpi ............................. ', 'READY']
 ];
+
+/**
+ * The edge of the Earth, across the foot of the front door.
+ *
+ * It replaces the aurora that used to glow there. The aurora was a colour with
+ * nothing behind it; this is the planet the fleet is on, seen from one step
+ * further out than the site overview shows it, and it puts the sign-in in the
+ * same room the portal opens into rather than in a decorated void.
+ *
+ * THREE THINGS AND NOTHING ELSE:
+ *   the ground   a circle whose centre is far below the window, so only its cap
+ *                crosses the screen; dark, because a limb is a dark body.
+ *   the line     the atmosphere edge-on, brightest under the sun and gone by
+ *                the time the terminator has run off to the left.
+ *   the haze     the same line spread over seven widening strokes, which is
+ *                what an atmosphere does to a horizon and what one stroke of
+ *                even alpha cannot imitate.
+ *
+ * NO SITE IS ON IT. Nothing here is clickable and no figure is printed over it;
+ * the fleet lives on the ring on the other side of this door.
+ *
+ * Painted once per resize — nothing on it moves, and a horizon redrawing itself
+ * sixty times a second is a fan spun up to animate a still.
+ */
+function Limb() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const cv = ref.current;
+    if (!cv) return undefined;
+    const lx = cv.getContext('2d');
+    if (!lx) return undefined;
+
+    const paint = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const W = window.innerWidth, H = window.innerHeight;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      cv.style.width = W + 'px'; cv.style.height = H + 'px';
+      lx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      lx.clearRect(0, 0, W, H);
+
+      /* the sun's place in the frame, read from the same custom property the
+         page's own wash is positioned by, so there is one sun on this screen */
+      const raw = getComputedStyle(cv).getPropertyValue('--sun-x').trim();
+      const n = parseFloat(raw);
+      const sx = isFinite(n) ? (raw.indexOf('%') >= 0 ? n / 100 : n / W) : 0.78;
+
+      /* the radius is set from the WIDTH, because the curve is read across the
+         screen rather than up it: too small and the horizon is a hill, too
+         large and it is a ruled line and the planet has gone */
+      const R = Math.max(W * 1.85, H * 2.2);
+      const rise = Math.max(58, Math.min(H * 0.27, 230));
+      const cx = W * 0.5, cy = H - rise + R;
+      const at = t => Math.max(0, Math.min(1, t));
+
+      /* lit ACROSS, not from a point: at this distance the terminator is a soft
+         band down the face of the planet, and a radial highlight would put a
+         spotlight on a world */
+      const g = lx.createLinearGradient(0, 0, W, 0);
+      g.addColorStop(0, '#080d16');
+      g.addColorStop(at(sx - 0.62), '#0a111c');
+      g.addColorStop(at(sx - 0.34), '#0f1a2a');
+      g.addColorStop(at(sx - 0.12), '#16283e');
+      g.addColorStop(at(sx + 0.06), '#1d3a55');
+      g.addColorStop(1, '#24455f');
+      lx.beginPath(); lx.arc(cx, cy, R, 0, 6.283185); lx.closePath();
+      lx.fillStyle = g; lx.fill();
+
+      /* the ground under the sun takes the warm of it — the same gold the
+         wordmark is, which is why the two read as one light */
+      lx.save();
+      lx.beginPath(); lx.arc(cx, cy, R, 0, 6.283185); lx.clip();
+      const wy = H - rise * 0.35;
+      const wg = lx.createRadialGradient(W * sx, wy, 0, W * sx, wy, Math.max(W * 0.30, 220));
+      wg.addColorStop(0, 'rgba(255,206,140,.24)');
+      wg.addColorStop(0.40, 'rgba(227,178,60,.08)');
+      wg.addColorStop(1, 'rgba(227,178,60,0)');
+      lx.fillStyle = wg;
+      lx.fillRect(0, H - rise - 40, W, rise + 40);
+      lx.restore();
+
+      /* ONE gradient says how lit the air is along the whole arc, and every
+         stroke below reads from it — so the hairline and the haze cannot
+         disagree about where the day ends */
+      const air = lx.createLinearGradient(0, 0, W, 0);
+      air.addColorStop(0, 'rgba(90,162,240,0)');
+      air.addColorStop(at(sx - 0.66), 'rgba(90,162,240,.10)');
+      air.addColorStop(at(sx - 0.38), 'rgba(125,185,245,.34)');
+      air.addColorStop(at(sx - 0.14), 'rgba(165,205,250,.72)');
+      air.addColorStop(at(sx + 0.04), 'rgba(215,232,255,.96)');
+      air.addColorStop(1, 'rgba(255,236,196,.90)');
+
+      /* the haze FIRST, widest and faintest, so the hairline lands on top of
+         its own glow rather than under it */
+      lx.lineCap = 'butt';
+      for (let i = 7; i >= 1; i--) {
+        lx.beginPath();
+        lx.arc(cx, cy, R + i * 3.6, Math.PI, 6.283185);
+        lx.lineWidth = i * 5.2;
+        lx.globalAlpha = 0.085 / Math.pow(i, 0.86);
+        lx.strokeStyle = air;
+        lx.stroke();
+      }
+      lx.globalAlpha = 1;
+
+      /* and the line itself: thin, because the thing it draws is thin */
+      lx.beginPath();
+      lx.arc(cx, cy, R + 0.6, Math.PI, 6.283185);
+      lx.lineWidth = 1.5;
+      lx.strokeStyle = air;
+      lx.stroke();
+    };
+
+    paint();
+    window.addEventListener('resize', paint);
+    return () => window.removeEventListener('resize', paint);
+  }, []);
+  return <canvas className="limb" ref={ref} aria-hidden="true" />;
+}
 
 const isEmail = s => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
 

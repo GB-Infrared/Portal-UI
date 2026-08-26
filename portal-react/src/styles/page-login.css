@@ -26,7 +26,8 @@
    #e3b23c. This used to be a second dark palette invented beside the portal's,
    right down to the LIGHT green #12a150 on the focus ring and the button, which
    was the one hue here that could not have come from the app it opens. */
-.page-login{position:fixed;inset:0;overflow:hidden;font-family:var(--mono);color:#a3b4c8;
+.page-login{--sun-x:78%;
+  position:fixed;inset:0;overflow:hidden;font-family:var(--mono);color:#a3b4c8;
   background:
     radial-gradient(ellipse 86% 66% at 50% 44%, rgba(35,54,82,.62) 0%, rgba(15,24,37,.22) 46%, transparent 72%),
     #121a26}
@@ -48,14 +49,17 @@
     radial-gradient(1px 1px at 19% 72%,  #9dbfda44, transparent),
     radial-gradient(1px 1px at 47% 80%,  #9dbfda44, transparent),
     radial-gradient(1px 1px at 82% 68%,  #7ee2ab44, transparent)}
-.page-login .aurora{position:absolute;left:-20%;right:-20%;bottom:-45vh;height:80vh;z-index:0;
-  pointer-events:none;
-  background:radial-gradient(ellipse at 50% 100%, rgba(47,208,122,.20) 0%, rgba(90,162,240,.12) 40%, transparent 70%);
-  filter:blur(44px);animation:lg-breathe 15s ease-in-out infinite}
-.page-login .aurora.two{left:-10%;bottom:-55vh;
-  background:radial-gradient(ellipse at 30% 100%, rgba(227,178,60,.13) 0%, transparent 65%);
-  animation-duration:19s;animation-delay:-7s}
-@keyframes lg-breathe{0%,100%{opacity:.55;transform:translateY(0)}50%{opacity:1;transform:translateY(-3vh)}}
+/* ---------- and the ground the fleet is on ----------
+   THE FRONT DOOR OPENS INTO THE SAME ROOM IT LEADS TO. What used to be here was
+   an aurora: a green-and-gold glow along the bottom of the frame, breathing on
+   a fifteen-second loop. It was a colour with nothing behind it. The planet is
+   behind it now — the same Earth the site overview puts the fleet on, seen from
+   one step further out. See the Limb component in Login.jsx for what it draws
+   and, more to the point, what it refuses to draw.
+
+   Above the stars, because a planet occludes what is behind it; below the
+   vignette and the grain, because those close down the whole frame. */
+.page-login .limb{position:absolute;inset:0;z-index:1;display:block;pointer-events:none}
 .page-login .vignette{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:radial-gradient(ellipse at 50% 42%, transparent 55%, rgba(6,11,19,.58) 100%)}
 /* the faint horizontal ruling of a CRT, at the edge of visibility — it is what
@@ -71,19 +75,48 @@
   border-bottom:1px solid rgba(47,208,122,.42);border-right:1px solid rgba(47,208,122,.42)}
 
 /* ---------- boot ---------- */
+/* the panel is lifted off dead centre, because the bottom of the frame is not
+   empty any more — the limb is there, and a card sitting on the horizon reads
+   as resting on it. The bottom padding is a floor, so a short window closes the
+   gap rather than pushing the sign-in off the top. */
 .page-login .boot{position:absolute;inset:0;z-index:10;overflow-y:auto;
-  display:flex;align-items:center;justify-content:center;padding:24px}
+  display:flex;align-items:center;justify-content:center;
+  padding:24px 24px max(24px,13vh)}
+
+/* ---------- ONE PANEL, AND IT IS THE OVERVIEW'S OWN ----------
+   The same glass the site overview's detail card stands on: same fill, same
+   hairline, same blur. Brand, log and form are one object on one surface now,
+   which is the whole of what was wrong before — nothing was missing from the
+   sign-in, but nothing on the screen said where it ENDED. */
+.page-login .stack{display:flex;flex-direction:column;
+  padding:24px 30px 26px;border-radius:16px;
+  background:rgba(27,37,51,.78);border:1px solid #324054;
+  box-shadow:0 34px 92px rgba(0,0,0,.55);
+  -webkit-backdrop-filter:blur(18px) saturate(130%);
+  backdrop-filter:blur(18px) saturate(130%)}
+
+/* ---------- the mark ----------
+   It heads the PANEL, not the screen — the size it has in the portal's own
+   header, so the eye still lands on the operator field first. */
+.page-login .brand{display:flex;align-items:center;gap:12px;
+  padding-bottom:18px;margin-bottom:4px;border-bottom:1px solid #253141}
+.page-login .brand img{height:32px;width:auto;display:block;flex:none}
+.page-login .brand .word{display:block;font-family:var(--serif,Georgia,serif);
+  font-weight:700;font-size:17px;color:#e3b23c;letter-spacing:.2px;line-height:1.05}
+.page-login .brand .sub{display:block;margin-top:4px;font-size:9px;letter-spacing:.28em;
+  color:#7a8ca1;text-transform:uppercase}
 /* the log sets the scale for the whole screen — the box below is sized off it,
    so these two numbers are the only ones to touch to make the page read bigger */
 .page-login .bootlog{font-family:var(--mono);font-size:14px;line-height:2.02;color:#a3b4c8;
-  min-width:540px;white-space:pre;margin:0}
-.page-login .bootlog .bt{color:#e3b23c;letter-spacing:.34em;font-size:16px;font-weight:700}
-.page-login .bootlog .sub{color:#7a8ca1;letter-spacing:.16em}
-.page-login .bootlog .rule{color:#324054}
+  min-width:540px;min-height:calc(4 * 2.02em);white-space:pre;margin:0}
 .page-login .bootlog b{color:#2fd07a;font-weight:500}
 .page-login .bootlog .warm{color:#e3b23c}
 @media (max-width:560px){
   .page-login .bootlog{min-width:0;font-size:12px;white-space:pre-wrap}
+  .page-login .boot{padding:18px 16px max(18px,9vh)}
+  .page-login .stack{padding:18px 18px 20px;border-radius:13px}
+  .page-login .brand img{height:27px}
+  .page-login .brand .word{font-size:15.5px}
 }
 
 .page-login .skip{position:absolute;bottom:26px;left:0;right:0;text-align:center;z-index:11;
