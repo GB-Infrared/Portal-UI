@@ -185,6 +185,11 @@
    over the field, which covers the thing it is complaining about */
 .page-login .lerr{color:#ff6b6b;font-size:11px;letter-spacing:.16em;margin-left:132px;margin-top:10px;
   min-height:14px;text-transform:uppercase;max-width:390px;line-height:1.7}
+/* an identifier is exempt from the caps. Everything else in this slot is prose
+   a person reads; a prop name is something a developer has to type back, and a
+   voice that rewrites it has stopped being a voice and started being wrong. */
+.page-login .lerr code{text-transform:none;font-family:var(--mono);
+  letter-spacing:.02em;color:#ff9a90}
 /* Caps Lock is the commonest reason a correct passkey is refused, and the field
    cannot show it back to you to check. Warned while it is true and taken down
    the moment it is not — a warning that outlives its condition teaches people

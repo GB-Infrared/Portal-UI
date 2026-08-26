@@ -117,8 +117,19 @@ export default function Login({ onSignIn, onResetPassword, to = '/' }) {
 
     const handler = kind === 'signin' ? onSignIn : onResetPassword;
     if (!handler) {
-      setErr([null, `NO AUTHENTICATION SERVICE IS CONNECTED — PASS ${
-        kind === 'signin' ? 'onSignIn' : 'onResetPassword'} TO <App>`]);
+      /* The refusal slot letterspaces everything into caps, which is the right
+         voice for ENTER YOUR PASSKEY and the wrong one for an identifier: this
+         message came out telling a developer to pass `ONSIGNIN` to `<APP>`,
+         neither of which exists. The prose stays in that voice and the code is
+         handed back its own case — the one message on this page that names
+         something you have to type correctly must print it correctly. */
+      setErr([null, (
+        <>
+          NO AUTHENTICATION SERVICE IS CONNECTED — PASS{' '}
+          <code>{kind === 'signin' ? 'onSignIn' : 'onResetPassword'}</code>
+          {' '}TO <code>&lt;App&gt;</code>
+        </>
+      )]);
       return;
     }
 
