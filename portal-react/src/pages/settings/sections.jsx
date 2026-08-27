@@ -5,73 +5,42 @@
  * what exists — and so adding a section is one entry rather than an edit in
  * three files.
  *
- * `headline` and `note` describe what a section will HOLD. Ten of the eleven are
- * not drawn yet, and saying so plainly is the point: a menu item that opens an
- * empty card reads as broken, one that names what belongs there reads as a plan,
- * and the shape of Settings can be reviewed before any of it is built.
+ * ALL OF THEM ARE DRAWN NOW — the panels live in panels.jsx and Settings.jsx
+ * routes to them by id. The `headline`/`note` pair each entry used to carry said
+ * what a section WOULD hold while it was still a placeholder; none of them needs
+ * one any more. The fallback in Settings.jsx that renders that pair is kept for
+ * the next section added to this list, not removed as dead.
  */
 export const SECTIONS = [
   {
     id: 'user-profile', group: 'Profile Management', label: 'User Profile'
-    /* the only one that is drawn — see Settings.jsx */
   },
   {
-    id: 'company-profile', group: 'Profile Management', label: 'Company Profile',
-    headline: 'The organisation behind the account',
-    note: 'Registered name, address, tax identifiers and the billing contact — the ' +
-          'company-level equivalent of the user profile beside it.'
+    id: 'company-profile', group: 'Profile Management', label: 'Company Profile'
   },
   {
-    id: 'customer-devices', group: 'Asset Management', label: 'Customer Devices',
-    headline: 'Every device this account owns, across every plant',
-    note: 'A table rather than a form: serial, model, plant, commissioning date, and the ' +
-          'data points it publishes. It is the register Monitoring reads from, so the ' +
-          'columns here should be the ones that page already names.'
+    id: 'customer-devices', group: 'Asset Management', label: 'Customer Devices'
   },
   {
-    id: 'emission-rate', group: 'System Configuration', label: 'Emission Rate',
-    headline: 'kg CO₂ avoided per kWh generated',
-    note: 'One rate, versioned by the date it takes effect — a grid factor that changes in ' +
-          'April must not silently rewrite last year’s reported savings.'
+    id: 'emission-rate', group: 'System Configuration', label: 'Emission Rate'
   },
   {
-    id: 'electricity-rate', group: 'System Configuration', label: 'Electricity Rate',
-    headline: 'The tariff the savings figures are counted against',
-    note: 'Per plant, and dated like the emission rate. If the tariff has slabs or a ' +
-          'peak/off-peak split, that structure belongs here rather than flattened into ' +
-          'one number.'
+    id: 'electricity-rate', group: 'System Configuration', label: 'Electricity Rate'
   },
   {
-    id: 'energy-offset', group: 'System Configuration', label: 'Energy Offset',
-    headline: 'A correction applied to metered generation',
-    note: 'What it offsets and why needs stating on the screen itself — an adjustment ' +
-          'nobody can trace is indistinguishable from a meter that is wrong.'
+    id: 'energy-offset', group: 'System Configuration', label: 'Energy Offset'
   },
   {
-    id: 'alarms-config', group: 'System Configuration', label: 'Alarms config',
-    headline: 'Which conditions raise an alarm, and at what severity',
-    note: 'The rules behind the Alarms page: threshold, dead-band, how long a condition ' +
-          'must hold before it counts, and who is notified. The severities here have to be ' +
-          'the same ones that page already colours.'
+    id: 'alarms-config', group: 'System Configuration', label: 'Alarms config'
   },
   {
-    id: 'access-user', group: 'Access Management', label: 'User',
-    headline: 'The people who can sign in',
-    note: 'A table with invite and deactivate — never delete, because an alarm acknowledged ' +
-          'by someone who no longer exists still has to say who acknowledged it.'
+    id: 'access-user', group: 'Access Management', label: 'User'
   },
   {
-    id: 'access-role', group: 'Access Management', label: 'Role',
-    headline: 'Named bundles of permissions',
-    note: 'Roles are what get assigned; Access Control is where each role’s permissions are ' +
-          'set. Keeping the two apart is what stops per-user exceptions accumulating until ' +
-          'nobody can say who can do what.'
+    id: 'access-role', group: 'Access Management', label: 'Role'
   },
   {
-    id: 'access-ctl', group: 'Access Management', label: 'Access Control',
-    headline: 'What each role may do, and to which plants',
-    note: 'A grid of roles against permissions. The plant dimension matters as much as the ' +
-          'verb: read-everywhere and write-on-one-site is the common case, not the exception.'
+    id: 'access-ctl', group: 'Access Management', label: 'Access Control'
   }
 ];
 

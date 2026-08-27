@@ -34,7 +34,19 @@ export const EMPTY_DATA = Object.freeze({
   kpiMetrics: [],
   kpi: null,
   paramCategories: [],
-  analysis: null
+  analysis: null,
+  /* ---- settings ----
+     Everything on the Settings screen that is a FACT about the account rather
+     than a reading from a plant. Empty here and empty on screen: a settings page
+     that invented a tariff would be inventing the kind of fact people act on. */
+  company: null,
+  deviceRegister: [],
+  emissionRates: [],
+  electricityRates: [],
+  energyOffsets: [],
+  alarmRecipients: [],
+  roles: [],
+  users: []
 });
 
 const p2 = n => String(n).padStart(2, '0');

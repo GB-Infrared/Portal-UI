@@ -123,3 +123,100 @@
   .page-settings .side{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}
   .page-settings .sidehead{height:60px}
 }
+
+/* =====================================================================
+   THE PANELS · tables, states and the pieces they share
+   Ported from the mockups. Every colour is a token, so the whole of this
+   follows the theme the way the rest of the portal does.
+   ===================================================================== */
+
+/* which site the card is about — the same pin, the same mono name, the same
+   sentence about where it is changed, as on every reading page */
+.page-settings .sitepin{display:inline-flex;align-items:center;gap:6px;color:var(--text)}
+.page-settings .sitepin svg{color:var(--green);flex:none}
+.page-settings .sitepin .n{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.02em}
+.page-settings .chead .count{font-size:11.5px;color:var(--faint)}
+
+/* ---------- the tables ---------- */
+.page-settings .tablewrap{overflow-x:auto}
+.page-settings table{width:100%;min-width:760px;border-collapse:separate;border-spacing:0}
+.page-settings table.wide{min-width:980px}
+.page-settings thead th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);padding:9px 14px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+/* The unit belongs in the column header. A bare "Rate" is how kg CO₂/kWh gets
+   entered as grams and every savings figure downstream comes out a thousandfold
+   wrong, with nothing on the screen to catch it. */
+.page-settings thead th .u{font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--faint)}
+.page-settings tbody td{padding:9px 14px;font-size:12.5px;border-bottom:1px solid var(--line-soft);
+  color:var(--muted);white-space:nowrap}
+/* the name is the one column a person chose, so it is the one in the reading
+   face; a serial is a machine key and stays in the mono column where keys live */
+.page-settings tbody td.nm{color:var(--text);font-weight:600}
+.page-settings tbody td.mono{font-family:var(--mono);font-weight:600}
+/* the dash that means "no end yet" is not a value, so it does not come up to
+   full strength with the readings when the row is hovered */
+.page-settings tbody td.dim{color:var(--faint)}
+.page-settings tbody tr{transition:background-color .12s ease}
+.page-settings tbody tr:hover{background:var(--row-hover)}
+.page-settings tbody tr:hover td:not(.dim){color:var(--text)}
+/* A suspended person is still in the table — they have to be, because every
+   alarm they ever acknowledged is filed under their name. Dimmed, never gone. */
+.page-settings tbody tr.gone td{color:var(--faint)}
+.page-settings tbody tr.gone td.nm{color:var(--muted)}
+
+/* the actions, on the row they act on */
+.page-settings .rowacts{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.page-settings .rowbtn{display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:7px;border:1px solid transparent;
+  background:transparent;color:var(--faint)}
+.page-settings .rowbtn:hover{color:var(--text);border-color:var(--line);background:var(--panel-2)}
+.page-settings .rowbtn.warn:hover{color:var(--red);border-color:var(--red-soft);background:var(--red-soft)}
+
+/* ---------- the pager ---------- */
+.page-settings .tfoot{display:flex;align-items:center;gap:14px;padding:11px 20px;font-size:12px;
+  color:var(--muted);flex-wrap:wrap;border-top:1px solid var(--line-soft)}
+.page-settings .tfoot select{height:30px;min-width:0;font-size:12px;padding:0 26px 0 9px}
+.page-settings .tfoot .sp{margin-left:auto}
+.page-settings .tfoot .range{font-family:var(--mono)}
+.page-settings .pgbtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font-size:15px;line-height:1}
+.page-settings .pgbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi)}
+.page-settings .pgbtn:disabled{opacity:.35;cursor:default}
+
+/* ---------- states, and they are the portal's own two ---------- */
+.page-settings .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:20px;
+  font-size:11px;font-weight:700}
+.page-settings .pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.page-settings .pill.live{color:var(--green-deep);background:var(--green-soft)}
+.page-settings .pill.held{color:var(--red);background:var(--red-soft)}
+
+/* the sites a role reaches, drawn as chips rather than run together in a
+   sentence — three names separated by commas is a sentence to be parsed, and
+   what the reader is doing is checking a set */
+.page-settings .chips{display:flex;flex-wrap:wrap;gap:4px}
+.page-settings .chip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;
+  font-weight:700;color:var(--muted);background:var(--panel-2);border:1px solid var(--line-soft)}
+.page-settings .chip.all{color:var(--green-deep);background:var(--green-soft);border-color:transparent}
+
+/* the role is changed where it is read, so the cell holds the control itself
+   rather than sending the reader to a dialog to do one thing */
+.page-settings select.mini{height:30px;min-width:150px;font-size:12.5px;padding:0 26px 0 9px}
+
+/* ---------- who hears about an alarm ----------
+   FOUR levels, and they are the portal's own four, ranked as it ranks them. The
+   head of a level's column carries that level's colour, so the ticks below it
+   are read against a label rather than against a legend somewhere else. */
+.page-settings thead th.sev-h{text-align:center}
+.page-settings thead th.sev-h.critical{color:var(--red)}
+.page-settings thead th.sev-h.alarm{color:var(--red)}
+.page-settings thead th.sev-h.warn{color:var(--amber)}
+.page-settings tbody td.tick{text-align:center;color:var(--green)}
+.page-settings tbody td.tick .off{color:var(--line-hi)}
+
+/* ---------- a table with nothing in it ----------
+   Said in a sentence. An empty grid with headings reads as a table that has
+   failed to load; a sentence reads as a fact about the account. */
+.page-settings .nodata{padding:34px 20px;text-align:center;font-size:12.5px;color:var(--faint)}
+
+/* an em-dash, wherever a value is missing */
+.page-settings .none{color:var(--faint)}

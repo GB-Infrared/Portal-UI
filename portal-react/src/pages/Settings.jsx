@@ -5,6 +5,10 @@ import { useToast } from '../components/Toasts';
 import { AccountMenu } from '../components/AccountMenu';
 import { useTheme } from '../lib/useTheme';
 import { SECTIONS, GROUP_ICON } from './settings/sections';
+import {
+  CompanyProfile, CustomerDevices, RateBoard, EnergyOffset,
+  AlarmsConfig, RoleTable, UserTable, AccessControl
+} from './settings/panels';
 
 /**
  * Settings · everything about the account rather than about the plant.
@@ -18,18 +22,30 @@ import { SECTIONS, GROUP_ICON } from './settings/sections';
  * that filled a missing phone number with a plausible one would be inventing
  * exactly the kind of fact people act on.
  *
- * Ten of the eleven sections are named but not drawn. They are stated rather
- * than hidden: a menu item that opens an empty card reads as broken, one that
- * says what it will hold reads as a plan, and the sidebar can be reviewed as a
- * whole before any of it is built.
+ * Every section is drawn. The panels live in settings/panels.jsx and read from
+ * the payload; a table the backend has not sent says so in a sentence rather
+ * than drawing an empty grid, and no control here writes anything without a
+ * host callback to write it with.
  */
 export default function Settings() {
-  const { user } = usePortal();
+  const { user, plant, plants, query, company, deviceRegister, emissionRates,
+          electricityRates, energyOffsets, alarmRecipients, roles, users } = usePortal();
+  /* the same resolution the top bar uses: the payload may name a plant, or it
+     may send only the list and the chosen id, and the pin has to be right either
+     way — see the note in App.jsx */
+  const chosen = plant || (plants || []).filter(p => p.id === query.plantId)[0];
+  const plantName = chosen && (chosen.name || chosen.id);
   const toast = useToast();
   const navigate = useNavigate();
   const { hash } = useLocation();
   const [theme, toggleTheme] = useTheme();
   const [shut, setShut] = useState(() => new Set());
+
+  /* EVERY WRITE GOES THROUGH THE HOST, and with no host wired this is what
+     every one of them does. Said once rather than at each call site, because
+     the answer is the same for all of them and a screen that pretended to save
+     would be worse than one that admits it cannot. */
+  const notWired = () => toast('Saving is the host application\u2019s to wire — see contract.js');
 
   /* the hash carries the section, so a link to one part of Settings lands on
      that part rather than on whichever happens to be first */
@@ -118,26 +134,57 @@ export default function Settings() {
               reader can see both where they are and what they are looking at */}
           <h1 className="pagehead">{current.group}</h1>
 
+          {/* Each panel draws its OWN head, because most of them carry tools —
+              a site pin, a count, an ADD button — that belong to the panel
+              rather than to the shell around it. User Profile is the one that
+              does not, so the shell keeps a head for it alone. */}
           <section className="card">
-            <div className="chead">
-              <div className="title">{current.label}</div>
-              {current.id === 'user-profile' && (
-                <div className="tools">
-                  <button className="tbtn" type="button"
-                          onClick={() => toast('Editing is not designed yet')}>EDIT</button>
+            {current.id === 'user-profile' ? (
+              <>
+                <div className="chead">
+                  <div className="title">{current.label}</div>
+                  <div className="tools">
+                    <button className="tbtn" type="button" onClick={notWired}>EDIT</button>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {current.id === 'user-profile'
-              ? <UserProfile user={user} onChangePassword={() => toast('The change-password screen is not designed yet')} />
-              : (
+                <UserProfile user={user} onChangePassword={notWired} />
+              </>
+            ) : current.id === 'company-profile' ? (
+              <>
+                <div className="chead"><div className="title">{current.label}</div></div>
+                <CompanyProfile company={company} />
+              </>
+            ) : current.id === 'customer-devices' ? (
+              <CustomerDevices devices={deviceRegister} plantName={plantName} />
+            ) : current.id === 'emission-rate' ? (
+              <RateBoard title="Emission Rate" unit="kg CO₂ / kWh" rates={emissionRates}
+                         plantName={plantName} onAdd={notWired} onRemove={notWired} />
+            ) : current.id === 'electricity-rate' ? (
+              <RateBoard title="Electricity Rate" unit="₹ / kWh" rates={electricityRates}
+                         plantName={plantName} onAdd={notWired} onRemove={notWired} />
+            ) : current.id === 'energy-offset' ? (
+              <EnergyOffset offsets={energyOffsets} plantName={plantName}
+                            onAdd={notWired} onRemove={notWired} />
+            ) : current.id === 'alarms-config' ? (
+              <AlarmsConfig recipients={alarmRecipients} onAdd={notWired} onEdit={notWired} />
+            ) : current.id === 'access-role' ? (
+              <RoleTable roles={roles} users={users} plants={plants}
+                         onAdd={notWired} onEdit={notWired} />
+            ) : current.id === 'access-user' ? (
+              <UserTable users={users} roles={roles}
+                         onAdd={notWired} onEdit={notWired} onHold={notWired} />
+            ) : current.id === 'access-ctl' ? (
+              <AccessControl users={users} roles={roles} plants={plants} onAssign={notWired} />
+            ) : (
+              <>
+                <div className="chead"><div className="title">{current.label}</div></div>
                 <div className="todo">
                   <span className="badge">Not designed yet</span>
                   <div className="h">{current.headline}</div>
                   <div className="p">{current.note}</div>
                 </div>
-              )}
+              </>
+            )}
           </section>
         </main>
       </div>

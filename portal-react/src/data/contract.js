@@ -404,6 +404,102 @@
  *                                                   should find them in the same
  *                                                   sequence here
  * @property {AnalysisData|null} analysis            analysis · chart + table
+ *
+ * ---- SETTINGS ----
+ * Facts about the ACCOUNT rather than readings from a plant. Every one of these
+ * is optional and every panel draws its own empty state, so a backend can wire
+ * Settings a table at a time rather than all at once.
+ *
+ * @property {Company|null} company                  settings · Company Profile
+ * @property {Device[]} deviceRegister               settings · Customer Devices —
+ *                                                   the register Monitoring and
+ *                                                   Alarms name devices FROM, so
+ *                                                   the ids here must be the ids
+ *                                                   those pages already use
+ * @property {RatePeriod[]} emissionRates            settings · Emission Rate
+ * @property {RatePeriod[]} electricityRates         settings · Electricity Rate
+ * @property {Offset[]} energyOffsets                settings · Energy Offset
+ * @property {Recipient[]} alarmRecipients           settings · Alarms config
+ * @property {Role[]} roles                          settings · Role, Access Control
+ * @property {AccountUser[]} users                   settings · User, Access Control
+ */
+
+/**
+ * @typedef {Object} Company
+ * @property {string} [name] @property {string} [address] @property {string} [email]
+ * @property {string} [adminEmail] @property {string} [phone]
+ * @property {boolean} [active]  customer service status; omitted renders as a dash
+ */
+
+/**
+ * @typedef {Object} Device                          one row of the device register
+ * @property {string} id @property {string} [serial] @property {string} [name]
+ * @property {string} [model] @property {string} [category]
+ * @property {string} [commissioned]                 ISO date
+ * @property {number} [dataPoints]                   how many tags it publishes
+ */
+
+/**
+ * A rate that RAN FOR A PERIOD, oldest first.
+ *
+ * `until` is never sent for the last row and never typed anywhere: a rate runs
+ * until the next one starts. The portal works the status out from position in
+ * the list rather than reading a stored flag — a stored status is a second copy
+ * of a fact, and the two copies disagree the first time a row is added without
+ * updating both.
+ *
+ * @typedef {Object} RatePeriod
+ * @property {string} id @property {string} from     ISO date the rate took effect
+ * @property {string} [until]                        ISO; omit on the current row
+ * @property {string|number} rate                    already rounded for display —
+ *                                                   the backend owns the precision,
+ *                                                   because kg CO₂/kWh and ₹/kWh do
+ *                                                   not carry the same number of
+ *                                                   decimals
+ * @property {string} [added]                        when the ROW was entered, which
+ *                                                   is not when the rate took effect
+ */
+
+/**
+ * @typedef {Object} Offset                          a correction to metered generation
+ * @property {string} id @property {string} [device] @property {string} from
+ * @property {string} [until] @property {string|number} [offset]  kWh, signed
+ * @property {string} [reason]                       the most important column here:
+ *                                                   an adjustment nobody can trace is
+ *                                                   indistinguishable from a meter
+ *                                                   that is wrong
+ * @property {string} [added]
+ */
+
+/**
+ * @typedef {Object} Recipient                       who hears about an alarm
+ * @property {string} id @property {string} [name] @property {string} [email]
+ * @property {Array<'critical'|'alarm'|'warn'|'event'>} [severities]
+ *   the portal's own four levels. A recipient list whose headings do not match
+ *   the events being raised cannot be checked against anything.
+ */
+
+/**
+ * @typedef {Object} Role
+ * @property {string} id @property {string} [name]
+ * @property {string[]} [sites]                      plant ids or names this role
+ *                                                   reaches; a role that reaches
+ *                                                   every site is drawn as one chip
+ */
+
+/**
+ * A person who can sign in.
+ *
+ * THERE IS NO DELETE, by design: an alarm acknowledged by someone who no longer
+ * exists still has to say who acknowledged it, so a person is suspended and keeps
+ * their name attached to everything they did. `active: false` is that state.
+ *
+ * @typedef {Object} AccountUser
+ * @property {string} id @property {string} [name]
+ * @property {string} [firstName] @property {string} [lastName]
+ * @property {string} [email] @property {string} [phone]
+ * @property {string} [role]                         a Role id
+ * @property {boolean} [active]
  */
 
 export {};
