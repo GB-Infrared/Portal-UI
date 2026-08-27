@@ -75,37 +75,13 @@
 .tbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi);background:var(--hover)}
 .tbtn:disabled{opacity:.45;cursor:default}
 
-/* ---------- plant picker ----------
-   A site is chosen on its state, not just on its name, so each option is a card
-   carrying whatever that page can say about it — live power on Home, capacity
-   and device count on Monitoring, open alarms on Alarms. The page supplies the
-   state line; this file only says how it is set. */
-.pplant{width:224px;padding:7px;display:flex;flex-direction:column;gap:5px;
-  max-height:min(60vh,320px);overflow-y:auto;scrollbar-width:thin}
-.pplant.wide{width:268px}
-.mpanel .pcard{display:flex;flex-direction:column;gap:3px;min-width:0;width:100%;
-  text-align:left;font-family:inherit;color:var(--text);cursor:pointer;
-  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:7px 10px}
-.mpanel .pcard:hover{background:var(--hover);border-color:var(--line-hi)}
-/* the plant already on screen is marked by SURFACE, not by colour — a green
-   "current" would read as a health light rather than as a selection */
-.mpanel .pcard.on{background:var(--sel);border-color:var(--line-hi)}
-.mpanel .pcard .top,.mpanel .pcard .row{display:flex;align-items:baseline;gap:6px;min-width:0}
-.mpanel .pcard .nm{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--text);
-  line-height:1.15;white-space:nowrap}
-/* a dot, not the word: at this size CURRENT would take a third of the line */
-.mpanel .pcard.on .nm::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
-  margin-left:6px;vertical-align:middle;background:var(--line-hi)}
-.mpanel .pcard .cap{font-family:var(--mono);font-size:9.5px;font-weight:800;color:var(--text);white-space:nowrap}
-.mpanel .pcard .dv{margin-left:auto;font-size:8.5px;font-weight:800;letter-spacing:.05em;
-  color:var(--faint);white-space:nowrap}
-/* the open count is the other half of the decision, so it is stated on every
-   card — including the ones with nothing open, which is itself the answer */
-.mpanel .pcard .alm{display:inline-flex;align-items:center;gap:4px;
-  font-size:8.5px;font-weight:800;letter-spacing:.05em;white-space:nowrap}
-.mpanel .pcard .alm::before{content:"";width:5px;height:5px;border-radius:50%;flex:none}
-.mpanel .pcard .alm.hot{color:var(--red)}    .mpanel .pcard .alm.hot::before{background:var(--red)}
-.mpanel .pcard .alm.cold{color:var(--faint)} .mpanel .pcard .alm.cold::before{background:var(--green)}
+/* THE PLANT PICKER IS GONE FROM HERE, and it went with the picker itself.
+   These rules dressed a dropdown whose options were plant CARDS - live power,
+   capacity, open alarms - because a site is chosen on its state and not just on
+   its name. That is still true, and it is the site overview's argument for
+   existing: it makes the same case on a picture of where the sites actually
+   are. Choosing happens there, in one place; the bar and Home only SAY which
+   site. So nothing renders these any more. */
 
 /* ---------- date + time window ----------
    One field, two controls. A datetime-local input looks tidy until it is

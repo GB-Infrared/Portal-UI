@@ -155,13 +155,8 @@ export default function Home() {
   const pageRef = useRef(null);
   const rowRef = useRef(null);
   const monthCardRef = useRef(null);
-  const [picking, setPicking] = useState(false);
   const budget = useChartBudget({
     rowRef, mainRef, pageRef, lineRef: chartCardRef, monthRef: monthCardRef,
-    /* the picker sits above these charts, so opening it genuinely takes ~85px
-       away; the month charts give it up and the day curve is held, because that
-       is the plot being read while you choose */
-    holdLine: picking,
     frozen: alarmsOpen
   });
 
@@ -176,9 +171,9 @@ export default function Home() {
   return (
     <div className="page" ref={pageRef}>
       {/* ===== PLANT HEADER ===== */}
-      <PlantSwitch plant={plant} plants={plants}
-                   onPick={id => setQuery({ plantId: id })}
-                   onOpenChange={setPicking} />
+      {/* the name, and the way out to the overview. It picks nothing itself:
+          which site is chosen on the overview and arrives here as ?plant= */}
+      <PlantSwitch plant={plant} plants={plants} />
 
       {/* the fleet goes in too: Energy today is summed from it, not read
           off the plant, so the strip and the rail state one number */}
