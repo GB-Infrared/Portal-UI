@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePortal } from '../data/PortalData';
+import { Globe } from '../components/Globe';
 import { num } from '../lib/format';
 
 /**
@@ -14,14 +15,26 @@ import { num } from '../lib/format';
  * picker of its own, so "which site" is answered in one place by a screen that
  * can show every site's state at once.
  *
- * WHAT THE PICTURE ENCODES, and it is only these three things:
- *   POSITION  nothing. Sites sit evenly around the ring in the order the backend
- *             lists them. It is a picker, not a map — inventing a geography here
- *             would be inventing a fact.
+ * THE RING IS GONE, AND THE REASON IT WENT is the reason it was defensible in
+ * the first place. It spaced sites evenly in backend order, with position
+ * encoding NOTHING, on the argument that inventing a geography would be
+ * inventing a fact. True — but the geography was never invented, it was simply
+ * not being ASKED for, and where a site is decides which crew goes and how long
+ * they are on the road. So the picture is the planet now, and a site stands at
+ * its own coordinates.
+ *
+ * WHAT THE PICTURE ENCODES:
+ *   POSITION  where the site actually is, from Plant.lat / Plant.lng.
  *   SIZE      AC capacity. The biggest site is the biggest node.
  *   COLOUR    health, and health only.
  * Brightness rides on output, so a fleet at midday glows and the same fleet at
  * midnight goes quiet without a single number being read.
+ *
+ * A SITE WITH NO COORDINATES IS NOT PLACED. It keeps its row in the rail, which
+ * is the control anyway, and simply has no dot — because the one thing worse
+ * than a map with a site missing from it is a map with a site in the wrong
+ * place. The screen says how many are unplaced rather than quietly dropping
+ * them.
  *
  * NOTHING HERE IS SIMULATED. Every figure comes from the plants the provider
  * was given; a field the backend omits renders as a dash rather than as a
@@ -36,7 +49,6 @@ export default function Plants() {
   const list = useMemo(() => plants || [], [plants]);
 
   const theatreRef = useRef(null);
-  const canvasRef = useRef(null);
   const chipRefs = useRef([]);
 
   /* 'hot' is the site under the pointer, and it is the whole of the state this
@@ -141,153 +153,54 @@ export default function Plants() {
     return () => window.removeEventListener('keydown', onKey);
   }, [list.length, closeCard]);
 
-  /* ================= THE CANVAS =================
-     The picture is drawn; the CONTROLS are HTML buttons laid over it. A canvas
-     can render a hundred sites beautifully and not one of them would be
-     reachable by keyboard, focusable, or readable aloud. */
-  const geom = useRef({ W: 0, H: 0, CX: 0, CY: 0, pts: [] });
-  const [, force] = useState(0);
+  /* ================= THE PICTURE =================
+     Drawn by <Globe/>, which owns the shader, the plates and the camera. What
+     stays here is what it cannot know: which sites exist, where their chips go,
+     and what the chips say. The chips are HTML over the canvas rather than
+     drawn into it — a canvas can render a hundred sites beautifully and not one
+     of them would be reachable by keyboard, focusable, or readable aloud. */
 
-  useLayoutEffect(() => {
-    const cv = canvasRef.current, box = theatreRef.current;
-    if (!cv || !box) return undefined;
-    const ox = cv.getContext('2d');
-    let raf = 0, theta = 0, last = performance.now();
-    const reduced = typeof matchMedia === 'function' &&
-      matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* Only the sites the backend has placed. A coordinate this app made up would
+     put a crew on a road to nowhere. */
+  const placed = useMemo(
+    () => list.filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng)), [list]);
+  const unplaced = list.length - placed.length;
 
-    const size = () => {
-      const r = box.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      geom.current.W = r.width; geom.current.H = r.height;
-      cv.width = r.width * dpr; cv.height = r.height * dpr;
-      cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
-      ox.setTransform(dpr, 0, 0, dpr, 0, 0);
-      /* the canvas measures the MAP, which already starts below the bar and
-         stops at the rail, so its own centre is the right one */
-      geom.current.CX = r.width / 2; geom.current.CY = r.height / 2;
-    };
-    size();
-    const ro = new ResizeObserver(size);
-    ro.observe(box);
+  /* where the camera rests: the fleet's own centroid, so the portal opens
+     looking straight at the sites rather than at a default meridian */
+  const home = useMemo(() => {
+    if (!placed.length) return { lng: 0, lat: 0 };
+    let a = 0, b = 0;
+    placed.forEach(p => { a += p.lng; b += p.lat; });
+    return { lng: a / placed.length, lat: b / placed.length };
+  }, [placed]);
 
-    const COLOR = { ok: '#2fd07a', warn: '#f0b249', crit: '#ff6b6b', off: '#56697f' };
-    const RING = 0.66;
+  const globeRef = useRef(null);
 
-    const frame = now => {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      if (!reduced) theta += dt * 0.035;             /* one turn every three minutes */
-      const { W, H, CX, CY } = geom.current;
-      const r = Math.min(W, H) * RING * 0.62;
-      ox.clearRect(0, 0, W, H);
-
-      /* two hairlines through the core: the field reads as an instrument rather
-         than a canvas, and the eye is handed the centre before the ring is */
-      ox.strokeStyle = 'rgba(90,162,240,.15)'; ox.lineWidth = 1;
-      ox.beginPath();
-      ox.moveTo(0, CY); ox.lineTo(W, CY);
-      ox.moveTo(CX, 0); ox.lineTo(CX, H);
-      ox.stroke();
-
-      ox.beginPath();
-      ox.strokeStyle = 'rgba(90,162,240,.20)';
-      ox.ellipse(CX, CY, r, r * 0.92, 0, 0, Math.PI * 2);
-      ox.stroke();
-
-      const pts = list.map((p, i) => {
-        const a = theta + i * Math.PI * 2 / (list.length || 1);
-        return { x: CX + Math.cos(a) * r, y: CY + Math.sin(a) * r * 0.92 };
-      });
-      geom.current.pts = pts;
-
-      /* spokes from the core to each site: the sum is made OF these, and a ring
-         with nothing crossing it would be a decoration rather than a relationship */
-      pts.forEach(q => {
-        ox.beginPath();
-        ox.strokeStyle = 'rgba(90,162,240,.12)';
-        ox.moveTo(CX, CY); ox.lineTo(q.x, q.y);
-        ox.stroke();
-      });
-
-      /* ---- the core: glow alone, never a disc ----
-         The portfolio total is printed over this point, and a bright disc landed
-         between the digits and read as a smudge. The glow breathes with load, so
-         a fleet at noon burns and the same fleet at midnight is a cold point. */
-      const load = totals.ac ? Math.min(1, totals.kw / totals.ac) : 0;
-      const breathe = reduced ? 1 : (1 + Math.sin(now / 1000 * 1.4) * 0.05);
-      const R = 17 * breathe * (0.55 + load * 0.45);
-      const g = ox.createRadialGradient(CX, CY, 0, CX, CY, R * 5.4);
-      const ah = v => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, '0');
-      g.addColorStop(0, '#e3b23c' + ah(0.30 + load * 0.34));
-      g.addColorStop(0.18, '#e3b23c' + ah(0.16 + load * 0.20));
-      g.addColorStop(0.45, '#e3b23c10');
-      g.addColorStop(1, '#e3b23c00');
-      ox.fillStyle = g;
-      ox.beginPath(); ox.arc(CX, CY, R * 5.4, 0, Math.PI * 2); ox.fill();
-
-      /* the collar: twelve marks on a dial, at a radius that clears the readout
-         on both axes so a five-digit total never collides with them */
-      const CR = Math.max(96, r * 0.30);
-      ox.strokeStyle = '#e3b23c' + ah(0.16 + load * 0.20); ox.lineWidth = 1;
-      for (let i = 0; i < 12; i++) {
-        const a = i * Math.PI / 6 + (reduced ? 0 : now / 1000 * 0.06);
-        ox.beginPath();
-        ox.moveTo(CX + Math.cos(a) * CR, CY + Math.sin(a) * CR * 0.92);
-        ox.lineTo(CX + Math.cos(a) * (CR + 7), CY + Math.sin(a) * (CR + 7) * 0.92);
-        ox.stroke();
+  /* Every frame: where each node has landed, and whether it can be seen at all.
+     Written straight to style rather than through state — this runs sixty times
+     a second, and a setState per frame would re-render the rail and the card to
+     move a dot. */
+  const onFrame = useCallback(project => {
+    for (let i = 0; i < placed.length; i++) {
+      const el = chipRefs.current[i];
+      if (!el) continue;
+      const q = project(placed[i].lng, placed[i].lat);
+      /* 0.05 rather than 0: a site exactly on the limb is edge-on and its chip
+         would sit on the horizon flickering in and out */
+      if (q.c > 0.05) {
+        el.style.display = '';
+        el.style.left = q.x + 'px';
+        el.style.top = q.y + 'px';
+      } else {
+        el.style.display = 'none';
       }
-
-      list.forEach((p, i) => {
-        const q = pts[i];
-        const st = stateOf(p), col = COLOR[st];
-        const dim = (hot && hot.id !== p.id) ? 0.3 : 1;
-        /* SIZE is capacity and brightness is output — two channels, two
-           questions, so "big" never has to mean "busy" */
-        const cap = p.acCapacity || 0;
-        const rad = 7 + Math.sqrt(Math.min(1, cap / 3200)) * 7;
-        const lit = st === 'off' || !cap || p.livePower == null
-          ? 0 : Math.min(1, p.livePower / cap);
-
-        ox.save(); ox.globalAlpha = dim;
-        const halo = ox.createRadialGradient(q.x, q.y, 0, q.x, q.y, rad * 3.4);
-        halo.addColorStop(0, col + ah(0.16 + lit * 0.47));
-        halo.addColorStop(1, col + '00');
-        ox.fillStyle = halo;
-        ox.beginPath(); ox.arc(q.x, q.y, rad * 3.4, 0, Math.PI * 2); ox.fill();
-
-        ox.fillStyle = col; ox.globalAlpha = dim * (0.45 + lit * 0.55);
-        ox.beginPath(); ox.arc(q.x, q.y, rad, 0, Math.PI * 2); ox.fill();
-
-        ox.globalAlpha = dim; ox.strokeStyle = col; ox.lineWidth = 1.4;
-        ox.beginPath(); ox.arc(q.x, q.y, rad + 4, 0, Math.PI * 2); ox.stroke();
-
-        /* a critical site keeps a slow pulse, so it is found without being hunted */
-        if (st === 'crit' && !reduced) {
-          const t = (now / 1000) % 2 / 2;
-          ox.globalAlpha = dim * (1 - t) * 0.55; ox.lineWidth = 1.2;
-          ox.beginPath(); ox.arc(q.x, q.y, rad + 4 + t * 22, 0, Math.PI * 2); ox.stroke();
-        }
-        ox.restore();
-      });
-
-      /* the chips are positioned from the same angles the nodes were drawn at,
-         so a label can never drift off the thing it names */
-      pts.forEach((q, i) => {
-        const el = chipRefs.current[i];
-        if (el) { el.style.left = q.x + 'px'; el.style.top = q.y + 'px'; }
-      });
-
-      raf = requestAnimationFrame(frame);
-    };
-    raf = requestAnimationFrame(frame);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
-  }, [list, hot, totals.ac, totals.kw, force]);
+    }
+  }, [placed]);
 
   if (!list.length) {
     return (
       <div className="page-plants">
-        <Ambient />
         <Bar user={user} clock={clock} totals={totals} navigate={navigate} />
         <div className="void">No portfolio has been loaded</div>
       </div>
@@ -300,27 +213,20 @@ export default function Plants() {
       <Bar user={user} clock={clock} totals={totals} navigate={navigate} />
 
       <section
-        className={'theatre' + (hot ? ' hot' : '') + (list.length > 9 ? ' dense' : '')}
+        className={'theatre' + (hot ? ' hot' : '') + (placed.length > 9 ? ' dense' : '')}
         ref={theatreRef}
-        aria-label="Portfolio orbital map"
-        onClick={e => { if (!e.target.closest('.chip')) closeCard(); }}   /* clicking off puts the card away */
+        aria-label="The fleet, on the Earth"
+        onClick={e => { if (!e.target.closest('.chip')) closeCard(); }}
       >
-        <canvas ref={canvasRef} />
+        <Globe ref={globeRef} home={home} onFrame={onFrame} />
 
-        <div className="core">
-          <div className="kw">
-            <span>{totals.anyKw ? num(totals.kw) : '—'}</span><small>kW</small>
-          </div>
-          <div className="cap">{list.length} SITES · PORTFOLIO OUTPUT</div>
-        </div>
-
-        {list.map((p, i) => {
+        {placed.map((p, i) => {
           const st = stateOf(p), n = openAlarms(p);
           return (
             <button
               key={p.id}
               type="button"
-              className={'chip' + (shown && shown.id === p.id ? ' on' : '')}
+              className={'chip' + (shown && shown.id === p.id ? ' on' : '') + ' ' + st}
               ref={el => { chipRefs.current[i] = el; }}
               aria-label={`${p.name || p.id} — ${STATE_TEXT[st]}${
                 p.livePower != null ? ', ' + num(p.livePower) + ' kilowatts' : ''}, ${
@@ -331,6 +237,7 @@ export default function Plants() {
               onMouseLeave={armClose}
               onBlur={armClose}
             >
+              <span className="dot" />
               <span className="lbl">
                 <span className="nm">{p.name || p.id}</span>
                 <span className="mt">
@@ -341,9 +248,6 @@ export default function Plants() {
                   <span className={'alm' + (n ? ' on' : '') + (p.criticalAlarms ? ' crit' : '')}>
                     {n || ''}
                   </span>
-                  {/* printed, not revealed on hover: a control that only admits
-                      to being one once the pointer is on it has already failed
-                      the reader who was looking for it */}
                   <svg className="go" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8.5 4.5 16 12l-7.5 7.5" />
                   </svg>
@@ -352,6 +256,23 @@ export default function Plants() {
             </button>
           );
         })}
+
+        {/* The wheel could always do this; these are the same motion made
+            visible and clickable, for the pointer that has no wheel. */}
+        <div className="zoom" role="group" aria-label="Zoom">
+          <button className="zbtn" type="button" aria-label="Zoom out"
+                  onClick={() => globeRef.current && globeRef.current.zoomBy(1 / 1.5)}>−</button>
+          <button className="zbtn" type="button" aria-label="Zoom in"
+                  onClick={() => globeRef.current && globeRef.current.zoomBy(1.5)}>+</button>
+        </div>
+
+        {/* said, not swallowed: a fleet with sites missing from the picture has
+            to say so, or the picture is quietly claiming to be the whole of it */}
+        {!!unplaced && (
+          <div className="unplaced">
+            {unplaced} {unplaced === 1 ? 'site has' : 'sites have'} no coordinates and {unplaced === 1 ? 'is' : 'are'} not on the map
+          </div>
+        )}
       </section>
 
       <Rail list={list} alarms={alarms} totals={totals} />
@@ -413,11 +334,17 @@ const openAlarms = p => (p.criticalAlarms || 0) + (p.warningAlarms || 0)
 const fmtP = kw => kw >= 1000 ? (kw / 1000).toFixed(kw >= 10000 ? 0 : 1) + ' MW' : num(kw) + ' kW';
 const fmtE = e => e >= 1000 ? (e / 1000).toFixed(e >= 10000 ? 0 : 1) + ' MWh' : num(e) + ' kWh';
 
+/* THE STARS AND THE AURORA ARE GONE FROM HERE, and they were not deleted so
+   much as superseded: the shader draws the real sky behind the planet — NASA's
+   Deep Star Maps, turned to the viewer's own sidereal time — and a CSS starfield
+   over the top of it would be a second, fake sky disagreeing with the first.
+
+   What is left is frame furniture, which belongs to the window rather than to
+   the picture: the vignette closing the corners down, the ruling, and the two
+   brackets that say "instrument" in four strokes. */
 function Ambient() {
   return (
     <>
-      <div className="stars" />
-      <div className="aurora" />
       <div className="vignette" />
       <div className="grain" />
       <div className="corner tl" />

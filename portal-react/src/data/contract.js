@@ -46,6 +46,18 @@
  * @property {string} id
  * @property {string} name
  * @property {string} [address]
+ * @property {number} [lat]               degrees north, WGS84
+ * @property {number} [lng]               degrees east, WGS84
+ *                                        WHERE THE SITE IS, and Site Control
+ *                                        puts it there. Send the surveyed
+ *                                        position — precise enough to land in
+ *                                        the right district is precise enough
+ *                                        for a picker. A site with neither is
+ *                                        left OFF the globe and SAID, never
+ *                                        placed somewhere plausible: a crew
+ *                                        sent to a guessed coordinate is a
+ *                                        real cost, and it keeps its row in
+ *                                        the rail either way.
  * @property {number} [acCapacity]        kW
  * @property {number} [dcCapacity]        kWp
  * @property {number} [livePower]         kW right now — shown on the plant

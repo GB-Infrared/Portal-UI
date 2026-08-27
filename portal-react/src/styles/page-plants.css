@@ -30,25 +30,6 @@
     #121a26}
 
 /* ---------- ambient · identical to the sign-in ---------- */
-.page-plants .stars{position:absolute;inset:0;z-index:0;opacity:.6;pointer-events:none;
-  background-image:
-    radial-gradient(1.2px 1.2px at 12% 18%, #9dbfdaaa, transparent),
-    radial-gradient(1px 1px at 27% 9%,   #7ee2ab88, transparent),
-    radial-gradient(1px 1px at 44% 26%,  #9dbfda77, transparent),
-    radial-gradient(1.4px 1.4px at 63% 12%, #e3b23c66, transparent),
-    radial-gradient(1px 1px at 78% 24%,  #9dbfda88, transparent),
-    radial-gradient(1px 1px at 88% 7%,   #7ee2ab66, transparent),
-    radial-gradient(1px 1px at 8% 44%,   #9dbfda66, transparent),
-    radial-gradient(1.2px 1.2px at 34% 52%, #9dbfda55, transparent),
-    radial-gradient(1px 1px at 57% 38%,  #7ee2ab55, transparent),
-    radial-gradient(1px 1px at 71% 57%,  #9dbfda55, transparent),
-    radial-gradient(1px 1px at 93% 47%,  #9dbfda66, transparent),
-    radial-gradient(1px 1px at 19% 72%,  #9dbfda44, transparent),
-    radial-gradient(1px 1px at 47% 88%,  #9dbfda44, transparent),
-    radial-gradient(1px 1px at 82% 78%,  #7ee2ab44, transparent)}
-.page-plants .aurora{position:absolute;left:-20%;right:-20%;bottom:-45vh;height:80vh;z-index:0;
-  pointer-events:none;filter:blur(44px);animation:pl-breathe 15s ease-in-out infinite;
-  background:radial-gradient(ellipse at 50% 100%, rgba(47,208,122,.17) 0%, rgba(90,162,240,.11) 40%, transparent 70%)}
 @keyframes pl-breathe{0%,100%{opacity:.55;transform:translateY(0)}50%{opacity:1;transform:translateY(-3vh)}}
 .page-plants .vignette{position:absolute;inset:0;z-index:3;pointer-events:none;
   background:radial-gradient(ellipse at 50% 46%, transparent 58%, rgba(6,11,19,.60) 100%)}
@@ -107,30 +88,38 @@
 .page-plants .theatre canvas{position:absolute;inset:0;width:100%;height:100%}
 @media (max-width:1100px){ .page-plants .theatre{right:0} }
 
-/* ---------- the core readout ----------
-   The portfolio total, in the middle of the thing it is the total of. It is a
-   SUM, and it says so: a number in the centre of a ring of sites would
-   otherwise read as one of them. */
-.page-plants .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;
-  text-align:center;pointer-events:none}
-.page-plants .core .kw{font-family:var(--mono);font-weight:300;font-size:clamp(28px,4vw,46px);
-  color:#f0dcae;letter-spacing:.02em;line-height:1;
-  text-shadow:0 0 32px rgba(227,178,60,.30),0 0 90px rgba(227,178,60,.14)}
-.page-plants .core .kw small{font-size:.4em;color:#7a8ca1;letter-spacing:.24em;margin-left:7px}
-.page-plants .core .cap{font-size:9.5px;letter-spacing:.34em;color:#a3b4c8;margin-top:8px}
+/* ---------- the globe ----------
+   Its own layer, filling the theatre. The canvas is the whole box and the
+   shader decides where the planet sits inside it, so nothing here has to agree
+   with anything there about where the centre is. */
+.page-plants .globe{position:absolute;inset:0;z-index:0;display:block;
+  width:100%;height:100%;touch-action:none}
 
-/* ---------- a site, as a chip ----------
-   A real <button> over the canvas rather than a shape drawn into it: the canvas
-   can render a hundred sites beautifully and not one of them would be reachable
-   by keyboard, focusable, or readable aloud. The picture is the canvas; the
-   CONTROL is always HTML. The hit area is a 58px circle centred on the node,
-   comfortably past the 44px a finger needs, with the label hanging above inside
-   the same button — one target rather than two things that look related. */
+/* the dot IS the site, and it stands where the site stands. The label rides
+   above it rather than replacing it: on a ring the name could be the marker,
+   but on a map the marker has to be the point being named. */
+.page-plants .chip .dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:11px;height:11px;border-radius:50%;background:#2fd07a;
+  box-shadow:0 0 0 1.5px rgba(10,16,26,.72),0 0 14px 2px rgba(47,208,122,.55);
+  transition:box-shadow .18s,background .18s}
+.page-plants .chip.warn .dot{background:#f0b249;box-shadow:0 0 0 1.5px rgba(10,16,26,.72),0 0 14px 2px rgba(240,178,73,.55)}
+.page-plants .chip.crit .dot{background:#ff6b6b;box-shadow:0 0 0 1.5px rgba(10,16,26,.72),0 0 16px 3px rgba(255,107,107,.6)}
+.page-plants .chip.off .dot{background:#7a8ca1;box-shadow:0 0 0 1.5px rgba(10,16,26,.72)}
+.page-plants .chip:hover .dot,.page-plants .chip.on .dot{box-shadow:0 0 0 1.5px rgba(10,16,26,.8),0 0 0 5px rgba(47,208,122,.22),0 0 18px 3px rgba(47,208,122,.6)}
+
 .page-plants .chip{position:absolute;z-index:7;transform:translate(-50%,-50%);
   width:58px;height:58px;border-radius:50%;background:none;border:none;padding:0;
   font-family:var(--mono);white-space:nowrap;transition:opacity .25s;cursor:pointer}
-.page-plants .chip .lbl{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);
-  margin-bottom:6px;display:flex;flex-direction:column;align-items:center;gap:3px;
+/* THE LABEL IS ON DEMAND, THE DOT IS ALWAYS. On a ring the sites were spread
+   evenly and every name had room; on a map they sit where they sit, and a real
+   fleet is clustered — three sites in one district put three names on top of
+   each other and none of them readable. So the globe carries the marks and the
+   RAIL carries the names, which is the surface built for reading a list. The
+   label comes up for the one site being pointed at, where there is by
+   definition only one of it. */
+.page-plants .chip .lbl{opacity:0;pointer-events:none;transition:opacity .16s,transform .18s;
+  position:absolute;left:50%;bottom:50%;transform:translateX(-50%);
+  margin-bottom:13px;display:flex;flex-direction:column;align-items:center;gap:3px;
   text-align:center;transition:transform .18s}
 .page-plants .chip .nm{font-size:clamp(11.5px,.78vw,15px);letter-spacing:.12em;color:#eff4fa;
   font-weight:500}
@@ -290,5 +279,27 @@
   text-transform:uppercase}
 
 @media (prefers-reduced-motion:reduce){
-  .page-plants .aurora{animation:none}
-}
+  }
+
+/* ---------- a site the backend has not placed ----------
+   Said out loud. A fleet with sites missing from the picture has to say so, or
+   the picture is quietly claiming to be the whole of it — and the row is still
+   in the rail, so the site is reachable even though it has no dot. */
+.page-plants .unplaced{position:absolute;left:18px;bottom:16px;z-index:8;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:#7a8ca1;background:rgba(9,16,28,.7);border:1px solid #324054;border-radius:8px;
+  padding:6px 10px;pointer-events:none;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+
+/* the same motion the wheel makes, for the pointer that has no wheel */
+.page-plants .zoom{position:absolute;left:18px;top:18px;z-index:8;display:flex;gap:6px}
+.page-plants .zbtn{width:30px;height:30px;border-radius:8px;border:1px solid #324054;
+  background:rgba(9,16,28,.7);color:#a3b4c8;font-size:16px;line-height:1;cursor:pointer;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.page-plants .zbtn:hover{color:#eff4fa;border-color:#48607d}
+
+.page-plants .chip:hover .lbl,
+.page-plants .chip:focus-visible .lbl,
+.page-plants .chip.on .lbl{opacity:1}
+/* and the one being read is lifted clear of the ones beside it */
+.page-plants .chip:hover,.page-plants .chip.on{z-index:9}
