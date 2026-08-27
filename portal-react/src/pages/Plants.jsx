@@ -56,7 +56,14 @@ export default function Plants() {
      a card held open by a double click - and it is gone with the gesture that
      set it; see the note on open() below. */
   const [hot, setHot] = useState(null);
-  const shown = hot;
+  /* the site being flown to, which is not the same thing as the one being read:
+     once a departure is running the card is gone and this is what the screen is
+     about. Kept in state AND in a ref because two clocks need it - the class
+     list is React's, the per-frame placement is the globe's. */
+  const [diving, setDiving] = useState(null);
+  const diveRef = useRef(null);
+  const irisRef = useRef(null);
+  const shown = diving ? null : hot;
 
   const [clock, setClock] = useState('');
   useEffect(() => {
@@ -107,13 +114,69 @@ export default function Plants() {
      after it is ignored, including one aimed at a different site while the page
      is already on its way somewhere. */
   const leaving = useRef(false);
+  const goT = useRef(0);
   const open = useCallback(p => {
     if (leaving.current) return;
     leaving.current = true;
     /* the portal opens ON the site that was picked — the whole point of the
-       screen. Home reads ?plant= and selects it. */
-    navigate('/?plant=' + encodeURIComponent(p.id));
+       screen. Home reads ?plant= and selects it.
+
+       WRITTEN FIRST, BEFORE ANY OF THE MOTION BELOW. Reaching the site is the
+       only part of this that MUST happen; the descent is the only part that can
+       be skipped. Ordered the other way round, a transition stands between a
+       reader and the thing they asked for. */
+    const go = () => navigate('/?plant=' + encodeURIComponent(p.id));
+
+    /* ---------- GOING THROUGH THE GROUND ----------
+       Opening a site was a cut: click, and the fleet was replaced by one plant's
+       Home in a single frame. Nothing was WRONG with that, which is exactly why
+       it was worth looking at twice - it worked, and it threw away the one thing
+       this screen has that no other page in the portal does.
+
+       This page's claim is that a site is a PLACE. It draws the real Earth from
+       real plates, lights it from where the sun actually is, and puts each site
+       at its own coordinates precisely so that "which site" is answered by
+       pointing at ground. A cut throws all of that away one frame before it pays
+       off. Falling to the coordinates, and through them, is the same sentence
+       finished - and it uses machinery that was already built here and never
+       called: the camera's fly-down, and the regional plate that cross-fades in
+       over the second half of a descent because the global plate is four hundred
+       metres to the pixel up close. By the time Home opens you have been looking
+       at the site's own ground.
+
+       AND THE FLEET GOES WITH THE ALTITUDE. The rail, the totals and the other
+       sites are fleet-scale readings, and half a second into a fall they
+       describe somewhere the reader no longer is, so they leave. What is left at
+       the bottom is one name over one piece of ground, which is the sentence the
+       next screen begins with.
+
+       SKIPPED, NOT SHORTENED, in the three cases where the fall is unavailable
+       or unwanted: a reader who asked for less motion, for whom a fall is the
+       one thing this is; a site with no coordinates, which cannot be fallen to;
+       and a narrow screen, where the picture is a plain list and there is no
+       ground to go through. All three get the old cut, unchanged - which is also
+       why the cut is still the first thing written above. */
+    const g = globeRef.current;
+    const still = typeof matchMedia === 'function'
+      && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!g || !g.dive || still || !Number.isFinite(p.lat) || !Number.isFinite(p.lng)
+        || window.innerWidth <= 720) { go(); return; }
+
+    clearTimeout(hotT.current);
+    setHot(null);
+    diveRef.current = p;
+    setDiving(p);
+    /* the chrome leaves on the stylesheet's clock, and this is what sets that
+       clock. Written from DIVE_MS so the picture and the panels cannot drift
+       apart; the fallback in the CSS is only for a frame rendered before this
+       lands. */
+    document.documentElement.style.setProperty('--go', DIVE_MS + 'ms');
+    g.dive(p, DIVE_MS);
+    /* by now the page has dissolved to the background Home opens on, so what
+       the navigation cuts between is two frames of one colour */
+    goT.current = setTimeout(go, DIVE_MS + 40);
   }, [navigate]);
+  useEffect(() => () => clearTimeout(goT.current), []);
 
   /* THE CROSSING. The card stands at the foot of the screen and the ring is in
      the middle of it, so reaching the card means leaving the chip that opened
@@ -136,6 +199,7 @@ export default function Plants() {
      browser find bar does, and stealing the arrow keys from it would be rude. */
   useEffect(() => {
     const onKey = e => {
+      if (diveRef.current) return;   /* a fall is not steerable */
       if (e.key === 'Escape') { closeCard(); return; }
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       if (e.altKey || e.ctrlKey || e.metaKey) return;
@@ -182,6 +246,17 @@ export default function Plants() {
      a second, and a setState per frame would re-render the rail and the card to
      move a dot. */
   const onFrame = useCallback(project => {
+    /* WHERE THE HOLE IS. The iris closes on the site being opened rather than on
+       the middle of the window, so the site's live position has to reach the
+       stylesheet. Read from a REF rather than from state or props: this runs
+       sixty times a second, and the globe captured this callback when it
+       mounted, so a re-created closure would never reach it. */
+    const dv = diveRef.current, ir = irisRef.current;
+    if (dv && ir) {
+      const q = project(dv.lng, dv.lat);
+      ir.style.setProperty('--go-x', q.x.toFixed(1) + 'px');
+      ir.style.setProperty('--go-y', q.y.toFixed(1) + 'px');
+    }
     for (let i = 0; i < placed.length; i++) {
       const el = chipRefs.current[i];
       if (!el) continue;
@@ -208,12 +283,13 @@ export default function Plants() {
   }
 
   return (
-    <div className="page-plants">
+    <div className={'page-plants' + (diving ? ' diving' : '')}>
       <Ambient />
       <Bar user={user} clock={clock} totals={totals} navigate={navigate} />
 
       <section
-        className={'theatre' + (hot ? ' hot' : '') + (placed.length > 9 ? ' dense' : '')}
+        className={'theatre' + (hot && !diving ? ' hot' : '') + (diving ? ' diving' : '')
+          + (placed.length > 9 ? ' dense' : '')}
         ref={theatreRef}
         aria-label="The fleet, on the Earth"
         onClick={e => { if (!e.target.closest('.chip')) closeCard(); }}
@@ -226,7 +302,8 @@ export default function Plants() {
             <button
               key={p.id}
               type="button"
-              className={'chip' + (shown && shown.id === p.id ? ' on' : '') + ' ' + st}
+              className={'chip' + (shown && shown.id === p.id ? ' on' : '')
+                + (diving && diving.id === p.id ? ' dive' : '') + ' ' + st}
               ref={el => { chipRefs.current[i] = el; }}
               aria-label={`${p.name || p.id} — ${STATE_TEXT[st]}${
                 p.livePower != null ? ', ' + num(p.livePower) + ' kilowatts' : ''}, ${
@@ -257,6 +334,20 @@ export default function Plants() {
           );
         })}
 
+        {/* THE WAY OUT. A hole rather than a wash, so the last of this page the
+            reader sees is the ground they are being taken to. Inert until a
+            site is opened - see THE DEPARTURE in page-plants.css.
+
+            ALWAYS MOUNTED, NEVER CONDITIONAL, and that is not a preference. A
+            transition needs a previous computed style to move away from; an
+            element rendered for the first time ALREADY carrying the departure's
+            values has no "before", so the browser has nothing to interpolate
+            and the hole snaps shut on the frame it appears. Rendered on
+            {diving && ...} it did exactly that - measured 0% on the first
+            sample after the click, with the whole close skipped. It costs one
+            inert, transparent, pointer-none span to keep it honest. */}
+        <span className="iris" ref={irisRef} aria-hidden="true" />
+
         {/* The wheel could always do this; these are the same motion made
             visible and clickable, for the pointer that has no wheel. */}
         <div className="zoom" role="group" aria-label="Zoom">
@@ -276,7 +367,7 @@ export default function Plants() {
       </section>
 
       <Rail list={list} alarms={alarms} totals={totals} />
-      <Detail site={shown} onOpen={open} onClose={closeCard}
+      <Detail site={shown} onClose={closeCard}
               onHold={holdCard} onLeave={armClose} />
 
       {/* the same sites, without the picture, for narrow screens */}
@@ -312,6 +403,12 @@ export default function Plants() {
    Warm anywhere on this ring means somebody has to look at something. The order
    matters: a critical outranks a warning, and a site with nothing coming in is
    neither — it is unknown, which is its own colour. */
+/* HOW LONG THE FALL IS, and the only place that decides. The stylesheet times
+   the chrome leaving and the frame closing against the same number through
+   --go, written from here, rather than carrying a second literal that can drift
+   out of step with this one. */
+const DIVE_MS = 1150;
+
 const STATE_TEXT = { ok: 'PRODUCING', warn: 'ATTENTION', crit: 'CRITICAL', off: 'OFFLINE' };
 const STATE_COLOR = { ok: '#2fd07a', warn: '#f0b249', crit: '#ff6b6b', off: '#56697f' };
 function stateOf(p) {
@@ -478,11 +575,26 @@ function Rail({ list, alarms, totals }) {
 
 /**
  * The readout for the site under the pointer. Glass rather than a flat panel:
- * it sits OVER the ring, and a solid fill punches a hole in the picture it is
- * describing. Double-clicking a node pins it — a card that vanishes the moment
- * the pointer leaves can be glanced at and nothing else.
+ * it sits OVER the picture, and a solid fill punches a hole in the thing it is
+ * describing.
+ *
+ * NOTHING ON IT IS A CONTROL, and that is the whole of what changed here. It
+ * carried an OPEN THIS SITE button along its foot, which was defensible on its
+ * own terms - a card you can read at leisure ought to be a card you can act
+ * from. What it was not defensible against was the chip six inches away that
+ * already did the same thing. Two doors to one room is not twice as easy to
+ * leave by; it is one question asked twice, and a reader who finds one of them
+ * has to wonder what the other does differently. Nothing. It did the same
+ * thing.
+ *
+ * So a site is opened from the FLEET - the chips, which are the site controls
+ * on this screen: named, focusable, reachable by arrow key - and this is a
+ * readout. It also settles a smaller thing that was never right: the card
+ * appears because the pointer went somewhere, and a control that arrives under
+ * a pointer that was only reading is a control that can be hit by accident.
+ * Nothing on it can be hit now.
  */
-function Detail({ site, onOpen, onClose, onHold, onLeave }) {
+function Detail({ site, onClose, onHold, onLeave }) {
   const p = site;
   const st = p ? stateOf(p) : 'off';
   const n = p ? openAlarms(p) : 0;
@@ -508,12 +620,6 @@ function Detail({ site, onOpen, onClose, onHold, onLeave }) {
           : '—'} />
         <Row k="ALARMS" v={n} cls={p && p.criticalAlarms ? 'crit' : n ? 'warn' : 'ok'} />
       </div>
-      {/* the card's own way in, and it no longer waits to be pinned before it
-          will work - it is reachable because hovering keeps it open, and a
-          control that is visible but inert is worse than one that is absent */}
-      <button className="go" type="button" onClick={() => { if (p) onOpen(p); }}>
-        ↵ OPEN THIS SITE
-      </button>
     </div>
   );
 }

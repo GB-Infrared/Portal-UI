@@ -234,19 +234,14 @@
 .page-plants .detail .r .v.ok{color:#2fd07a}
 .page-plants .detail .r .v.warn{color:#f0b249}
 .page-plants .detail .r .v.crit{color:#ff6b6b}
-/* ---------- the card's own way in ----------
-   A card that vanishes the moment the pointer leaves it can be glanced at and
-   nothing else: not read at leisure, not held while you look across at the site
-   next to it, and above all not clicked. That used to be bought with a pin, on
-   a double click. It is bought with the hover grace instead now - the chip and
-   the card are one region, and the pointer can cross between them - so the card
-   is always live while it is up, and the control below is always real. */
-.page-plants .detail .go{display:block;width:100%;margin-top:14px;padding:10px 0 0;text-align:left;
-  background:none;border:none;border-top:1px solid #324054;
-  font-family:var(--mono);font-size:9px;letter-spacing:.26em;color:#2fd07a;
-  cursor:default;transition:color .2s}
-.page-plants .detail.on .go{cursor:pointer}
-.page-plants .detail.on .go:hover{color:#7ee2ab}
+/* ---------- the card has no way in, on purpose ----------
+   It carried an OPEN THIS SITE control along its foot. The rule that used to
+   stand here argued for it: a card held open by the hover grace is a card you
+   can read at leisure, and one you can read at leisure ought to be one you can
+   act from. True, and beside the point - the chip that raised the card already
+   opens the site, so the button was a second door to one room. Two doors is not
+   twice as easy to leave by; it is one question asked twice.
+   The card is a readout. Everything left in it is text. */
 .page-plants .detail .x{display:none;position:absolute;top:11px;right:12px;
   width:22px;height:22px;border:none;background:none;border-radius:6px;
   color:#7a8ca1;font-family:var(--mono);font-size:14px;line-height:1;cursor:pointer}
@@ -278,8 +273,87 @@
   justify-content:center;text-align:center;font-size:11px;letter-spacing:.24em;color:#56697f;
   text-transform:uppercase}
 
+/* ================= THE DEPARTURE =================
+   Opening a site is the one thing this screen exists for, and it used to be a
+   cut. The fall it becomes instead is described where it is started, in
+   Plants.jsx. What lives here is everything that is NOT the camera: the
+   fleet-scale chrome getting out of the way, and the frame closing.
+
+   EVERY DURATION BELOW IS A FRACTION OF --go, and --go is written from DIVE_MS
+   in the component. One number decides how long the departure is. Two numbers -
+   one here and one there - is how a transition ends up navigating a quarter
+   second after the picture has already gone black, which is a bug nobody can
+   see and everybody can feel. */
+
+/* THE FLEET GOES WITH THE ALTITUDE. The rail, the totals and the card are
+   readings taken from orbit, and half a second into a fall they describe
+   somewhere the reader no longer is. They leave OUTWARD, each to the edge it
+   already lives against, so the screen reads as opening rather than as a set of
+   panels being switched off. */
+.page-plants.diving .rail,.page-plants.diving .hud,
+.page-plants.diving .detail,.page-plants.diving .zoom,
+.page-plants.diving .unplaced{
+  pointer-events:none;opacity:0;
+  transition:opacity calc(var(--go,1150ms)*.30) ease,
+             transform calc(var(--go,1150ms)*.40) cubic-bezier(.4,0,.9,.55)}
+.page-plants.diving .rail{transform:translateX(30px)}
+.page-plants.diving .hud {transform:translateY(-14px)}
+.page-plants.diving .detail{transform:translateY(10px)}
+
+/* every site but the one being opened */
+.page-plants .theatre.diving .chip{transition:opacity calc(var(--go,1150ms)*.34) ease}
+.page-plants .theatre.diving .chip:not(.dive){opacity:0;pointer-events:none}
+.page-plants .theatre.diving .chip.dive{opacity:1}
+/* and its label goes before the hole is small enough to slice it in half - a
+   caption cut through the middle by a circle is an artefact, not a composition.
+   What the iris closes on is the dot, which is the right last thing to see:
+   the place, not the caption. */
+.page-plants .theatre.diving .chip.dive .lbl{opacity:0;
+  transition:opacity calc(var(--go,1150ms)*.22) ease calc(var(--go,1150ms)*.34)}
+
+/* THE BRACKETS GO LAST, because they are the only marks on this page that
+   belong to the INSTRUMENT rather than to the fleet. While they are up,
+   whatever is happening is still happening inside a frame. Letting them go is
+   the frame itself standing down, and it is the last thing that should. */
+.page-plants.diving .corner{opacity:0;
+  transition:opacity calc(var(--go,1150ms)*.26) ease calc(var(--go,1150ms)*.46)}
+
+/* ---- AND THEN THROUGH ----
+   The iris closes on the SITE, not on the middle of the window - --go-x and
+   --go-y are written onto this element every frame from the same projected
+   position the chip is placed at. The hole sits over the ground being fallen
+   to, so the last thing visible on this page is the place the next one is
+   about.
+
+   Declared through @property so the radius can be TRANSITIONED. A custom
+   property is a string by default and a string does not interpolate: without
+   this the hole would sit open and then snap shut on the final frame. Where
+   @property is not understood that snap is exactly what happens, which is the
+   old cut - the behaviour this replaces - and nothing worse. */
+@property --iris{syntax:'<percentage>';inherits:false;initial-value:150%}
+.page-plants .iris{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;--iris:150%;
+  background:radial-gradient(circle at var(--go-x,50%) var(--go-y,46%),
+    transparent var(--iris), #04080e calc(var(--iris) + 18%))}
+/* CLOSED WITH ROOM TO SPARE, and the margin is the point of these two numbers.
+   .28 + .56 puts the last frame of the close at 84% of the beat; the navigation
+   is at 100% of it. That gap is not padding - the cut has to happen behind a
+   shutter that is ALREADY down. Timed flush it is not: a transition begins at
+   the next style flush, not on the frame its class is set, and that latency
+   would be the whole margin. */
+.page-plants.diving .iris{opacity:1;--iris:0%;
+  transition:--iris calc(var(--go,1150ms)*.56) cubic-bezier(.55,0,.85,.55)
+               calc(var(--go,1150ms)*.28),
+             opacity calc(var(--go,1150ms)*.10) linear calc(var(--go,1150ms)*.28)}
+
+/* a reader who asked for less motion never gets here - open() skips the whole
+   departure for them and cuts, the way it always did. Belt and braces for the
+   chrome, in case the class is ever set from somewhere else. */
 @media (prefers-reduced-motion:reduce){
-  }
+  .page-plants.diving .rail,.page-plants.diving .hud,.page-plants.diving .detail,
+  .page-plants.diving .zoom,.page-plants.diving .unplaced,
+  .page-plants.diving .corner,.page-plants.diving .iris,
+  .page-plants .theatre.diving .chip{transition:none}
+}
 
 /* ---------- a site the backend has not placed ----------
    Said out loud. A fleet with sites missing from the picture has to say so, or

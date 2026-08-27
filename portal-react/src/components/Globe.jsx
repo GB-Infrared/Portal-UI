@@ -175,7 +175,7 @@ export const Globe = forwardRef(function Globe({ home, onFrame, onStatus, hudTop
       tLAM: home ? home.lng : 0, tPHI: home ? home.lat : 0,
       sinP: Math.sin((home ? home.lat : 0) * D2R),
       cosP: Math.cos((home ? home.lat : 0) * D2R),
-      ZOOM: 1, tZOOM: 1, FLY: false, REGMIX: 0, idle: 0,
+      ZOOM: 1, tZOOM: 1, FLY: false, REGMIX: 0, idle: 0, DIVE: null,
       W: 0, H: 0, CX: 0, CY: 0, R0: 200, R: 200, SKYK: 540
     };
   }
@@ -185,6 +185,18 @@ export const Globe = forwardRef(function Globe({ home, onFrame, onStatus, hudTop
      which is the whole fleet with room around it and the regional plate at very
      nearly its native resolution. Past that you are enlarging pixels. */
   const MAXZ = 34, DESC_Z = 22;
+
+  /* HOW FAR A DEPARTURE GOES, and it is deliberately past the ceiling every
+     other motion on this page obeys. MAXZ is the limit on BROWSING - the point
+     past which you are enlarging pixels rather than learning anything, which is
+     the right limit for somebody looking. Held to it, a departure beginning
+     where a descent already parked the camera has 22 to 34 to travel in: about
+     one and a half times, spread over a second, which is not a fall. It is a
+     still frame with a shutter closing over it. The ground goes soft near the
+     bottom, and that is not a defect being tolerated - you are going THROUGH
+     it, behind a closing iris, and ground that stayed crisp while it rushed
+     past would read as a zoom rather than a descent. */
+  const GO_Z = 92;
 
   useImperativeHandle(ref, () => ({
     /* take me closer to this one */
@@ -199,6 +211,32 @@ export const Globe = forwardRef(function Globe({ home, onFrame, onStatus, hudTop
       cam.tLAM = home ? home.lng : 0;
       cam.tPHI = home ? home.lat : 0;
       cam.tZOOM = 1; cam.FLY = true; cam.idle = 0;
+    },
+    /* GOING THERE, rather than easing towards it.
+       descend() hands the camera a TARGET and lets the frame loop chase it,
+       which is right for browsing: it decelerates into place, a drag can
+       interrupt it, and it gives up once it arrives. None of that suits a
+       departure. This one has to finish, has to finish ON TIME because a
+       navigation is timed against it, and above all has to ACCELERATE - an
+       exponential approach slows as it lands, which is the feel of arriving,
+       and this is the feel of falling. So the camera is ASSIGNED its position
+       from a script, and the easing is skipped entirely while it runs.
+
+       THE TWO CURVES ARE THE WHOLE EFFECT, and having them the same way round
+       ruins it. A degree of longitude crosses more of the screen the closer the
+       camera is, so a pan still running at 30x throws the site clean off the
+       side of the frame. The pan is ease-OUT and is done early; the fall is
+       ease-IN and has barely begun by then. The camera arrives ABOVE the site,
+       and only then goes down. */
+    dive(p, ms) {
+      cam.DIVE = {
+        t: 0, dur: Math.max(0.2, (ms || 1000) / 1000),
+        lam0: cam.LAM, dLam: angTo(cam.LAM, p.lng),
+        phi0: cam.PHI, phi1: Math.max(-78, Math.min(78, p.lat)),
+        lz0: Math.log(cam.ZOOM), lz1: Math.log(GO_Z)
+      };
+      cam.FLY = false;
+      cam.idle = -1e9;   /* and the idle return does not get to interrupt it */
     },
     zoomBy(f) { cam.tZOOM = Math.max(1, Math.min(MAXZ, cam.tZOOM * f)); cam.FLY = false; },
     isDown() { return cam.ZOOM > 2.2; }
@@ -393,25 +431,44 @@ export const Globe = forwardRef(function Globe({ home, onFrame, onStatus, hudTop
       last = now;
       cam.idle += dt;
 
-      /* nobody has touched it for a while, so it goes home */
-      if (!drag && cam.idle > 7 && !reduced) {
-        cam.tLAM = home ? home.lng : 0;
-        cam.tPHI = home ? home.lat : 0;
-        cam.tZOOM = 1; cam.FLY = true;
+      if (cam.DIVE) {
+        /* the camera is ASSIGNED its position for this instant of the fall. The
+           targets are dragged along behind it so that if a dive were ever
+           cancelled mid-air, the easing would resume from where the camera
+           actually is rather than snapping back to where it was pointed. */
+        const dv = cam.DIVE;
+        dv.t += dt;
+        const u = Math.min(1, dv.t / dv.dur);
+        const pan = 1 - Math.pow(1 - u, 3);   /* over first — ease out */
+        const fall = u * u * u;               /* down after — ease in  */
+        cam.LAM = dv.lam0 + dv.dLam * pan;
+        const ph = dv.phi0 + (dv.phi1 - dv.phi0) * pan;
+        cam.PHI = ph;
+        cam.sinP = Math.sin(ph * D2R);
+        cam.cosP = Math.cos(ph * D2R);
+        cam.ZOOM = Math.exp(dv.lz0 + (dv.lz1 - dv.lz0) * fall);
+        cam.tLAM = cam.LAM; cam.tPHI = cam.PHI; cam.tZOOM = cam.ZOOM;
+      } else {
+        /* nobody has touched it for a while, so it goes home */
+        if (!drag && cam.idle > 7 && !reduced) {
+          cam.tLAM = home ? home.lng : 0;
+          cam.tPHI = home ? home.lat : 0;
+          cam.tZOOM = 1; cam.FLY = true;
+        }
+
+        const e = Math.min(1, dt * (drag ? 20 : (cam.FLY ? 1.7 : 2.8)));
+        cam.LAM += angTo(cam.LAM, cam.tLAM) * e;
+        const nextPhi = Math.max(-78, Math.min(78, cam.PHI + (cam.tPHI - cam.PHI) * e));
+        cam.PHI = nextPhi;
+        cam.sinP = Math.sin(nextPhi * D2R);
+        cam.cosP = Math.cos(nextPhi * D2R);
+
+        /* zoom eases in LOG space: going 1→34 and 34→1 should feel like the same
+           move, and linear interpolation of a ratio does not */
+        const lz = Math.log(cam.ZOOM), lt = Math.log(cam.tZOOM);
+        cam.ZOOM = Math.exp(lz + (lt - lz) * Math.min(1, dt * (cam.FLY ? 1.55 : 6.5)));
+        if (Math.abs(lt - lz) < 0.002 && Math.abs(angTo(cam.LAM, cam.tLAM)) < 0.05) cam.FLY = false;
       }
-
-      const e = Math.min(1, dt * (drag ? 20 : (cam.FLY ? 1.7 : 2.8)));
-      cam.LAM += angTo(cam.LAM, cam.tLAM) * e;
-      const nextPhi = Math.max(-78, Math.min(78, cam.PHI + (cam.tPHI - cam.PHI) * e));
-      cam.PHI = nextPhi;
-      cam.sinP = Math.sin(nextPhi * D2R);
-      cam.cosP = Math.cos(nextPhi * D2R);
-
-      /* zoom eases in LOG space: going 1→34 and 34→1 should feel like the same
-         move, and linear interpolation of a ratio does not */
-      const lz = Math.log(cam.ZOOM), lt = Math.log(cam.tZOOM);
-      cam.ZOOM = Math.exp(lz + (lt - lz) * Math.min(1, dt * (cam.FLY ? 1.55 : 6.5)));
-      if (Math.abs(lt - lz) < 0.002 && Math.abs(angTo(cam.LAM, cam.tLAM)) < 0.05) cam.FLY = false;
       cam.R = cam.R0 * cam.ZOOM;
       /* the fleet's own ground fades in over the second half of the descent */
       cam.REGMIX = Math.max(0, Math.min(1, (cam.ZOOM - 6) / 10));
