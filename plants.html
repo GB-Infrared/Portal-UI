@@ -486,23 +486,27 @@ body{background:
   transition:opacity .2s ease,transform .2s ease}
 .card.on{opacity:1;transform:translate(0,-50%);pointer-events:auto}
 .card .ch{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
-/* THE NAMEPLATE IS THE WAY IN. The leader from the globe has pointed at this
-   line all along, so this is where "open this site" belongs - not on a button
-   added at the bottom of the card, which would be a second place to look for
-   the one thing the card is for.
+/* THE CARD DOES NOT OPEN ANYTHING, AND THAT IS THE WHOLE OF THIS BLOCK.
 
-   The arrow is printed, not revealed on hover. A control that only admits to
-   being a control once the pointer is on it has already failed the reader who
-   was looking for it. */
-.card .go{display:flex;align-items:baseline;gap:7px;padding:0;border:0;
-  background:transparent;font:inherit;color:inherit;cursor:pointer;text-align:left}
-.card .go .ar{flex:none;width:11px;height:11px;align-self:center;stroke:var(--void-dim);
-  stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;
-  transition:stroke .16s ease,transform .16s ease}
-.card .go:hover .nm,.card .go:focus-visible .nm{color:#fff}
-.card .go:hover .ar,.card .go:focus-visible .ar{stroke:var(--emerald);transform:translateX(2px)}
-.card .go:focus-visible{outline:none}
-.card .go:focus-visible .nm{text-decoration:underline;text-underline-offset:3px}
+   The nameplate used to be a button with an arrow on it, on the argument that
+   the leader from the globe has pointed at that line all along, so the line is
+   where "open this site" belongs. The argument was sound about WHERE, and wrong
+   about WHETHER. It left the screen with two doors to the same room - this one
+   and the fleet row that summons it - and two doors is not twice as easy to
+   leave by, it is one question asked twice: a reader who finds one of them now
+   has to wonder what the other one does differently. Nothing. It did the same
+   thing.
+
+   So the card is what it looks like: a READOUT. It appears by being pointed at,
+   it says what a site is doing, and it takes no gesture at all. Every way into
+   a site on this screen is a fleet row - the list you were already reading down
+   when the card came up - and the arrow printed at the end of that row is the
+   only arrow on the screen that promises anything.
+
+   It also settles a smaller thing that was never quite right: the card is a
+   hover surface, and a control that appears under the pointer because the
+   pointer went past it is a control that can be hit by a hand that was only
+   reading. Nothing on it can be hit now. */
 .card .ch .nm{font-size:12.5px;letter-spacing:.16em;color:var(--void-fg);
   font-weight:700;text-transform:uppercase}
 .card .ch .st{margin-left:auto;font-size:8.5px;letter-spacing:.2em;color:var(--emerald)}
@@ -738,6 +742,77 @@ body.down .hud .out{color:#c3d2e2;border-color:rgba(150,180,220,.34)}
 .theatre .chip{transition:opacity .45s ease}
 .theatre.down .chip{opacity:0;pointer-events:none}
 
+/* ================= THE DEPARTURE =================
+   Opening a site is the one moment this screen exists for, and it used to be a
+   cut. The fall it becomes instead is described where it is started, in open().
+   What lives here is everything that is NOT the camera: the fleet-scale chrome
+   getting out of the way, and the frame closing.
+
+   EVERY DURATION BELOW IS A FRACTION OF --go, and --go is written from GO_MS in
+   the script. One number decides how long the departure is. Two numbers - one
+   here and one there - is how a transition ends up navigating a quarter second
+   after the picture has already gone black, which is a bug nobody can see and
+   everybody can feel. */
+
+/* THE FLEET GOES WITH THE ALTITUDE. The rail, the portfolio total and the card
+   are all readings taken from orbit, and half a second into a fall they are
+   describing somewhere the reader no longer is. They leave OUTWARD, each to the
+   edge it already lives against, so the screen reads as opening rather than as
+   a set of panels being switched off. */
+body.going .rail,body.going .sumx,body.going .card,body.going .zoom,body.going .hud{
+  pointer-events:none;opacity:0;
+  transition:opacity calc(var(--go,1150ms)*.30) ease,
+             transform calc(var(--go,1150ms)*.40) cubic-bezier(.4,0,.9,.55)}
+body.going .rail{transform:translateX(-30px)}
+body.going .sumx{transform:translateX(30px)}
+body.going .card{transform:translate(-18px,-50%)}
+body.going .hud {transform:translateY(-14px)}
+
+/* THE BRACKETS GO LAST, and they go last because they are the only two marks on
+   this page that belong to the INSTRUMENT rather than to the fleet. While they
+   are up, whatever is happening is still happening inside a frame. Letting them
+   go is the frame itself standing down, and it is the last thing that should. */
+body.going .corner{opacity:0;
+  transition:opacity calc(var(--go,1150ms)*.26) ease calc(var(--go,1150ms)*.46)}
+
+/* ---- AND THEN THROUGH ----
+   The iris closes on the SITE, not on the middle of the window - --go-x and
+   --go-y are written every frame from the same projected position the marker
+   is drawn at, exactly the way --sun-x and --sun-y already carry the sun into
+   the stylesheet. The hole is over the ground being fallen to, so the last
+   thing visible on this page is the place the next one is about.
+
+   Declared through @property so the radius can be TRANSITIONED. A custom
+   property is a string by default and a string does not interpolate: without
+   this the hole would sit open and then snap shut on the final frame. Where
+   @property is not understood that snap is exactly what happens, which is the
+   old cut - the behaviour this replaces - and nothing worse. */
+@property --iris{syntax:'<percentage>';inherits:false;initial-value:150%}
+.iris{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;--iris:150%;
+  background:radial-gradient(circle at var(--go-x,50%) var(--go-y,46%),
+    transparent var(--iris), #04080e calc(var(--iris) + 18%))}
+/* CLOSED WITH ROOM TO SPARE, and the margin is the point of these two numbers.
+   .28 + .56 puts the last frame of the close at 84% of the beat; the navigation
+   is at 100% of it. That gap is not padding, it is the only thing making the
+   claim above true - the cut has to happen behind a shutter that is ALREADY
+   down. Timed to land exactly on the cut it is not: a transition does not begin
+   on the frame its class is set, it begins on the next style flush, which
+   measured about 60ms here and will be worse on a machine drawing a real globe
+   rather than a software one. Tuned flush, that latency is the whole margin,
+   and the flash it produces is the artefact this element exists to prevent. */
+body.going .iris{opacity:1;--iris:0%;
+  transition:--iris calc(var(--go,1150ms)*.56) cubic-bezier(.55,0,.85,.55)
+               calc(var(--go,1150ms)*.28),
+             opacity calc(var(--go,1150ms)*.10) linear calc(var(--go,1150ms)*.28)}
+
+/* a reader who asked for less motion is not shown a fall - open() skips the
+   whole departure for them and cuts, the way it always did. This is belt and
+   braces for the chrome, in case the class is ever set from somewhere else. */
+@media (prefers-reduced-motion:reduce){
+  body.going .rail,body.going .sumx,body.going .card,body.going .zoom,
+  body.going .hud,body.going .corner,body.going .iris{transition:none}
+}
+
 </style>
 </head>
 <body>
@@ -747,6 +822,11 @@ body.down .hud .out{color:#c3d2e2;border-color:rgba(150,180,220,.34)}
      top of it. The stars and the gravity grid are on the canvas. -->
 <div class="rays"></div>
 <div class="vignette"></div>
+<!-- THE WAY OUT. Inert and invisible until a site is opened; see "THE
+     DEPARTURE" in the stylesheet and open() in the script. It is a hole rather
+     than a wash so that the last of this page the reader sees is the ground
+     they are being taken to. -->
+<div class="iris"></div>
 <div class="grain"></div>
 <div class="corner tl"></div>
 <div class="corner br"></div>
@@ -809,7 +889,12 @@ body.down .hud .out{color:#c3d2e2;border-color:rgba(150,180,220,.34)}
 
 <!-- and the one card the rail opens, tethered to its site by the leader drawn
      on the canvas -->
-<div class="card" id="card" role="dialog" aria-live="polite" aria-label="Site detail"></div>
+<!-- A READOUT, NOT A DIALOG. It carried role="dialog" while it still had a
+     button in it; with nothing focusable left, "dialog" promises a screen
+     reader something to interact with and somewhere to return from, and there
+     is neither. What it actually is, is a region that changes as the pointer
+     moves down the fleet - which is what a polite live region is for. -->
+<div class="card" id="card" aria-live="polite" aria-label="Site detail"></div>
 
 <!-- WHAT THE FLEET ADDS UP TO, standing clear of every edge. -->
 <aside class="sumx" id="sumx" aria-label="Portfolio total">
@@ -1100,6 +1185,36 @@ let ZOOM=1, tZOOM=1;
 const MAXZ=34, DESC_Z=22;
 let FLY=false;                 /* a commanded move, eased slowly and cinematically */
 let REGMIX=0;                  /* how much of the fleet's own ground is showing   */
+
+/* ---- THE DEPARTURE ----
+   GOING is the site the screen is leaving for, and it is set only by open().
+   While it is set the camera is not being EASED towards anything - it is being
+   assigned its position from a script (see frame()), because a transition that
+   something else is timed against has to finish, and finish on the beat.
+
+   GO_MS is that beat, and it is the only place that decides. The stylesheet
+   times the rail leaving and the page dissolving against the same number
+   through --go, written from here, so the picture and the chrome can never
+   drift out of step the way two literals eventually do. */
+let GOING=null, GO=null, GOT=0;   /* GOT: 0..1, how far through the departure */
+const GO_MS=1150;
+
+/* HOW FAR THROUGH, and it is deliberately past the ceiling everything else on
+   this page obeys. MAXZ is the limit on BROWSING - the point past which you are
+   enlarging pixels rather than learning anything, which is the right limit for
+   somebody looking. Held to it, a departure that begins where the load-descent
+   already left the camera has 22 to 34 to travel in: about one and a half
+   times, spread over a second, which is not a fall. It is a still frame with a
+   shutter closing over it, and the first cut of this transition proved it -
+   the frame at half a second and the frame at three quarters were the same
+   picture.
+
+   So the departure gets its own ceiling and it is roughly four times the
+   browsing one. The ground goes soft well before the bottom, and that is not a
+   defect being tolerated: you are going THROUGH it, the last third is behind a
+   closing iris, and ground that stayed crisp while it rushed past would be the
+   one part of this that looked like a zoom rather than a descent. */
+const GO_Z=92;
 
 function descend(p){
   const t=p||{lng:HOME.lam,lat:HOME.phi};
@@ -1682,14 +1797,13 @@ oc.addEventListener('wheel',function(e){
 /* one card per site, built once. Every readout it will ever show is here from
    the start and is looked up ONCE - the paint runs sixty times a second, and a
    querySelector per field per site per frame is a cost paid for nothing. */
-/* THE CARD IS NOT THE BUTTON. THE NAMEPLATE IS.
-   It used to be one <button> around the whole assembly, which meant that
-   reading a number was a click away from leaving the screen: a pointer resting
-   on REVENUE to check it was a pointer sitting on a control, and one stray
-   click sent you to Home. The readout is now inert - it is a table, and tables
-   are for reading - and the NAMEPLATE is the control, which is also what the
-   leader from the globe has pointed at all along. One thing on this card is
-   clickable and it is the thing with the site's name on it. */
+/* NOTHING ON THIS CARD IS A CONTROL.
+   It was one <button> around the whole assembly once, so reading a number was a
+   click away from leaving the screen - a pointer resting on REVENUE to check it
+   was a pointer sitting on a control. That was cut back to the nameplate alone,
+   and the nameplate has now gone the same way: a site is opened from the FLEET,
+   and only from the fleet. See the note over .card .ch in the stylesheet for
+   why one door beats two. The card is a table, and tables are for reading. */
 const CARD=$('card'), ROWS=$('rows');
 let ACT=null;                     /* the site the card is currently about */
 
@@ -1697,10 +1811,7 @@ let ACT=null;                     /* the site the card is currently about */
    and refilled, so opening a site costs a few text writes rather than a parse. */
 CARD.innerHTML=
   '<span class="ch">'+
-    '<button class="go" type="button"><span class="nm"></span>'+
-      '<svg class="ar" viewBox="0 0 24 24" aria-hidden="true">'+
-        '<path d="M5 12h13M12.5 5.5 19 12l-6.5 6.5"/></svg>'+
-    '</button>'+
+    '<span class="nm"></span>'+
     '<span class="st"></span>'+
   '</span>'+
   '<span class="rd"><span class="val"></span><span class="u">kW</span>'+
@@ -1717,18 +1828,13 @@ CARD.innerHTML=
   '<span class="site"><svg class="pin" viewBox="0 0 8 11" aria-hidden="true">'+
     '<path d="M4 0a4 4 0 0 0-4 4c0 3 4 7 4 7s4-4 4-7a4 4 0 0 0-4-4zm0 5.6A1.6 1.6 0 1 1 4 2.4a1.6 1.6 0 0 1 0 3.2z"/>'+
   '</svg><span class="ad"></span></span>';
-/* One handler, reading the card's current subject rather than closing over a
-   site: the card is built once and re-pointed, so a listener bound to a
-   particular site would open the wrong one from the second site onward. */
-function wireCardOpen(){ CQ.go.addEventListener('click',function(){ if(ACT) open(ACT); }); }
 const CQ=(function(){
   const q=s=>CARD.querySelector(s);
   const g=CARD.querySelectorAll('.gr b');
-  return { nm:q('.nm'), st:q('.st'), go:q('.go'), val:q('.val'), u:q('.u'), pc:q('.pc'),
+  return { nm:q('.nm'), st:q('.st'), val:q('.val'), u:q('.u'), pc:q('.pc'),
            fl:q('.tr i'), ad:q('.ad'),
            peak:g[0], e:g[1], ac:g[2], dc:g[3], dev:g[4], alm:g[5] };
 })();
-wireCardOpen();
 
 PLANTS.forEach(function(p,i){
   const b=document.createElement('button');
@@ -1810,8 +1916,6 @@ function fillCard(p){
   const st=stateOf(p), kw=outputOf(p), f=(st==='off'||!p.ac)?0:Math.min(1,kw/p.ac);
   CARD.className='card on'+(st==='ok'?'':' '+st);
   CQ.nm.textContent=p.id;
-  CQ.go.title='Open '+p.id+' in the portal';
-  CQ.go.setAttribute('aria-label','Open '+p.id+' in the portal');
   CQ.st.textContent=STATE_TEXT[st];
   CQ.ad.textContent=p.addr;
   CQ.ac.textContent=fmtP(p.ac);
@@ -1855,9 +1959,57 @@ function open(p){
      screen - and STAYS on it. The query string carries the choice to Home; the
      remembered value carries it to every page after that, because the nav tabs
      are plain links and a site chosen here must not be forgotten the first time
-     somebody clicks Monitoring. */
+     somebody clicks Monitoring.
+
+     WRITTEN FIRST, BEFORE ANY OF THE MOTION BELOW. The choice is the only part
+     of this function that MUST happen; the descent is the only part that can be
+     skipped. Ordering them the other way round would put a transition between a
+     reader and the thing they asked for. */
   try{ localStorage.setItem('enerops-plant',p.id); }catch(e){}
-  location.href='home.html?plant='+encodeURIComponent(p.id);
+  const go=function(){ location.href='home.html?plant='+encodeURIComponent(p.id); };
+
+  /* ---- GOING THROUGH THE GROUND ----
+     Opening a site used to be a cut: click, and the fleet was replaced by one
+     plant's Home in a single frame. Nothing was WRONG with it, which is exactly
+     why it was worth looking at twice - it worked, and it threw away the one
+     thing this screen has that no other page in the portal does.
+
+     This page's whole claim is that a site is a PLACE. It draws the real Earth
+     from real plates, lights it from where the sun actually is, and puts each
+     site at its own coordinates precisely so that "which site" is answered by
+     pointing at ground. It already FALLS to a site when you click its dot. A
+     cut at the end throws all of that away one frame before it pays off; going
+     the rest of the way down, and through, is the same sentence finished. The
+     fleet's own ground is already wired to arrive with the altitude - REGMIX
+     rides on ZOOM - so by the time Home opens you have been looking at the
+     site's own dirt for half a second.
+
+     IT IS SKIPPED, NOT SHORTENED, in the three cases where the fall is not
+     available or not wanted: a reader who asked for less motion, for whom a
+     fall is the one thing this is; a site with no coordinates, which cannot be
+     fallen to; and a narrow screen, where the picture is a plain list and there
+     is no ground to go through. All three get the old cut, unchanged - which is
+     also why the cut is still the first thing written above. */
+  if(reduced || !isFinite(p.lat) || !isFinite(p.lng) || innerWidth<=720){ go(); return; }
+
+  GOING=p; GOT=0;
+  GO={ t:0, dur:GO_MS/1000,
+       lam0:LAM, dLam:angTo(LAM,p.lng),
+       phi0:PHI, phi1:Math.max(-78,Math.min(78,p.lat)),
+       lz0:Math.log(ZOOM), lz1:Math.log(GO_Z) };
+  FLY=false; idle=-1e9;
+  /* the chrome leaves on the stylesheet's clock, and this is what starts it.
+     --go is written from GO_MS so there is one number, not two. */
+  document.documentElement.style.setProperty('--go',GO_MS+'ms');
+  document.body.classList.add('going');
+  /* the card, the leader and the lit row all belong to BROWSING, and this is
+     no longer that. shut() rather than cool(), because cool() defers to an open
+     card - correct everywhere else, wrong here, where the card is usually the
+     very thing that was just clicked. */
+  shut();
+  /* by now the page has dissolved to the same background Home opens on, so
+     what the navigation cuts between is two frames of one colour */
+  setTimeout(go,GO_MS+40);
 }
 
 /* The site under the pointer, and nothing else. It used to also drive a panel
@@ -2670,7 +2822,25 @@ function clashes(r){
 function drawSiteClose(p,col){
   const a=CLOSE;
   if(a<=0.002||!p.vis) return;
-  const dim=(hot&&hot!==p&&ACT!==p)?0.72:1;
+  /* THE DEPARTURE, and the close-up needs its own rule for it because it
+     carries its own dim. Two different fades, for two different reasons.
+
+     THE SITES BEING LEFT go the way their markers do - a reticle and a
+     nameplate left standing over ground the reader is leaving would be the one
+     part of the fleet that did not get the message.
+
+     THE SITE BEING OPENED goes too, and EARLIER, which is the part that is not
+     obvious. The iris closes on the marker, and this block is a wide slab of
+     text starting at the marker and running right: left up, it gets sliced in
+     half by the closing hole, and a label cut through the middle by a circle is
+     an artefact, not a composition. It is done saying what it says by then - it
+     has been on screen for most of a second - so it is gone by the time the
+     hole is small enough to reach it. What the iris actually closes on is the
+     dot, which is drawn in drawSites and not here, and which is the right last
+     thing to see: the place, not the caption. */
+  const dim=((hot&&hot!==p&&ACT!==p)?0.72:1)
+    *(GOING ? (p===GOING ? Math.max(0,Math.min(1,(0.70-GOT)/0.25))
+                         : Math.max(0,1-GOT*2.4)) : 1);
   const live=(ACT===p||hot===p);
   const st=stateOf(p), kw=outputOf(p);
 
@@ -2797,7 +2967,13 @@ function drawSites(now,dt){
     /* Up from 0.52. A site the sun has set on is not faulty and it is not
        gone - it is a site you may well be opening BECAUSE it is dark. Halving
        it made the night half of the fleet something you had to hunt for. */
-    const dim=((hot&&hot!==p)?0.28:1)*(p.sunUp===false?0.74:1);
+    /* AND ON THE WAY OUT, THE FLEET GOES WITH THE ALTITUDE. Every other marker
+       is a fleet-scale reading, and a second into a departure it is describing
+       something the reader is no longer looking at. They are gone by about the
+       half-way point, which leaves one mark over one piece of ground - the
+       sentence the next screen begins with. */
+    const dim=((hot&&hot!==p)?0.28:1)*(p.sunUp===false?0.74:1)
+      *(GOING ? (p===GOING ? 1 : Math.max(0,1-GOT*2.4)) : 1);
     p._h=(p._h||0)+((hot===p?1:0)-(p._h||0))*Math.min(1,dt*9);
     /* Smaller than they were. Over a diagram a big soft disc was the brightest
        thing on screen; over a photograph of the Earth it is a smear on top of
@@ -3011,11 +3187,45 @@ function frame(now){
 
      The ZOOM is left where it was put: coming home is about not getting lost,
      and how close somebody chose to stand is not being lost. */
-  if(!drag && !isDown() && idle>5.5){
+  if(!drag && !GOING && !isDown() && idle>5.5){
     const t=now/1000;
     tLAM=HOME.lam + (reduced?0:Math.sin(t*0.100)*2.6);
     tPHI=HOME.phi + (reduced?0:Math.sin(t*0.067)*1.1);
   }
+  if(GOING){
+    /* ---- GOING THROUGH THE GROUND ----
+       descend() hands the camera a TARGET and lets this loop chase it, which is
+       right for browsing: it decelerates into place, a drag can interrupt it,
+       and it gives up once it arrives. None of that suits a departure. This one
+       has to finish, has to finish ON TIME because the navigation is timed
+       against it, and above all has to ACCELERATE - an exponential approach
+       slows as it lands, which is the feel of arriving, and this is the feel of
+       falling. So the camera is ASSIGNED its position rather than eased toward
+       one, and FLY is left out of it entirely.
+
+       THE TWO CURVES ARE THE WHOLE EFFECT, and getting them the same way round
+       ruins it. A degree of longitude crosses more of the screen the closer the
+       camera is, so a pan still running at 30x throws the site clean off the
+       side of the frame. The pan is ease-OUT and is essentially done in the
+       first third; the fall is ease-IN and has barely started by then. The
+       camera arrives ABOVE the site, and only then goes down.
+
+       It goes past DESC_Z to the ceiling. DESC_Z is where BROWSING stops -
+       close enough to read the ground, far enough that you are not enlarging
+       pixels - and stopping there would be arriving, again. This is not
+       arriving anywhere on this page. */
+    GO.t+=dt;
+    const u=Math.min(1,GO.t/GO.dur);
+    const pan=1-Math.pow(1-u,3), fall=u*u*u;
+    LAM=GO.lam0+GO.dLam*pan;
+    setPhi(GO.phi0+(GO.phi1-GO.phi0)*pan);
+    ZOOM=Math.exp(GO.lz0+(GO.lz1-GO.lz0)*fall);
+    R=R0*ZOOM;
+    /* the targets are dragged along behind so nothing snaps if a departure is
+       ever cancelled from somewhere this function cannot see */
+    tLAM=LAM; tPHI=PHI; tZOOM=ZOOM;
+    GOT=u;
+  } else {
   const e=Math.min(1,dt*(drag?20:(FLY?1.7:2.8)));
   LAM+=angTo(LAM,tLAM)*e;
   setPhi(PHI+(tPHI-PHI)*e);
@@ -3034,6 +3244,7 @@ function frame(now){
     R=R0*ZOOM;
     if(FLY && Math.abs(lt-Math.log(ZOOM))<0.02) FLY=false;
   }
+  }
   /* the fleet's own ground comes up as the planet gets close, and is completely
      in by the time the curvature has left the frame */
   REGMIX=Math.max(0,Math.min(1,(ZOOM-2.6)/(9.0-2.6)));
@@ -3045,6 +3256,17 @@ function frame(now){
   PLANTS.forEach(function(p){ p.sunUp=sunUpAt(p,sub); });
 
   place();
+  /* WHERE THE HOLE IS. The iris closes on the site being opened rather than on
+     the middle of the window, so the site's live position has to reach the
+     stylesheet - the same trip --sun-x and --sun-y already make every frame,
+     and for the same reason: CSS can light and frame a picture it cannot see,
+     provided something that CAN see it keeps telling it where things are.
+     Viewport pixels on both sides: the theatre is inset:0 and so is the iris. */
+  if(GOING && GOING.vis){
+    const gs=document.documentElement.style;
+    gs.setProperty('--go-x',GOING.x.toFixed(1)+'px');
+    gs.setProperty('--go-y',GOING.y.toFixed(1)+'px');
+  }
   ox.clearRect(0,0,W,H);
   /* the void first, and everything after it is drawn on top of a sky that has
      already been bent by the thing about to be drawn into the hole in it */
