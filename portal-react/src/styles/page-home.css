@@ -114,13 +114,53 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
    as one thing opening, not two things jumping. The cost is real height while it
    is open, taken deliberately: the cards get room to carry power, rating and
    alarms rather than just a name. */
+.page-home .pexpand{overflow:hidden;max-height:0;opacity:0;margin-top:0;
+  transition:max-height .22s ease,opacity .15s ease,margin-top .22s ease}
+.page-home .pexpand.open{max-height:210px;opacity:1;margin-top:8px}
 /* Tracks are CAPPED, not stretched. auto-fit with a 1fr max collapses the empty
    tracks and hands their width to the cards that are there, so three plants got
    a third of the header each. auto-fill keeps them, and a fixed max stops any
    card growing past the width its own content needs - 232px, which is what the
    state line measures at, not a round number.
    THE LIST SCROLLS past two rows rather than the header growing without limit. */
+.page-home .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,258px));
+  gap:6px;padding-top:9px;border-top:1px solid var(--line-soft);
+  max-height:174px;overflow-y:auto;scrollbar-width:none}
+.page-home .pgrid::-webkit-scrollbar{width:0}
+.page-home .pgrid:hover{scrollbar-width:thin;scrollbar-color:var(--line-hi) transparent}
+.page-home .pgrid:hover::-webkit-scrollbar{width:7px}
+.page-home .pgrid:hover::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:7px}
 
+.page-home .pcard{display:flex;flex-direction:column;gap:3px;min-width:0;
+  text-align:left;font-family:inherit;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:7px 10px}
+.page-home .pcard:hover{background:var(--hover);border-color:var(--line-hi)}
+/* the plant already on screen is marked by surface, not by colour - a green
+   "current" would read as a health light rather than as a selection */
+.page-home .pcard.on{background:var(--sel);border-color:var(--line-hi)}
+.page-home .pcard .top,.page-home .pcard .row{display:flex;align-items:baseline;gap:6px;min-width:0}
+.page-home .pcard .nm{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--text);
+  line-height:1.15;white-space:nowrap}
+.page-home .pcard.on .nm::after{content:"";display:inline-block;width:5px;height:5px;
+  border-radius:50%;margin-left:6px;vertical-align:middle;background:var(--line-hi)}
+/* flex:1 1 0 with min-width:0 is what actually lets it ellipsis - a flex item
+   will not shrink below its content width otherwise, and the address then just
+   pushed the card wider than its column */
+.page-home .pcard .ad{flex:1 1 0;min-width:0;text-align:right;font-size:9px;color:var(--faint);
+  line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.page-home .pcard .pw{font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:-.4px;
+  color:var(--green-deep);line-height:1.1}
+.page-home .pcard .u{font-family:var(--mono);font-size:8px;font-weight:700;color:var(--muted);margin-left:-3px}
+.page-home .pcard .cap{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--faint);white-space:nowrap}
+.page-home .pcard .meterbar{height:3px;margin-top:1px}
+/* the alarm count is the other half of the decision, so it is stated on every
+   card - including the ones with nothing wrong, which is itself the answer */
+.page-home .pcard .alm{margin-left:auto;display:inline-flex;align-items:center;gap:4px;
+  font-size:8.5px;font-weight:800;letter-spacing:.05em;white-space:nowrap}
+.page-home .pcard .alm::before{content:"";width:5px;height:5px;border-radius:50%;flex:none}
+.page-home .pcard .alm.hot{color:var(--red)}    .page-home .pcard .alm.hot::before{background:var(--red)}
+.page-home .pcard .alm.cold{color:var(--faint)} .page-home .pcard .alm.cold::before{background:var(--green)}
 .page-home .pname .n{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:.2px;line-height:1.05;
   display:flex;align-items:center;gap:11px;flex-wrap:wrap}
 .page-home .pname .addr{font-size:11.5px;color:var(--faint);letter-spacing:.01em}
@@ -128,6 +168,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .page-home .pill.warn{color:var(--amber);background:var(--amber-soft);border:1px solid var(--amber-soft)}
 .page-home .pill.warn::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--amber)}
+.page-home .caps{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.page-home .cap{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:9px;
+  padding:6px 11px;min-width:108px}
+.page-home .cap .k{font-size:8.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--faint)}
+.page-home .cap .v{font-family:var(--mono);font-weight:800;font-size:15px;letter-spacing:-.3px;margin-top:2px}
+.page-home .cap .v .u{font-size:9.5px;color:var(--muted);margin-left:3px}
 /* ---------- KPI cards ---------- */
 /* left rail + main column, mirroring the Monitoring shell */
 .page-home .shell{display:grid;grid-template-columns:clamp(212px,15vw,248px) minmax(0,1fr);
@@ -403,6 +449,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 }
 @media (max-width:820px){
 .page-home .page{padding:12px 14px 30px}
+.page-home .caps{margin-left:0}
 .page-home .g-half{grid-template-columns:1fr}
 .page-home .chead{flex-wrap:wrap}
 .page-home .chead .title{white-space:normal}

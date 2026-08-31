@@ -29,16 +29,11 @@ const SHARE = 0.52;
  * @param {Object} o.pageRef   the page, for its bottom padding
  * @param {Object} o.lineRef   the day-curve card, to measure its non-plot chrome
  * @param {Object} o.monthRef  one month card, likewise
+ * @param {boolean} o.holdLine keep the curve at its resting height (the plant
+ *                             picker is open — see below)
  * @param {boolean} o.frozen   freeze the whole budget (the alarms panel is open)
  */
-/* THERE WAS A holdLine HERE, and it is gone with the thing it existed for. Home
-   used to unfold a plant picker above these charts, which genuinely took ~85px
-   away, so the month charts gave that up and the day curve was pinned at its
-   resting height because it was the plot being read while you chose. Choosing a
-   site moved to the site overview; the picker went; the flag stayed, wired to a
-   state nothing ever set. A parameter that is always false is not a
-   configuration, it is three branches nobody takes. */
-export function useChartBudget({ rowRef, mainRef, pageRef, lineRef, monthRef, frozen }) {
+export function useChartBudget({ rowRef, mainRef, pageRef, lineRef, monthRef, holdLine, frozen }) {
   const [size, setSize] = useState({ line: 0, month: 0 });
   const resting = useRef(null);   // the last size measured with nothing open
 
@@ -73,18 +68,21 @@ export function useChartBudget({ rowRef, mainRef, pageRef, lineRef, monthRef, fr
 
     /* floor, not round: the two shares have to sum to AT MOST the budget, and
        rounding each up put the page one pixel over and gave it a scrollbar */
-    let line = Math.floor(Math.min(MAX_LINE, Math.max(MIN_LINE, budget * SHARE)));
+    let line = holdLine && resting.current
+      ? resting.current.line
+      : Math.floor(Math.min(MAX_LINE, Math.max(MIN_LINE, budget * SHARE)));
     let month = Math.floor(Math.min(MAX_MONTH, budget - line));
 
     /* the month charts absorb first — they are furthest from the pointer — but
        once they are on the floor the day curve has to give way as well, or the
        page takes the difference and that is the scrollbar again */
-    if (month < MIN_MONTH) { line = Math.max(MIN_LINE, line - (MIN_MONTH - month)); month = MIN_MONTH; }
+    const mFloor = holdLine ? 110 : MIN_MONTH;
+    if (month < mFloor) { line = Math.max(holdLine ? 140 : MIN_LINE, line - (mFloor - month)); month = mFloor; }
 
     const next = { line, month };
-    if (!frozen) resting.current = next;
+    if (!holdLine && !frozen) resting.current = next;
     setSize(prev => (prev.line === next.line && prev.month === next.month ? prev : next));
-  }, [rowRef, mainRef, pageRef, lineRef, monthRef, frozen]);
+  }, [rowRef, mainRef, pageRef, lineRef, monthRef, holdLine, frozen]);
 
   useLayoutEffect(() => {
     measure();
