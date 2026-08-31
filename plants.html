@@ -519,8 +519,6 @@ body{background:
 .card.crit .val{color:#ff6b5e}
 .card.off  .val{color:#5d6e83;font-size:15px;letter-spacing:.16em}
 .card .u{font-size:10px;letter-spacing:.16em;color:var(--void-dim)}
-.card .pc{margin-left:auto;font-size:10.5px;color:var(--void-dim);
-  font-variant-numeric:tabular-nums}
 .card .tr{height:3px;border-radius:2px;background:rgba(150,180,220,.16);
   overflow:hidden;margin:9px 0 11px}
 .card .tr i{display:block;height:100%;width:0;border-radius:2px;
@@ -1824,8 +1822,12 @@ CARD.innerHTML=
     '<span class="nm"></span>'+
     '<span class="st"></span>'+
   '</span>'+
-  '<span class="rd"><span class="val"></span><span class="u">kW</span>'+
-    '<span class="pc"></span></span>'+
+  /* NO PERCENTAGE HERE. The bar directly underneath already draws output
+     against nameplate, and the figure said the same thing a second time in
+     words - which is only ever noticed when it reads 0%, at night, on a site
+     that is behaving perfectly. AC CAP is in the grid below for anyone who
+     wants the denominator. */
+  '<span class="rd"><span class="val"></span><span class="u">kW</span></span>'+
   '<span class="tr"><i></i></span>'+
   '<span class="gr">'+
     '<span class="c"><i>PEAK</i><b>—</b></span>'+
@@ -1841,7 +1843,7 @@ CARD.innerHTML=
 const CQ=(function(){
   const q=s=>CARD.querySelector(s);
   const g=CARD.querySelectorAll('.gr b');
-  return { nm:q('.nm'), st:q('.st'), val:q('.val'), u:q('.u'), pc:q('.pc'),
+  return { nm:q('.nm'), st:q('.st'), val:q('.val'), u:q('.u'),
            fl:q('.tr i'), ad:q('.ad'),
            peak:g[0], e:g[1], ac:g[2], dc:g[3], dev:g[4], alm:g[5] };
 })();
@@ -1937,8 +1939,8 @@ function fillCard(p){
 function paintCard(){
   const p=ACT; if(!p) return;
   const st=stateOf(p), kw=outputOf(p), f=(st==='off'||!p.ac)?0:Math.min(1,kw/p.ac);
-  if(st==='off'){ CQ.val.textContent='OFFLINE'; CQ.u.style.display='none'; CQ.pc.textContent=''; }
-  else { CQ.val.textContent=num(kw); CQ.u.style.display=''; CQ.pc.textContent=Math.round(f*100)+'%'; }
+  if(st==='off'){ CQ.val.textContent='OFFLINE'; CQ.u.style.display='none'; }
+  else { CQ.val.textContent=num(kw); CQ.u.style.display=''; }
   CQ.fl.style.width=(f*100).toFixed(1)+'%';
   const t=peakAt(), pk=peakOf(p), nA=alarmsOf(p);
   CQ.peak.textContent = pk>0 ? fmtP(pk) : '—';
