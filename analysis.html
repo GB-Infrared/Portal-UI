@@ -168,6 +168,56 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
    Without this the bar is eight equal boxes and nothing says which value
    belongs to which category. */
 .pair{display:flex;align-items:flex-end;gap:6px;padding:0 9px 0 0;border-right:1px solid var(--line);margin-right:3px}
+/* ---------- saved views ----------
+   ONE control, not three. The first pass put a dropdown, a SAVE and a DELETE
+   side by side in the filter bar: three boxes for one idea, and enough width
+   that the bar wrapped onto a second line on a laptop. A saved view is a single
+   thing you either open, name, or throw away - so it is a single button, and
+   everything you can do to one happens inside the panel it opens. */
+.vw{position:relative}
+.vwbtn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 11px;
+  border:1px solid var(--line);border-radius:9px;background:var(--panel);
+  color:var(--text);font-family:inherit;font-size:13px;font-weight:600;
+  max-width:230px;white-space:nowrap}
+.vwbtn:hover{border-color:var(--line-hi);background:var(--hover)}
+.vw.open .vwbtn{border-color:var(--line-hi);background:var(--hover)}
+.vwbtn svg{flex:none;color:var(--faint)}
+.vw.on .vwbtn svg{color:var(--brand)}
+.vwbtn .t{overflow:hidden;text-overflow:ellipsis}
+.vwbtn .t.none{color:var(--faint);font-weight:500}
+/* the one honest thing a saved view has to be able to say about itself */
+.vwbtn .edit{color:var(--amber);font-size:11px;font-weight:800;letter-spacing:.06em;flex:none}
+.vwbtn .cx{margin-left:2px;color:var(--faint);flex:none}
+
+.vwpanel{position:absolute;top:calc(100% + 6px);left:0;z-index:40;
+  min-width:340px;max-width:400px;padding:0;overflow:hidden}
+.vwlist{max-height:230px;overflow:auto;padding:4px}
+.vwrow{display:flex;align-items:center;gap:8px;width:100%;padding:8px 9px;
+  border:none;background:transparent;border-radius:8px;text-align:left;
+  font-family:inherit;font-size:13px;color:var(--text);cursor:pointer}
+.vwrow:hover{background:var(--hover)}
+.vwrow .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+/* the summary gives way before the NAME does: the name is what the reader is
+   looking for, the summary is only there to tell two similar ones apart */
+.vwrow .q{color:var(--faint);font-size:11px;font-weight:600;font-family:var(--mono);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto;min-width:0}
+.vwrow .n{flex:0 1 auto}
+.vwrow.on{background:var(--sel)}
+.vwrow.on .n{color:var(--brand)}
+.vwx{flex:none;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;
+  border:none;background:transparent;border-radius:6px;color:var(--faint);opacity:0}
+.vwrow:hover .vwx,.vwx:focus-visible{opacity:1}
+.vwx:hover{background:var(--red-soft);color:var(--red)}
+.vwnone{padding:14px 12px;color:var(--faint);font-size:12.5px;line-height:1.5}
+.vwfoot{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line-soft);background:var(--panel-2)}
+.vwfoot input{flex:1;min-width:0;height:32px;border:1px solid var(--line);border-radius:8px;
+  background:var(--panel);color:var(--text);font-family:inherit;font-size:12.5px;padding:0 9px;outline:none}
+.vwfoot input:focus{border-color:var(--line-hi)}
+.vwfoot button{flex:none;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--green);
+  background:var(--green);color:var(--on-accent);font-family:inherit;font-size:12px;font-weight:700}
+.vwfoot button:hover{background:var(--green-deep);border-color:var(--green-deep)}
+.vwerr{color:var(--red);font-size:11.5px;font-weight:600;padding:0 10px 9px}
+.vwerr:empty{display:none}
 .pair:last-of-type{border-right:none}
 .axtag{display:inline-flex;align-items:center;gap:5px}
 .axtag i{width:14px;height:0;border-top-width:2px;border-top-color:var(--muted);display:inline-block}
@@ -498,6 +548,39 @@ thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
          value stays because everything downstream already reads the site from
          it and none of it needs to learn that the control in front of it went. -->
     <input type="hidden" id="pl-sel" value="Sangria">
+
+    <!-- ---------- SAVED VIEWS ----------
+         Analysis is asked the same question over and over: this operator always
+         opens INV06 against POA, that one always reads module temperature. The
+         bar can be set to either in five picks, and being made to make those
+         five picks every morning is what makes a page feel like work.
+
+         A view is the WHOLE query - the devices, both categories, both values -
+         because half a remembered question is not one. It is NOT the window:
+         the point of reopening a saved view is to ask the same thing about a
+         different day, so the dates stay where the reader put them. -->
+    <div class="field">
+      <label>Profile</label>
+      <div class="vw" id="vw">
+        <button class="vwbtn" id="vw-btn" type="button"
+                aria-haspopup="true" aria-expanded="false" aria-controls="vw-panel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6.5 3.8h11a1 1 0 0 1 1 1V20l-6.5-3.6L5.5 20V4.8a1 1 0 0 1 1-1z"/></svg>
+          <span class="t none" id="vw-lab">Unsaved view</span>
+        </button>
+        <div class="colpanel vwpanel" id="vw-panel" hidden>
+          <div class="colhead">Saved views</div>
+          <div class="vwlist" id="vw-list"></div>
+          <div class="vwfoot">
+            <input id="vw-name" type="text" maxlength="40" spellcheck="false"
+                   placeholder="Name this view">
+            <button id="vw-go" type="button">Save</button>
+          </div>
+          <div class="vwerr" id="vw-err"></div>
+        </div>
+      </div>
+    </div>
     <!-- Device is the ONE control that takes several values: analysis is
          comparison, and "INV03 against INV06" is the question the page is for.
          Everything else stays single - two categories or two units on one axis
@@ -1331,6 +1414,9 @@ function applyQuery(msg){
   buildRows(); syncCols();
   PAGE=0;
   renderLegend(); fitChart(true); drawChart(); renderTable();
+  /* the saved-view label has to re-read itself, or a bar that has been changed
+     goes on claiming to be the view it was opened from */
+  if(typeof vwPaint==='function') vwPaint();
   if(msg) T(msg);
 }
 
@@ -1413,6 +1499,7 @@ $('y2c-sel').addEventListener('change',function(){
 $('y1v-sel').addEventListener('change',function(){ applyQuery('Y1 · '+labelOf(this.value)); });
 $('y2v-sel').addEventListener('change',function(){ applyQuery('Y2 · '+labelOf(this.value)); });
 
+let DEVPICK=null;
 /* ---------- device multi-select ----------
    The column picker's panel with the fleet in it - one idiom on the page for
    "tick several", not two. */
@@ -1465,8 +1552,164 @@ $('y2v-sel').addEventListener('change',function(){ applyQuery('Y2 · '+labelOf(t
     SEL.sort((a,b)=>DEVICES.indexOf(a)-DEVICES.indexOf(b));
     draw(); label(); applyQuery();
   });
+  /* a saved view sets SEL from outside this closure, and the button has to be
+     able to say so */
+  api.refresh=label;
+  DEVPICK=api;
   PICKS.push(api); label();
 })();
+
+/* =======================================================================
+   SAVED VIEWS
+   A view is the query minus the window - see the note in the bar above. Held in
+   localStorage beside the site the portal is on, because it is the same kind of
+   fact: something this reader chose that should still be true tomorrow. A
+   backend replaces vwRead/vwWrite and nothing else here changes.
+   ======================================================================= */
+const VKEY='enerops-analysis-views';
+function vwRead(){
+  try{ const v=JSON.parse(localStorage.getItem(VKEY)); return Array.isArray(v)?v:[]; }
+  catch(e){ return []; }
+}
+function vwWrite(){ try{ localStorage.setItem(VKEY,JSON.stringify(VIEWS)); }catch(e){} }
+let VIEWS=vwRead();
+let vwCur='';                          /* the NAME of the view on screen, or '' */
+
+/* the whole query, and only the query */
+function vwSnap(){
+  return {dev:SEL.slice(), y1c:$('y1c-sel').value, y1v:$('y1v-sel').value,
+          y2c:$('y2c-sel').value, y2v:$('y2v-sel').value};
+}
+const vwSame=(a,b)=> !!a && !!b
+  && a.y1c===b.y1c && a.y1v===b.y1v && a.y2c===b.y2c && a.y2v===b.y2v
+  && a.dev.length===b.dev.length && a.dev.every(function(d,i){ return d===b.dev[i]; });
+const vwBy=n=>VIEWS.filter(function(x){ return x.n===n; })[0];
+/* what a row is, in the row - so the list can be read without opening each one */
+function vwSay(q){
+  const y=q.y2c===NONE ? q.y1v : q.y1v+' / '+q.y2v;
+  return q.dev.length+(q.dev.length===1?' device':' devices')+' \u00b7 '+y;
+}
+
+/* setting the bar from a view: every control is told, then the query runs once */
+function vwApply(q){
+  SEL=q.dev.slice();
+  if(DEVPICK) DEVPICK.refresh();
+  Y1C.set(q.y1c);
+  Y1V.options(catOf(q.y1c).vals.map(function(v){ return v[0]; }),false);
+  Y1V.set(q.y1v);
+  Y2C.set(q.y2c);
+  if(q.y2c===NONE){ Y2V.options([],false); }
+  else { Y2V.options(catOf(q.y2c).vals.map(function(v){ return v[0]; }),false); Y2V.set(q.y2v); }
+}
+
+/* EDITED, said out loud. A view that has been changed since it was opened is
+   not that view any more, and a button still claiming to be it is the one way
+   this control could mislead. */
+function vwPaint(){
+  const lab=$('vw-lab'), box=$('vw');
+  const v=vwBy(vwCur);
+  const dirty=v && !vwSame(v.q,vwSnap());
+  lab.textContent = v ? v.n : 'Unsaved view';
+  lab.classList.toggle('none',!v);
+  box.classList.toggle('on',!!v);
+  const old=$('vw-btn').querySelector('.edit'); if(old) old.remove();
+  if(dirty){
+    const e=document.createElement('span'); e.className='edit'; e.textContent='EDITED';
+    $('vw-btn').appendChild(e);
+  }
+}
+
+function vwList(){
+  const wrap=$('vw-list');
+  if(!VIEWS.length){
+    wrap.innerHTML='<div class="vwnone">No saved views yet. Set the bar the way you '
+      +'want it, then name it below \u2014 it comes back with one click.</div>';
+    return;
+  }
+  wrap.innerHTML=VIEWS.map(function(v,i){
+    return '<div class="vwrow'+(v.n===vwCur?' on':'')+'" data-i="'+i+'" role="button" tabindex="0">'
+      +'<span class="n">'+esc(v.n)+'</span>'
+      +'<span class="q">'+esc(vwSay(v.q))+'</span>'
+      +'<button class="vwx" type="button" data-del="'+i+'" title="Delete this view"'
+      +' aria-label="Delete '+esc(v.n)+'">'
+      +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+      +' stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'
+      +'<path d="M4.5 6.5h15M9.5 6.5V5a1.4 1.4 0 0 1 1.4-1.4h2.2A1.4 1.4 0 0 1 14.5 5v1.5"/>'
+      +'<path d="M6.6 6.5 7.4 19a1.6 1.6 0 0 0 1.6 1.5h6a1.6 1.6 0 0 0 1.6-1.5l.8-12.5"/></svg>'
+      +'</button></div>';
+  }).join('');
+}
+
+function vwErr(msg){ $('vw-err').textContent=msg||''; }
+function vwOpen(on){
+  $('vw-panel').hidden=!on;
+  $('vw').classList.toggle('open',on);
+  $('vw-btn').setAttribute('aria-expanded',on?'true':'false');
+  if(on){
+    pickClose();
+    vwList();
+    /* the name field opens holding the current view's name, so Save over the
+       top of it is one keystroke rather than a retype */
+    $('vw-name').value=vwCur||'';
+    vwErr('');
+  }
+}
+$('vw-btn').addEventListener('click',function(e){
+  e.stopPropagation();
+  vwOpen($('vw-panel').hidden);
+});
+$('vw-panel').addEventListener('click',function(e){
+  e.stopPropagation();
+  const del=e.target.closest('.vwx');
+  if(del){
+    const v=VIEWS[+del.dataset.del]; if(!v) return;
+    VIEWS=VIEWS.filter(function(x){ return x!==v; });
+    vwWrite();
+    /* the bar is LEFT WHERE IT IS: deleting the name a view was filed under is
+       not a request to throw away the query on screen */
+    if(vwCur===v.n) vwCur='';
+    vwList(); vwPaint();
+    T('\u201c'+v.n+'\u201d deleted');
+    return;
+  }
+  const row=e.target.closest('.vwrow');
+  if(row){
+    const v=VIEWS[+row.dataset.i]; if(!v) return;
+    vwCur=v.n;
+    vwApply(v.q);
+    vwOpen(false);
+    applyQuery('Opened \u201c'+v.n+'\u201d');
+  }
+});
+$('vw-panel').addEventListener('keydown',function(e){
+  const row=e.target.closest('.vwrow');
+  if(row && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); row.click(); }
+});
+$('vw-name').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){ e.preventDefault(); $('vw-go').click(); }
+  if(e.key==='Escape'){ e.preventDefault(); vwOpen(false); $('vw-btn').focus(); }
+});
+$('vw-go').addEventListener('click',function(){
+  const n=$('vw-name').value.trim();
+  if(!n){ vwErr('A view needs a name.'); $('vw-name').focus(); return; }
+  /* Saving over a name REPLACES it, because that is what somebody who typed the
+     same name again meant. Two views called the same thing is a list you cannot
+     read. */
+  const had=vwBy(n);
+  if(had) had.q=vwSnap();
+  else VIEWS.push({n:n, q:vwSnap()});
+  VIEWS.sort(function(a,b){ return a.n.toLowerCase()<b.n.toLowerCase()?-1:1; });
+  vwWrite();
+  vwCur=n;
+  vwOpen(false);
+  vwPaint();
+  T(had ? '\u201c'+n+'\u201d updated' : '\u201c'+n+'\u201d saved');
+});
+document.addEventListener('click',function(){ if(!$('vw-panel').hidden) vwOpen(false); });
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape' && !$('vw-panel').hidden){ vwOpen(false); $('vw-btn').focus(); }
+});
+vwPaint();
 
 /* ================= WHICH SITE THE PORTAL IS ON =================
    ONE site, chosen ONCE, on the Sites screen.

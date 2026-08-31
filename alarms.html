@@ -499,18 +499,21 @@ tbody tr:hover td:not(.nil){color:var(--text)}
     <div class="field"><label>Device</label><div class="msel" id="m-dev"></div></div>
     <div class="field"><label>Severity</label><div class="msel" id="m-sev"></div></div>
     <div class="field"><label>Status</label><div class="msel" id="m-st"></div></div>
-    <div class="field"><label>Start date time</label>
+    <!-- DATES, NOT DATE-TIMES. An alarm log is asked for by the day: "what
+         happened on the 26th", never "what happened after 20:44 on the 26th".
+         The clock halves were four more things to set before the question could
+         be put, and they were set to the same minute on both ends by default -
+         which is not a window anybody chose, it is the moment the page opened.
+         The window now runs from the start of the first day to the END of the
+         last, so picking one date twice is a single day rather than nothing. -->
+    <div class="field"><label>Start date</label>
       <div class="dt">
         <input type="date" id="f-from-d" value="2026-07-26" aria-label="Start date">
-        <div class="tpick" data-time="f-from-t"></div>
-        <input type="hidden" id="f-from-t" value="20:44">
       </div>
     </div>
-    <div class="field"><label>End date time</label>
+    <div class="field"><label>End date</label>
       <div class="dt">
         <input type="date" id="f-to-d" value="2026-07-27" aria-label="End date">
-        <div class="tpick" data-time="f-to-t"></div>
-        <input type="hidden" id="f-to-t" value="20:44">
       </div>
     </div>
   </div>
@@ -677,10 +680,13 @@ function buildLog(n,plant,from,to){
   }
   return out;
 }
-/* the two ends of the window, as epoch ms - null while they disagree */
+/* the two ends of the window, as epoch ms - null while they disagree.
+   The end date is INCLUSIVE: a log asked for "the 26th to the 27th" is expected
+   to contain the 27th, and ending the window at that morning's midnight would
+   quietly drop a day. */
 function winRange(){
-  const a=Date.parse($('f-from-d').value+'T'+($('f-from-t').value||'00:00')+':00');
-  const b=Date.parse($('f-to-d').value+'T'+($('f-to-t').value||'00:00')+':00');
+  const a=Date.parse($('f-from-d').value+'T00:00:00');
+  const b=Date.parse($('f-to-d').value+'T23:59:59');
   return (isFinite(a)&&isFinite(b)&&b>a)?[a,b]:null;
 }
 /* ?empty=1 reviews the state before a backend is wired; ?rows=N sizes the log */
@@ -973,7 +979,7 @@ document.addEventListener('keydown',function(e){
 
 /* the window is part of the query too, so moving either end re-reads the log
    rather than re-rendering the same rows */
-['f-from-d','f-from-t','f-to-d','f-to-t'].forEach(function(id){
+['f-from-d','f-to-d'].forEach(function(id){
   $(id).addEventListener('change',function(){ reload(); applyFilters(); });
 });
 
@@ -1008,69 +1014,9 @@ function siteNow(ids){
    count belongs to. */
 PSEL=[siteNow(PLANTS.map(function(p){ return p.id; }))];
 
-/* ---------- time dropdowns ----------
-   The hidden input is the value: everything else on the page asks the field
-   for "HH:MM" and gets it, exactly as it did when this was a time input, so
-   the query wiring never learns that the control changed. */
-function wireTimePicks(){
-  document.querySelectorAll('.tpick').forEach(function(box){
-    const el=$(box.dataset.time);
-    const bits={};
-    function parts(){
-      const m=/^(\d{1,2}):(\d{2})/.exec(el.value||'');
-      return m?[+m[1],+m[2]]:[0,0];
-    }
-    function bit(k,n){
-      const b=document.createElement('button');
-      b.type='button'; b.className='tbit'; b.dataset.part=k;
-      b.setAttribute('aria-label',k==='h'?'Hour':'Minute');
-      const list=document.createElement('div'); list.className='tlist'; list.hidden=true;
-      b.appendChild(list); box.appendChild(b);
-      bits[k]={b:b,list:list,n:n};
-      const api={close:function(){ if(!list.hidden){ list.hidden=true; b.classList.remove('open'); } }};
-      b.addEventListener('click',function(e){
-        e.stopPropagation();
-        if(!list.hidden){ api.close(); return; }
-        MSELS.forEach(function(m){ if(m!==api) m.close(); });
-        const now=parts()[k==='h'?0:1];
-        let h='';
-        for(let i=0;i<n;i++) h+='<button type="button" value="'+i+'"'+(i===now?' class="on"':'')+'>'+pad(i)+'</button>';
-        list.innerHTML=h; list.hidden=false; b.classList.add('open');
-        const on=list.querySelector('button.on');
-        /* snapped to whole rows: a list resting part way into one reads as a
-           misprint even when nothing is beside it to be out of step with */
-        if(on){
-          const rows=list.querySelectorAll('button');
-          const step=rows.length>1?(rows[1].offsetTop-rows[0].offsetTop):on.offsetHeight;
-          list.scrollTop=Math.max(0,Math.round((on.offsetTop-list.clientHeight/2)/step)*step);
-        }
-      });
-      list.addEventListener('click',function(e){
-        e.stopPropagation();
-        const t=e.target.closest('button'); if(!t) return;
-        const p=parts();
-        el.value=pad(k==='h'?+t.value:p[0])+':'+pad(k==='m'?+t.value:p[1]);
-        paint(); api.close();
-        el.dispatchEvent(new Event('change',{bubbles:true}));
-      });
-      MSELS.push(api);
-    }
-    function paint(){
-      const p=parts();
-      bits.h.b.firstChild.nodeValue=pad(p[0]);
-      bits.m.b.firstChild.nodeValue=pad(p[1]);
-    }
-    bit('h',24);
-    box.insertBefore(Object.assign(document.createElement('span'),
-      {className:'tsep',textContent:':'}),bits.h.b.nextSibling);
-    bit('m',60);
-    /* the label text has to exist before paint() can rewrite it in place */
-    bits.h.b.insertBefore(document.createTextNode(''),bits.h.list);
-    bits.m.b.insertBefore(document.createTextNode(''),bits.m.list);
-    paint();
-  });
-}
-wireTimePicks();
+/* The hour:minute control is gone with the time fields it filled: this bar
+   asks for dates, and a picker with nothing to pick for is dead weight the
+   next reader has to work out is unreachable. */
 
 /* The whole date field is the button that opens the calendar.
 

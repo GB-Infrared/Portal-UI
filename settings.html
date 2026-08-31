@@ -1432,6 +1432,27 @@ body.locked{overflow:hidden}
     </div>
     <form onsubmit="return alSave(event)">
       <div class="mbody">
+        <!-- PICK A PERSON, or type somebody who is not one.
+
+             Most recipients are already users on this account, and retyping a
+             name and an address the account already holds is how a list ends up
+             with two spellings of one person and an address with a typo in it -
+             and an alarm sent to a typo is an alarm nobody gets.
+
+             ONLY USERS NOT ALREADY ON THE LIST ARE OFFERED. Somebody who is
+             already being told about alarms is not a person you can add, and
+             offering them would be offering a row the form is about to refuse.
+
+             The two fields stay editable underneath, because a recipient does
+             not have to be a user: the site office mailbox never signs in. -->
+        <div class="fld" id="al-userfld">
+          <label class="lab" for="al-user">From your users</label>
+          <button class="mbtn" id="al-user" type="button" data-ss="alwho" value=""
+                  data-any="Type below, or pick a user"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="sspanel">
+            <span class="mlab any">Type below, or pick a user</span>
+          </button>
+        </div>
         <div class="mrow">
           <div class="fld">
             <label class="lab" for="al-who">Name</label>
@@ -2066,12 +2087,13 @@ function dvRows(){
   return r;
 }
 
+/* NO RETIRE ACTION. Taking a device out of service is not a settings edit -
+   it is a decision about the plant, and this register is the record of what
+   is installed rather than the switch that decides what is running. Status
+   is still printed, because whether a device is live is a fact anyone
+   reading this table needs; it is simply not this screen's to change.
+   Renaming stays: a label is exactly the kind of thing a register owns. */
 function dvRowHtml(d){
-  const acts = d.live
-    ? '<button class="rowbtn warn" type="button" title="Retire this device"'
-      +' aria-label="Retire '+esc(d.nm)+'" onclick="openRt(\''+d.id+'\')">'+I_BOX+'</button>'
-    : '<button class="rowbtn" type="button" title="Bring back into service"'
-      +' aria-label="Bring '+esc(d.nm)+' back into service" onclick="openRt(\''+d.id+'\')">'+I_BACK+'</button>';
   return '<tr'+(d.live?'':' class="gone"')+'>'
     +'<td class="nm">'+esc(d.nm)+'</td>'
     +'<td class="mono">'+d.id+'</td>'
@@ -2083,7 +2105,7 @@ function dvRowHtml(d){
     +'<td><div class="rowacts">'
     +'<button class="rowbtn" type="button" title="Rename this device"'
     +' aria-label="Rename '+esc(d.nm)+'" onclick="openRn(\''+d.id+'\')">'+I_PEN+'</button>'
-    +acts+'</div></td></tr>';
+    +'</div></td></tr>';
 }
 
 window.dvDraw=function(reset){
@@ -2176,28 +2198,6 @@ window.ask=function(o){
 };
 window.askShut=function(){ scrimOff('askdlg'); askThen=null; };
 window.askYes=function(){ const f=askThen; askShut(); if(f) f(); };
-
-/* ---------- retire, which is not delete ---------- */
-window.openRt=function(id){
-  const d=byDev(id); if(!d) return;
-  ask({
-    title: d.live ? 'Retire device' : 'Bring back into service',
-    rows: [['Device',d.nm],['Id',d.id],['Plant',d.pl]],
-    text: d.live
-      ? '<b>'+esc(d.nm)+'</b> stops appearing on Monitoring, in the KPI table and in '
-        +'Analysis. Everything it has already reported stays where it is and stays filed '
-        +'under its id, so nothing that cites it becomes unreadable. This can be undone.'
-      : '<b>'+esc(d.nm)+'</b> starts appearing on the live screens again from now on. '
-        +'Nothing is invented to fill the time it spent retired.',
-    go: d.live ? 'Retire device' : 'Bring it back',
-    kind: d.live ? 'danger' : 'primary',
-    then: function(){
-      d.live=!d.live;
-      dvDraw(false);
-      T(d.live ? d.nm+' is back in service' : d.nm+' retired');
-    }
-  });
-};
 
 /* ---------- rates, which are histories ----------
    Emission and Electricity are the same board twice: one number per site,
@@ -2613,6 +2613,30 @@ function alDraw(){
 }
 
 let alIx=null;
+/* The users this account has, minus the ones already being told. USERS is
+   declared further down the file; that is fine, because list() is not called
+   until the panel is opened, by which time every top-level const has run. */
+SSK.alwho={
+  label:'Users not yet on this list',
+  empty:'Every user on this account is already being told',
+  list:function(){
+    /* the row being EDITED does not count as already-configured, or a person
+       could not be re-picked while their own row is open */
+    const taken=NOTIF.filter(function(r,i){ return i!==alIx; })
+                     .map(function(r){ return r.mail.toLowerCase(); });
+    return USERS.filter(function(u){ return taken.indexOf(u.mail.toLowerCase())<0; })
+                .map(function(u){ return {v:u.id, t:userName(u), s:u.mail}; });
+  },
+  /* the pick FILLS the fields rather than replacing them: what was chosen is
+     still visible, still editable, and still what gets saved */
+  pick:function(btn,v){
+    const u=USERS.filter(function(x){ return x.id===v; })[0];
+    if(!u) return;
+    $('al-who').value=userName(u);
+    $('al-mail').value=u.mail;
+    alErr('al-who',''); alErr('al-mail','');
+  }
+};
 function alErr(id,msg){
   const w=$(id).closest('.fld');
   w.classList.toggle('bad',!!msg);
@@ -2626,6 +2650,10 @@ window.alAdd=function(ix){
   $('al-go').textContent   = alIx===null ? 'Add recipient' : 'Save changes';
   $('al-who').value=r.who; $('al-mail').value=r.mail;
   SEVS.forEach(function(sv){ $('al-'+sv.k).checked=!!r.on[sv.k]; });
+  /* the picker is a way IN to a new row, so it is only offered while one is
+     being added - on an edit the two fields already hold the answer */
+  ssValue('al-user','');
+  $('al-userfld').hidden = (alIx!==null);
   ['al-who','al-mail','al-critical'].forEach(function(id){ alErr(id,''); });
   scrimOn('aldlg');
   requestAnimationFrame(function(){ $('al-who').focus(); $('al-who').select(); });

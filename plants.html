@@ -906,7 +906,7 @@ body.going .iris{opacity:1;--iris:0%;
        aria-hidden="true"></svg>
   <div class="tt"><span>05:30</span><em id="x-now">—</em><span>18:30</span></div>
   <div class="xg">
-    <div class="c"><i>PEAK TODAY</i><b class="em" id="x-peak">—</b></div>
+    <div class="c"><i>CO₂ AVOIDED</i><b class="em" id="x-co2">—</b></div>
     <div class="c"><i>ENERGY</i><b class="gd" id="x-e">—</b></div>
     <div class="c"><i>REVENUE</i><b class="gd" id="x-rev">—</b></div>
     <div class="c"><i>DEVICES</i><b id="x-dev">—</b></div>
@@ -1118,6 +1118,16 @@ function peakOf(p){
 /* the tariff Home already costs energy at, so the two screens cannot quote
    different money for the same kilowatt-hours */
 const TARIFF=2.84;
+
+/* CARBON, at the same grid factor Home reports it at and the one Settings ships
+   as the current emission rate - three screens quoting three factors for the
+   same kilowatt-hours is how a savings figure stops being citable.
+
+   The fleet's, not a site's: this strip is the portfolio, so it answers what
+   ALL the sites avoided today. */
+const CO2=0.71;
+const fmtC=kg=> kg>=1000 ? (kg/1000).toFixed(kg>=10000?0:1)+' t'
+              : num(kg)+' kg';
 const inr=v=> v>=1e7 ? '₹'+(v/1e7).toFixed(2)+' Cr'
             : v>=1e5 ? '₹'+(v/1e5).toFixed(2)+' L'
             : '₹'+num(v);
@@ -2126,16 +2136,16 @@ function paintSlow(){
 
 /* ---- what the fleet adds up to ----
    Summed from the same per-site figures the cards are drawn from, so the strip
-   and the picture cannot disagree. Peak is a sum rather than a maximum because
-   every site here peaks at the same hour: the fleet's best moment IS the sum of
-   theirs, and taking a max would report the biggest site instead of the fleet.
+   and the picture cannot disagree. Carbon is derived from the fleet's energy
+   rather than summed per site, because it is the same multiplication either way
+   and one of them can drift from the kWh printed next to it.
    Devices are counted as reporting-of-total, because a fleet with four
    inverters dark is a different fleet from one with none, and a single number
    cannot say which you have. */
 function paintSum(){
-  let kw=0, ac=0, e=0, pk=0, dev=0, up=0, alm=0, crit=0;
+  let kw=0, ac=0, e=0, dev=0, up=0, alm=0, crit=0;
   PLANTS.forEach(function(p){
-    kw+=outputOf(p); ac+=p.ac; e+=energyToday(p); pk+=peakOf(p);
+    kw+=outputOf(p); ac+=p.ac; e+=energyToday(p);
     dev+=p.dev; up+=p.dev-p.down; alm+=alarmsOf(p); crit+=p.crit;
   });
   const f=ac?Math.min(1,kw/ac):0;
@@ -2150,7 +2160,9 @@ function paintSum(){
   $('x-u').textContent  = big ? big[2] : 'kW';
   $('x-pc').textContent=Math.round(f*100)+'%';
   $('x-ac').textContent=fmtP(ac);
-  $('x-peak').textContent = pk>0 ? fmtP(pk) : '—';
+  /* CARBON, from the SAME energy figure printed beside it - one number, one
+     source, so the strip cannot report a saving the energy does not support. */
+  $('x-co2').textContent = e>0 ? fmtC(e*CO2) : '—';
   $('x-e').textContent=fmtE(e);
   $('x-rev').textContent=inr(e*TARIFF);
   $('x-dev').innerHTML=up+'<small>OF '+dev+'</small>';

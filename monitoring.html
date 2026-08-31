@@ -1321,7 +1321,28 @@ const PH_COLS=3;
    system codepage, where its UTF-8 bytes surface as "Â·". */
 /* the unit follows the selected data point - the table header and the CSV both
    read it, so picking S_AC must not leave two columns still labelled kW */
-const DP_UNIT={P_AC:'kW',S_AC:'kVA',Q_AC:'kVAR',COS_PHI:'',F_AC:'Hz',I_AC:'A'};
+const DP_UNIT={P_AC:'kW',S_AC:'kVA',Q_AC:'kVAR',COS_PHI:'',F_AC:'Hz',I_AC:'A',
+               V_AC:'V',GHI:'W/m²',POA:'W/m²',T_AMB:'°C',T_MOD:'°C',
+               T_OIL:'°C'};
+
+/* WHAT EACH KIND OF DEVICE ACTUALLY REPORTS.
+
+   The data point list used to offer an inverter's AC tags whatever was chosen
+   above it, so picking Weather station left POA off the list and F_AC on it -
+   asking a pyranometer for its grid frequency. A control that offers a reading
+   the device cannot take is worse than one that offers nothing: the reader
+   picks it, the table heads a column with it, and the empty column reads as a
+   fault in the plant rather than as a question nobody could have answered.
+
+   Same vocabulary as the Analysis catalogue, so a tag named on one page is the
+   same tag on the other. */
+const DP_BY_TYPE={
+  'Inverter':        ['P_AC','S_AC','Q_AC','COS_PHI','F_AC','I_AC'],
+  'MFM':             ['P_AC','S_AC','Q_AC','COS_PHI','F_AC','I_AC','V_AC'],
+  'Weather station': ['GHI','POA','T_AMB','T_MOD'],
+  'Transformer':     ['P_AC','V_AC','I_AC','T_OIL']
+};
+const dpFor=t=>DP_BY_TYPE[t]||DP_BY_TYPE.Inverter;
 let UNIT='P_AC (kW)';
 function setUnit(dp){const u=DP_UNIT[dp]; UNIT=dp+(u?' ('+u+')':'');}
 function renderTable(){
@@ -1539,7 +1560,17 @@ function singleSelect(o){
           (v===el.value?' checked':'')+'>'+v+'</label>';
       }).join('');
   }
-  const api={close:function(){ if(!pan.hidden) open(false); }};
+  const api={
+    close:function(){ if(!pan.hidden) open(false); },
+    /* the list is rebuilt when the control above it changes - that is the whole
+       point of the pair. The current answer is kept when the new list still
+       offers it, so changing Inverter to MFM does not throw away P_AC. */
+    options:function(list){
+      o.options=list;
+      if(list.indexOf(el.value)<0) el.value=list[0]||'';
+      lab.textContent=el.value;
+    }
+  };
   function open(on){
     if(on){ pickClose(api); draw(); }
     pan.hidden=!on; mount.classList.toggle('open',on);
@@ -1554,15 +1585,26 @@ function singleSelect(o){
     el.dispatchEvent(new Event('change',{bubbles:true}));
   });
   PICKS.push(api);
+  return api;
 }
-singleSelect({mount:'dt-pick',value:'dt-sel',head:'Device type',
+const DTPICK=singleSelect({mount:'dt-pick',value:'dt-sel',head:'Device type',
   options:['Inverter','MFM','Weather station','Transformer']});
 /* Listed in the HMI's own order, not alphabetically and not in the order they
    happened to be typed: the firmware groups an inverter's tags as AC Output
    (P_AC, S_AC, Q_AC, COS_PHI, F_AC) and then AC Current (I_AC), and an engineer
    who reads the panel on site should find them in the same sequence here. */
-singleSelect({mount:'dp-pick',value:'dp-sel',head:'Data point',title:'Active power',
-  options:['P_AC','S_AC','Q_AC','COS_PHI','F_AC','I_AC']});
+const DPPICK=singleSelect({mount:'dp-pick',value:'dp-sel',head:'Data point',
+  title:'Active power', options:dpFor($('dt-sel').value)});
+
+/* the device type narrows the data point, so the pair is one decision */
+$('dt-sel').addEventListener('change',function(){
+  DPPICK.options(dpFor(this.value));
+});
+/* and the pair is made honest on arrival too: the two hidden inputs carry their
+   own defaults, and nothing else stops them being seeded out of step - a bar
+   opening on "Weather station / P_AC" would be the exact fault this pairing was
+   added to remove. */
+DPPICK.options(dpFor($('dt-sel').value));
 
 /* ================= WHICH SITE THE PORTAL IS ON =================
    ONE site, chosen ONCE, on the Sites screen.

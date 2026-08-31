@@ -540,14 +540,17 @@ thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
            chips switch a series off, which is how you read one against one
            without a second control. -->
       <div class="legend" id="legend"></div>
-      <!-- Three buckets, three questions: DAY is "what happened this month",
-           WEEK smooths the weather out of it, MONTH is "how is the year going".
-           Nothing else changes - the same reading over a different bucket, so
-           it belongs with the legend on the chart it redraws, not in the filter
-           bar with the controls that choose WHICH data the page is about. -->
+      <!-- Two buckets, two questions: DAY is "what happened this month" and
+           MONTH is "how is the year going". Weekly sat between them answering
+           neither - a week is not a period this business closes on, its bars
+           moved every time the month started on a different weekday, and the
+           axis had to label it with the days it covered because "W3" means
+           nothing. Nothing else changes between the two - the same reading over
+           a different bucket, so this belongs with the legend on the chart it
+           redraws, not in the filter bar. -->
       <div class="tools">
         <div class="seg" id="gran">
-          <button type="button" class="on" data-g="day" onclick="setGran('day')">Daily</button><button type="button" data-g="week" onclick="setGran('week')">Weekly</button><button type="button" data-g="month" onclick="setGran('month')">Monthly</button>
+          <button type="button" class="on" data-g="day" onclick="setGran('day')">Daily</button><button type="button" data-g="month" onclick="setGran('month')">Monthly</button>
         </div>
       </div>
     </div>
@@ -756,19 +759,6 @@ function buckets(){
     const last=dim(PY,PM);
     for(let d=1;d<=last;d++)
       out.push({key:d, label:pad(d)+' '+MON[PM], stamp:pad(d)+'.'+pad(PM+1)+'.'+PY, days:[[PY,PM,d]]});
-  }else if(GRAN==='week'){
-    /* weeks of the chosen MONTH, so the period control still means one thing */
-    const last=dim(PY,PM);
-    let w=1;
-    for(let d=1;d<=last;d+=7){
-      const end=Math.min(last,d+6), days=[];
-      for(let i=d;i<=end;i++) days.push([PY,PM,i]);
-      /* the axis is labelled with the days the week COVERS, not W1..W5: a week
-         number is an index into the month, and nobody reads a chart to find out
-         which index a reading had */
-      out.push({key:w, label:pad(d)+'–'+pad(end), stamp:pad(d)+'-'+pad(end)+' '+MON[PM]+' '+PY, days:days});
-      w++;
-    }
   }else{
     for(let m=0;m<12;m++){
       const last=dim(PY,m), days=[];
@@ -806,11 +796,27 @@ function buildRows(){
 /* =======================================================================
    THE SERIES
    ======================================================================= */
+/* THREE READINGS, THREE MARKS - and the mark says which kind of claim it is.
+
+   ACTUAL is measured, so it is a BAR: a bar sits on the baseline and its height
+   is the whole of it, which is how a quantity that happened should read.
+   SIMULATED is a model's line through the same days, so it is a LINE - it is
+   continuous by nature, and drawn over the bars it can be read against them at
+   a glance instead of beside them.
+   FORECAST has not happened, so it is a DASHED line. The break in the stroke is
+   the difference between a reading and an expectation, and it is the one
+   difference on this chart that colour alone was being asked to carry. */
 const SERIES=[
-  {k:'actual',    t:'Actual',    col:'var(--green)'},
-  {k:'simulated', t:'Simulated', col:'var(--blue)'},
-  {k:'forecast',  t:'Forecast',  col:'var(--amber)'}
+  {k:'actual',    t:'Actual',    col:'var(--green)', mark:'bar'},
+  {k:'simulated', t:'Simulated', col:'var(--blue)',  mark:'line'},
+  {k:'forecast',  t:'Forecast',  col:'var(--amber)', mark:'dash'}
 ];
+/* the legend and the tooltip wear the same three marks the plot draws with */
+const MARKI=function(s){
+  return s.mark==='bar'
+    ? '<i class="sq" style="background:'+s.col+'"></i>'
+    : '<i class="'+(s.mark==='dash'?'dash':'solid')+'" style="border-top-color:'+s.col+'"></i>';
+};
 /* off, not on: a series switched off stays off while you change the metric */
 const OFF={actual:false,simulated:false,forecast:false};
 const live=()=>SERIES.filter(s=>!OFF[s.k]);
@@ -819,7 +825,7 @@ const val=(row,sk)=>{ const r=row[sk]; return r?met().f(r):null; };
 function renderLegend(){
   $('legend').innerHTML=SERIES.map(function(s){
     return '<span class="lg'+(OFF[s.k]?' off':'')+'" data-s="'+s.k+'" title="Click to hide or show">'+
-      '<i class="sq" style="background:'+s.col+'"></i><span class="n">'+s.t+'</span></span>';
+      MARKI(s)+'<span class="n">'+s.t+'</span></span>';
   }).join('');
   $('legend').querySelectorAll('.lg').forEach(function(el){
     el.onclick=function(){
@@ -874,7 +880,6 @@ function drawChart(){
   note.hidden=true;
   TOP=niceTop(Math.max.apply(null,vals));
   SLOT=PW/ROWS.length;
-  const bw=Math.max(3,Math.min(24,(SLOT-6)/ser.length));
 
   let ax='';
   for(let i=0;i<=5;i++){
@@ -894,21 +899,41 @@ function drawChart(){
         esc(b.label)+'</text>';
   });
   ax+='<text class="axt" x="'+(ML+PW/2)+'" y="'+(MT+PH+32)+'" text-anchor="middle" opacity=".75">'+
-      (GRAN==='month'?(PY+' · MONTH'):(MONL[PM]+' '+PY+' · '+(GRAN==='week'?'WEEK':'DAY')))+'</text>';
+      (GRAN==='month'?(PY+' · MONTH'):(MONL[PM]+' '+PY+' · DAY'))+'</text>';
   $('axes').innerHTML=ax;
 
   let g='';
-  ROWS.forEach(function(b,i){
-    ser.forEach(function(s,j){
-      const v=val(b,s.k);
+  /* THE BARS FIRST, so the modelled lines are read ON them rather than behind
+     them. Actual is the only series drawn as a quantity; it gets the middle of
+     the slot and a width that stops growing once a bar is wide enough to read. */
+  const actual=ser.filter(function(s){return s.mark==='bar';})[0];
+  if(actual){
+    const abw=Math.max(3,Math.min(26,SLOT*0.52));
+    ROWS.forEach(function(b,i){
+      const v=val(b,actual.k);
       if(v==null||!isFinite(v)) return;
-      const x=ML+SLOT*i+(SLOT-bw*ser.length)/2+bw*j;
-      const y=Y(v), h=Math.max(1,MT+PH-y);
-      /* a forecast is drawn lighter than a measurement: one of these happened
-         and the other has not */
-      g+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+
-         '" rx="2" fill="'+s.col+'" opacity="'+(s.k==='forecast'?'.55':'.92')+'"/>';
+      const x=ML+SLOT*i+(SLOT-abw)/2, y=Y(v), h=Math.max(1,MT+PH-y);
+      g+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+abw.toFixed(1)+
+         '" height="'+h.toFixed(1)+'" rx="2" fill="'+actual.col+'" opacity=".92"/>';
     });
+  }
+  /* and then the modelled series, through the middle of each slot. A GAP IS A
+     GAP: the stroke breaks where a bucket has no value rather than being drawn
+     straight across it, so a forecast that starts halfway through the month
+     starts halfway across the plot. */
+  ser.filter(function(s){return s.mark!=='bar';}).forEach(function(s){
+    let d='', pen=false;
+    ROWS.forEach(function(b,i){
+      const v=val(b,s.k);
+      if(v==null||!isFinite(v)){ pen=false; return; }
+      const x=ML+SLOT*i+SLOT/2, y=Y(v);
+      d+=(pen?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';
+      pen=true;
+    });
+    if(!d) return;
+    g+='<path d="'+d.trim()+'" fill="none" stroke="'+s.col+'" stroke-width="2.2"'+
+       ' stroke-linejoin="round" stroke-linecap="round"'+
+       (s.mark==='dash'?' stroke-dasharray="6 4"':'')+'/>';
   });
   $('bars').innerHTML=g;
 }
@@ -920,8 +945,8 @@ function drawChart(){
 (function(){
   const svg=$('chart'), tip=$('tip'), hl=$('hl'), wrap=$('chartwrap');
   const hide=function(){ tip.style.opacity=0; hl.setAttribute('opacity','0'); };
-  const row=(c,n,v,dim)=>'<div class="tr"'+(dim?' style="opacity:.7"':'')+
-    '><i class="sq" style="background:'+c+'"></i>'+n+'<b>'+v+'</b></div>';
+  const row=(s,v,dim)=>'<div class="tr"'+(dim?' style="opacity:.7"':'')+
+    '>'+MARKI(s)+s.t+'<b>'+v+'</b></div>';
   svg.addEventListener('mousemove',function(e){
     if(!ROWS.length||!SLOT){ hide(); return; }
     const r=svg.getBoundingClientRect();
@@ -937,7 +962,7 @@ function drawChart(){
       const v=val(b,s.k);
       if(v==null) return;
       peak=Math.max(peak,v);
-      rows+=row(s.col,s.t,trim(v,m.dec)+' '+m.u,s.k==='forecast');
+      rows+=row(s,trim(v,m.dec)+' '+m.u,s.k==='forecast');
     });
     if(!rows){ hide(); return; }
     /* a half-elapsed bucket says so, rather than looking like a bad day */
@@ -1210,7 +1235,7 @@ window.setGran=function(g){
   });
   PERPICK.repaint();
   applyQuery();
-  T(g==='day'?'Daily · '+MONL[PM]+' '+PY:g==='week'?'Weekly · '+MONL[PM]+' '+PY:'Monthly · '+PY);
+  T(g==='day'?'Daily · '+MONL[PM]+' '+PY:'Monthly · '+PY);
 };
 
 /* =======================================================================
