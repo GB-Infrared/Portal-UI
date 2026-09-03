@@ -49,7 +49,7 @@ no toolchain on it.
 | 3 | `home.html` | 2,352 | 130 KB | Portfolio dashboard: KPI tiles, power-vs-irradiance, energy, plant KPI. |
 | 4 | `monitoring.html` | 2,087 | 111 KB | Device rail, live power curve, gauge, history table. |
 | 5 | `alarms.html` | 1,496 | 78 KB | The alarm log, with device / severity / status filters and a window. |
-| 6 | `analysis.html` | 2,505 | 126 KB | Multi-device parameter comparison, **overlaid or split**. |
+| 6 | `analysis.html` | 2,367 | 118 KB | Multi-device parameter comparison. **One frame, four series.** |
 | 7 | `kpi.html` | 1,710 | 89 KB | One site, one metric, examined closely: actual vs simulated vs forecast. |
 | 8 | `settings.html` | 3,268 | 162 KB | Ten panes: profile, assets, system config, access management. |
 
@@ -372,68 +372,44 @@ The **Online / Offline tally** at the foot of the rail is gone. It restated what
 the cards above it already said, more plainly, and counting them is both quicker
 than reading a summary and the only way to find out *which* five are down.
 
-### `analysis.html` — overlaid **or** split
-
-Two arrangements of the same readings, switched in the head of the card. Not a
-filter — the query does not change, so the control does not live in the filter bar.
+### `analysis.html` — one frame, four series
 
 ```
-        ┌ Analysis Data ───────────── [ Overlaid │ Split ] ┐
-        └──────────────────────────────────────────────────┘
-
-  OVERLAID  ─ one frame                SPLIT  ─ one panel per device
-  ┌────────────────────────┐          ┌────────────────────────┐
-  │      ╭────╮            │          │ INV06        ← named   │
-  │  ────╯    ╰────  INV06 │          │    ────╯╰────          │
-  │   ───╯    ╰───   INV07 │          └────────────────────────┘
-  │                        │          ┌────────────────────────┐
-  │                        │          │ INV07                  │
-  └────────────────────────┘          │    ────╯╰────          │
-       06:00  12:00  18:00            └────────────────────────┘
-                                           06:00  12:00  18:00
-                                              ← still ONE time axis
+        ┌ Analysis Data ─── [INV06 Power] [INV07 Power] [WMS01 POA] ┐
+        │                                                            │
+        │  kW ─┐                        ╭──────╮              ┌─ W/m²│
+        │  400 ┤            ╭─── INV06 ─╯      ╰──╮           │  1000│
+        │      │      ╭─────╯                     ╰─────╮     │      │
+        │  200 ┤  ╭───╯ ┄┄┄┄┄┄┄┄ WMS01 POA ┄┄┄┄┄┄┄┄╮    ╰──╮  │   500│
+        │      │ ╭╯ ┄┄┄┄┘                          └┄┄┄╮  ╰╮ │      │
+        │    0 ┼─┴───────────────────────────────────────┴──┴─┤    0 │
+        │       06:00      09:00      12:00      15:00     18:00     │
+        └────────────────────────────────────────────────────────────┘
+          solid reads the LEFT scale · dashed reads the RIGHT
 ```
 
-**Why both.** They answer different questions and neither answer suits the other.
+Every plotted device is drawn into **one frame**, sharing one baseline and one
+set of gridlines. That is what makes the comparison exact: the gap between two
+curves is read off directly rather than estimated across a gutter.
 
-- **Overlaid** is how you compare *precisely*. Two curves in one frame share a baseline and a gridline, so the gap between them is read directly instead of estimated across a gutter.
-- **Split** is how you read a *fleet*. Seven inverters on one site run the same curve within a few percent; overlaid they are a bundle a few pixels wide and the one that **dipped** is underneath the six that did not.
+- **Two scales, told apart by stroke.** Solid reads Y1 down the left, dashed reads Y2 down the right. The axis a line belongs to is the one thing a two-scale plot cannot show by itself, so the axis titles and the legend chips carry the same mark rather than leaving it to be worked out.
+- **`PLOTCAP = 4`, and it is a *colour* cap.** In one frame the only thing keeping two curves apart is their hue, and past four there is no fifth that stays clear of the other four for a colour-blind reader. A fifth device is still selected — it stays in the table, and the legend's last chip says `+N more in table` rather than the chart quietly dropping it.
+- **The right gutter only exists when Y2 does.** With one axis it would be 58 px of nothing between the last reading and the card edge, so `MR` is 58 or 20 depending on whether there is a second scale to print.
+- **The plot keeps its proportions** — height tracks the card's width inside a 230–380 px band. A chart is read as a shape, and a shape that changes with the window is a different chart at every width.
+- **A gap is a gap.** A device that stopped reporting gets a *broken* path, not a straight line bridging the silence — and the fill under it breaks with it, one closed shape per run of readings.
+- **Empty is a state.** Nothing selected still draws the frame, with the note sitting on a plot rather than on a blank rectangle.
 
-**Split is the default** — it is the arrangement that survives seven devices, and
-opening on the view that fails at seven would mean the reader meets the failure first.
-
-**One band, one list.** The refactor was small because the band was always a
-variable. A band now carries a *list* of devices rather than one device: overlaid
-returns a single band holding everything, split returns one band per device.
-Nothing downstream — the frame, the scales, the series loop — knows which
-arrangement it is drawing.
-
-```js
-if(LAYOUT==='overlay'){
-  return [{ id:null, ids:live.map(p=>p.id), top:MT, h:PH, … }];
-}
-return live.map((p,i)=>({ id:p.id, ids:[p.id], top:MT+i*(h+BGAP), h:h, … }));
-```
-
-The overlaid band has **no `id`**, and that single fact suppresses the panel
-surface and the name in its corner. There is no one device to name, and the
-legend above the chart is already doing that job.
-
-**The cap depends on the layout, and so does the reason.**
-
-| Layout | Cap | Why that number |
-|--------|----:|-----------------|
-| **Overlaid** | 4 | A **colour** cap. Past four lines stacked in one frame there is no fifth hue that stays apart from the other four for a colour-blind reader. |
-| **Split** | 8 | A **room** cap. A line alone in a named panel is not told apart from anything by its colour, so the limit is vertical: eight panels is already taller than a screen. |
-
-The `+N more in table` legend chip counts against whichever cap is live, and its
-tooltip names the limit you just met — a reader switching between the two should
-not have to guess which rule bit.
-
-- **The scales stay shared** in both arrangements. A curve higher in its panel *is* higher. Per-panel autoscaling would fill each frame nicely and make the set incomparable — which is the one thing a stack of panels is for.
-- **One x axis**, under everything. Time is the same in every panel.
-- A split panel prints **only the axis it has a series on** — no gutter of numbers nothing is measured against.
-- The card **grows with the panel count** to a ceiling of 760 px, then panels give height back evenly. Overlaid it is one frame however many devices are in it: **470 px → 230 px** on the round trip, and back to identical geometry.
+> **Split panels were tried here, and went.** For a while the chart could be
+> stacked one panel per device — named surfaces, shared scales, one time axis
+> under the whole stack — and briefly it was offered both ways on a segmented
+> control in the chart's head. The switch went with the split. The chart is one
+> frame; a control with one setting is not a control, it is a label that looks
+> clickable. What the split left behind is worth keeping in mind if it ever
+> comes back: the band is still a **returned value** rather than four loose
+> constants, so the gridlines, the scales, the series and the crosshair all read
+> one geometry from `plot()` instead of each recomputing it. The `PLOTCAP` of 8
+> went too — a line alone in a named panel is not told apart by its colour, so
+> the limit there was vertical room, and that reason left with the panels.
 
 ### `kpi.html` — three readings, three marks
 
@@ -474,7 +450,6 @@ worse than either keeping the feature or dropping it. Order is by name, always.
 |---------|---------|-------|
 | **Refresh** | Off · 5 min · 10 min · 15 min | Header, all six portal pages. Only `monitoring` runs a real timer. `analysis` and `kpi` default to **Off** — a closed historical window does not move while you read it. |
 | **Rows per page** | 25 · 50 · 75 · 100 · 150 · 200 | Table footers. Opens **upward** — a list dropped downward from a page footer opens into the window edge. |
-| **Chart layout** | Overlaid · Split | `analysis` only, in the chart's head. Split by default. Not in the filter bar — it does not change the query. |
 | **Theme** | ☾ / ☀ | Header. Names *what it will do*, not where you are. |
 | **Escape** | closes any open panel | 19 handlers across the eight files. |
 

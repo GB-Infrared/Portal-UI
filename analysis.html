@@ -541,18 +541,13 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg)}
 .card .chead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:13px 16px 10px}
 .chead .title{font-size:14.5px;font-weight:700;white-space:nowrap;flex:none}
-.chead .tools{margin-left:auto;display:flex;align-items:center;gap:8px}
-/* ---------- the layout switch ----------
-   The same segmented control Monitoring puts its Day/Week/Month on and KPI its
-   Daily/Monthly, in the same place - the head of the chart it redraws. Three
-   pages, one control, learnt once. It is not in the filter bar because it does
-   not change the QUERY: the same readings are being drawn either way. */
-.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
-.seg button{padding:6px 11px;font-size:11.5px;font-weight:600;background:transparent;border:none;color:var(--muted);white-space:nowrap}
-.seg button:hover{color:var(--text);background:var(--hover)}
-.seg button.on{background:var(--green-soft);color:var(--green)}
-.seg button.on:hover{background:var(--green-soft)}
-.seg button:not(:last-child){border-right:1px solid var(--line)}
+/* THERE IS NO LAYOUT SWITCH, and no .tools box in the chart's head to hold one.
+
+   The plot was briefly offered as Overlap or Split, on the segmented control
+   Monitoring and KPI use for their buckets. Both went with the split: the chart
+   is one frame, and a control with one setting is not a control - it is a label
+   that looks clickable. The idiom is still on those two pages if it is ever
+   wanted back here. */
 
 /* ---------- legend ----------
    Identity is never colour alone: every chip carries the device name, and the
@@ -579,18 +574,6 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .gl.v{stroke:var(--grid-v)}
 .axt{fill:var(--faint);font-size:10.5px;font-family:var(--mono)}
 .axtitle{fill:var(--muted);font-size:10.5px;font-family:var(--sans);font-weight:700;letter-spacing:.06em}
-/* the name in the corner of a panel. Mono, because it is a device id, and small
-   enough to sit inside the plot without taking a row of it. */
-.panname{font-family:var(--mono);font-size:10.5px;font-weight:800;letter-spacing:.06em}
-/* EACH PANEL IS A SURFACE, not a patch of gridlines floating in the card.
-
-   Split into three, the stack read as one tall grid with gaps in it: the eye
-   had nothing to tell it where INV06 ended and INV07 began except that two
-   rows of gridlines were further apart than the rest. A frame settles it in one
-   stroke - the same faint lift and the same hairline the portal uses for every
-   other nested surface, so a panel is read the way a card inside a card is read
-   everywhere else on this page. */
-.panbg{fill:var(--hover-soft);stroke:var(--line);stroke-width:1}
 #xh{stroke:var(--text)}
 .tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;background:var(--elev);
   border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-width:150px;
@@ -939,37 +922,21 @@ thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
     <div class="chead">
       <div class="title">Analysis Data</div>
       <div class="legend" id="legend"></div>
-      <!-- OVERLAID OR SPLIT, and the reader chooses.
-
-           The plot was one frame with every device in it, then it was one panel
-           per device, and each of those was the right answer to a different
-           question. OVERLAID is how you compare precisely: two curves in one
-           frame share a baseline and a gridline, so the gap between them is
-           read directly rather than estimated across a gutter. SPLIT is how you
-           read seven inverters that run the same curve within a few percent -
-           overlaid they are a bundle a few pixels wide and the one that dipped
-           is underneath the six that did not.
-
-           Neither is a default that suits both, so it is a switch. It sits in
-           the chart's head rather than the filter bar because it does not
-           change the query: the same readings are drawn either way. -->
-      <div class="tools">
-        <div class="seg" id="lay">
-          <button type="button" data-l="overlay" onclick="setLayout('overlay')">Overlap</button><button type="button" class="on" data-l="split" onclick="setLayout('split')">Split</button>
-        </div>
-      </div>
     </div>
 
-    <!-- TWO ARRANGEMENTS OF THE SAME READINGS, switched in the head of the card.
+    <!-- ONE FRAME, WITH EVERY PLOTTED DEVICE OVERLAID IN IT.
 
-         SPLIT (the default) is one panel per device, stacked, sharing one time
-         axis and one pair of scales - Y1 read down the left of every panel, Y2
-         down the right. OVERLAID is the single frame they used to share.
+         Y1 is read down the left gutter and Y2 down the right, and a line says
+         which of the two it belongs to by its STROKE - solid reads left, dashed
+         reads right. That is the same mark the axis titles and the legend chips
+         carry, because the axis a line is measured against is the one thing a
+         two-scale plot cannot show by itself.
 
-         The scales stay SHARED either way, which is what makes the split worth
-         having: every panel is drawn against the same extent, so a curve that
-         sits higher in its panel IS higher. Per-panel autoscaling would fill
-         each frame nicely and make the set incomparable. See panels().
+         Overlaying is what makes the comparison exact: every curve shares one
+         baseline and one set of gridlines, so the gap between two of them is
+         read off directly rather than estimated across a gutter. The cost is
+         that one frame cannot carry many lines at once, which is what the
+         four-series cap is for - see plotted().
 
          The lines are drawn the way Monitoring draws its power curve - same
          weight, same joins, the same fill fading away underneath - so a curve
@@ -1277,44 +1244,26 @@ function stamp(ms){
 const SLOTS=['var(--s1)','var(--s2)','var(--s3)','var(--s4)',
              'var(--s5)','var(--s6)','var(--s7)','var(--s8)'];
 
-/* SPLIT until told otherwise. It is the arrangement that survives a fleet: a
-   site with seven inverters is the case the single frame could not draw, and
-   opening on the view that fails at seven means the reader meets the failure
-   first. Overlaid is a step somebody takes deliberately, on two or three
-   devices, to read one against another exactly. */
-let LAYOUT='split';
+/* FOUR SERIES, AND IT IS A COLOUR CAP.
 
-/* THE CAP DEPENDS ON THE LAYOUT, because the two arrangements are limited by
-   different things.
+   In one frame the only thing keeping two curves apart is their hue, and past
+   four there is no fifth that stays clear of the other four for a colour-blind
+   reader. So a fifth device is selected but not plotted, and the legend says so
+   in its last chip rather than the chart quietly dropping it.
 
-   OVERLAID it is a COLOUR cap. Past four lines stacked in one frame there is no
-   fifth hue that stays apart from the other four for a colour-blind reader, so
-   there is no fifth line and the rest stay in the table - which is what the
-   chart says, in the last legend chip.
-
-   SPLIT it is a ROOM cap. A line alone in a named panel is not being told apart
-   from anything by its colour, so the limit is vertical: eight panels is
-   already a card taller than a screen, and past that the strip stops being read
-   and starts being scrolled. */
-const CAPS={overlay:4, split:8};
-const PLOTCAP=8;                     /* the widest either mode ever plots */
-const cap=()=>CAPS[LAYOUT];
-const plotted=()=>SEL.slice(0,cap());
+   It was briefly 8, while the plot could be split into a panel per device: a
+   line alone in a named panel is not told apart by its colour, so the limit
+   there was vertical room instead. The split went, and the reason for 8 went
+   with it. */
+const PLOTCAP=4;
+const plotted=()=>SEL.slice(0,PLOTCAP);
 const colorOf=id=>SLOTS[plotted().indexOf(id)]||'var(--dim)';
 
 let W=1300,H=340;
 const ML=58,MT=16,MB=40;
-/* THE AIR BETWEEN TWO PANELS, and it is doing the whole job of separating them.
-
-   It is a gap and not a rule: the panels already carry their own gridlines, and
-   a divider between every pair turns eight plots into a ledger. But it has to be
-   big enough to READ as a gap - at 16px the bottom gridline of one panel and the
-   top of the next were close enough to scan as one continuous grid, with two
-   axis numbers sitting almost on the same line saying different things. */
-const BGAP=30;
-/* the right gutter exists only to hold the Y2 scale. With one axis, or with the
-   two axes split onto their own panels, it is 58px of nothing between the last
-   reading and the card edge - so it is only reserved when it is used. */
+/* the right gutter exists only to hold the Y2 scale. With one axis it is 58px
+   of nothing between the last reading and the card edge, so it is only reserved
+   when there is something to print in it. */
 let MR=58;
 let PW=W-ML-MR, PH=H-MT-MB;
 
@@ -1402,38 +1351,19 @@ function xLabel(ms,step){
   return pad(d.getDate())+'/'+pad(d.getMonth()+1);
 }
 
-/* THE CARD GROWS WITH THE NUMBER OF PANELS, up to a ceiling.
+/* THE PLOT KEEPS ITS PROPORTIONS. Its height tracks the card's width and stays
+   inside a band, so the same day looks like the same day on a laptop and on a
+   wide monitor - a chart is read as a shape, and a shape that changes with the
+   window is a different chart at every width.
 
-   It used to be one plot whose height tracked the width and stayed in a band.
-   A stack cannot work that way: dividing a fixed 340px between six devices
-   leaves each of them 40px, which is a sparkline, not a plot.
-
-   So a panel asks for a height of its own - enough to carry three gridlines and
-   a curve with somewhere to move - and the card is however tall that many of
-   them come to. The CEILING is what stops six devices producing three screens
-   of chart: past it the panels give height back evenly rather than one of them
-   being cut, and the floor underneath makes sure they never shrink to a rule.
-
-   fitChart runs on every redraw, not only on resize, because the panel count is
-   part of the geometry now: unticking a device has to give its room back. */
-const PANH=118, PANMIN=64, HMAX=760;
+   For a while the height grew with a panel count instead, because the plot
+   could be split one frame per device. There is one frame again, so there is
+   one height again. */
 function fitChart(force){
   const box=$('chartwrap');
   const cw=Math.max(320,Math.round(box.clientWidth-20));
-  /* how many panels this draw will need. It is counted from the same rule
-     panels() uses - PH is not settled yet, so it cannot be asked directly. */
   const b2=y2();
-  const live=plotted().filter(function(id){
-    return (reports(id,y1()) && !OFF[id+'|1'])
-        || (b2 && reports(id,y2()) && !OFF[id+'|2']);
-  }).length;
-  /* overlaid is ONE frame however many devices are in it - that is the whole of
-     the difference in the geometry */
-  const n=LAYOUT==='overlay' ? 1 : Math.max(1, live);
-  /* a single panel keeps the proportions the page had before the split */
-  const want = n===1 ? Math.min(380,Math.max(230,cw*0.21))
-                     : MT+MB + n*PANH + (n-1)*BGAP;
-  const nh=Math.round(Math.min(HMAX, Math.max(MT+MB+n*PANMIN+(n-1)*BGAP, want)));
+  const nh=Math.round(Math.min(380,Math.max(230,cw*0.21)));
   /* the right gutter only exists when there is a second scale to print in it */
   const nmr=b2?58:20;
   if(!force && cw===W && nh===H && nmr===MR) return false;
@@ -1442,85 +1372,44 @@ function fitChart(force){
   return true;
 }
 
-/* ======================= ONE PANEL PER DEVICE =======================
+/* ======================= THE PLOT AREA =======================
 
-   THE PLOT WAS ONE FRAME WITH EVERY DEVICE IN IT, and with more than two or
-   three it stopped answering the question it was drawn for. Seven inverters on
-   one site run the same curve within a few percent of each other: overlaid,
-   that is seven lines in a band a few pixels wide, and the one that dipped at
-   eleven o'clock - the only thing anybody opened the page to find - is
-   underneath the six that did not. Switching the others off in the legend to
-   see it is reading one device at a time on a chart built to compare them.
+   ONE FRAME, and every plotted device drawn into it. The band is the rectangle
+   the curves live in, and it is a VALUE rather than four loose constants so
+   that the gridlines, the scales, the series and the crosshair all read the
+   same geometry from one place instead of each recomputing it.
 
-   Split, each device gets its own frame and its own vertical room, so a dip is
-   a dip in a plot rather than a thickening of a bundle.
+   IT ALSO CARRIES WHICH AXES IT NEEDS. A frame whose devices all report power
+   and nothing else should not print a second gutter of numbers down the right
+   that nothing in it is measured against - so y1 and y2 say whether there is
+   anything to read on each side, and the gutter follows.
 
-   THE SCALES ARE SHARED, and that is the whole reason this works. Every panel
-   is drawn against the same Y1 extent - and the same Y2 - so a curve that sits
-   higher in its panel IS higher. Per-panel autoscaling would fill each frame
-   nicely and make the set incomparable, which is the one thing a stack of
-   panels is for. extent() already reads across every plotted device, so it did
-   not have to change.
+   THE SCALES ARE SHARED across every device in the frame, which is the whole
+   point of overlaying them: two curves drawn against the same extent can be
+   compared by eye. extent() reads across every plotted device.
 
-   ONE X AXIS, at the foot of the stack. Time is the same in every panel; a
-   label strip under each one would print the same twelve stamps eight times.
+   NULL WHEN THERE IS NOTHING TO DRAW - a device is in the frame only if it
+   reports the parameter and the legend has not switched that series off. Empty
+   is a state, and the caller draws an empty frame with the note over it rather
+   than a blank rectangle.
 
-   A device gets a panel only if it has something to draw in it: it reports the
-   parameter, and the legend has not switched that series off. A frame with
-   nothing in it says a device has no readings, when what is true is that it was
-   never asked for any. */
-function panels(){
+   This briefly returned a LIST of bands, one per device, and the plot could be
+   split into a stack. It is one frame again, so it is one band again - but it
+   stays a returned value rather than an assumption, because that is what kept
+   the drawing code from having to know either way. */
+function plot(){
   const b2=y2();
   const live=plotted().map(function(id){
-    /* what this panel actually has in it. A weather station asked for power and
-       irradiance has one series, not two, and the panel should print one scale
-       rather than a second gutter of numbers nothing in the frame is measured
-       against - which was the first thing wrong with the split: every panel
-       carried both axes whether or not it had a curve on either. */
-    return {id:id,
-            a: reports(id,y1()) && !OFF[id+'|1'],
+    return {a: reports(id,y1()) && !OFF[id+'|1'],
             b: !!(b2 && reports(id,y2()) && !OFF[id+'|2'])};
   }).filter(function(p){ return p.a||p.b; });
-  const n=live.length;
-  if(!n) return [];
-
-  /* A BAND CARRIES A LIST, not a device. Overlaid, that list is everything and
-     there is one band; split, it is one device and there are n. Every consumer
-     below - the frame, the scales, the series - reads bands and their lists, so
-     neither arrangement is a special case anywhere except here.
-
-     The overlaid band has no `id`, which is what suppresses the panel surface
-     and the name in its corner: there is no one device to name, and the legend
-     above the chart is doing that job instead. */
-  if(LAYOUT==='overlay'){
-    return [{ id:null, ids:live.map(function(p){ return p.id; }),
-              y1:live.some(function(p){ return p.a; }),
-              y2:live.some(function(p){ return p.b; }),
-              top:MT, h:PH }];
-  }
-  const h=(PH-BGAP*(n-1))/n;
-  return live.map(function(p,i){
-    return {id:p.id, ids:[p.id], y1:p.a, y2:p.b, top:MT+i*(h+BGAP), h:h};
-  });
+  if(!live.length) return null;
+  return { y1:live.some(function(p){ return p.a; }),
+           y2:live.some(function(p){ return p.b; }),
+           top:MT, h:PH };
 }
 
-/* the switch itself: the layout, the chips that show it, and one redraw. The
-   card's height is part of the layout, so drawChart re-fits before it draws. */
-window.setLayout=function(v){
-  if(v===LAYOUT) return;
-  LAYOUT=v;
-  $('lay').querySelectorAll('button').forEach(function(b){
-    b.classList.toggle('on', b.dataset.l===v);
-  });
-  /* a device dropped by the tighter overlaid cap must not stay switched off in
-     a legend it is no longer in - and one coming back must return as it was */
-  renderLegend(); drawChart();
-  T(v==='split' ? 'One panel per device' : 'All devices in one frame');
-};
-
 function drawChart(){
-  /* the stack's height is part of the drawing now - a device switched off in
-     the legend gives its panel back, and the card closes up by that much */
   fitChart(false);
   const svg=$('chart'), b2=y2();
   const w=winRange();
@@ -1551,45 +1440,31 @@ function drawChart(){
    to be worked out. */
 function drawFrame(e1,e2){
   const w=winRange(); if(!w) return;
-  const P=panels(), b2=y2();
-  /* nothing plotted: the frame is still drawn, as one empty band, so the note
+  const b2=y2();
+  /* nothing plotted: the frame is still drawn, as an empty band, so the note
      over it sits on a plot rather than on a blank rectangle */
-  const list=P.length?P:[{id:null,y1:true,y2:true,top:MT,h:PH}];
+  const band=plot()||{y1:true,y2:true,top:MT,h:PH};
   const tt=timeTicks(w[0],w[1],Math.max(2,Math.min(14,Math.floor(PW/86))));
-  /* a short panel takes three labels rather than five - five numbers down 64px
-     of gutter is a column of type, not a scale */
-  const steps=list[0].h>=132?4:2;
+  const steps=4;
   let s='';
 
-  list.forEach(function(band){
-    /* the surface first, so every gridline and curve is drawn ON it */
-    if(band.id) s+='<rect class="panbg" x="'+ML+'" y="'+band.top.toFixed(1)+
-      '" width="'+PW.toFixed(1)+'" height="'+band.h.toFixed(1)+'" rx="9"/>';
-    if(e1||e2) for(let i=0;i<=steps;i++){
-      const y=band.top+band.h*(i/steps);
-      s+='<line class="gl" x1="'+ML+'" y1="'+y.toFixed(1)+'" x2="'+(W-MR)+'" y2="'+y.toFixed(1)+'"/>';
-    }
-    /* Y1 scale, left: the labels END at the gutter and run leftward, or they
-       would be printed across the plot they are labelling. Printed only where
-       there is a Y1 curve in the frame to read against it. */
-    if(e1&&band.y1!==false) s+=yScale(e1,band,'end',ML-8,steps);
-    /* Y2 reads the same frame from the right-hand gutter, on the same terms */
-    if(b2&&e2&&band.y2) s+=yScale(e2,band,'start',W-MR+8,steps);
-    /* the time gridlines stop at each panel's edges rather than running through
-       the air between them - the gaps are what separates one plot from the next */
-    tt.ticks.forEach(function(t){
-      const x=xOf(t);
-      s+='<line class="gl v" x1="'+x.toFixed(1)+'" y1="'+band.top.toFixed(1)+
-         '" x2="'+x.toFixed(1)+'" y2="'+(band.top+band.h).toFixed(1)+'"/>';
-    });
-    /* THE PANEL SAYS WHOSE IT IS, inside its own top-left corner and in the
-       device's own colour. On a stack this is what a legend was doing on an
-       overlay, and it is doing it beside the curve rather than above the card. */
-    if(band.id) s+='<text class="panname" x="'+(ML+11)+'" y="'+(band.top+16)+'" fill="'+
-      colorOf(band.id)+'">'+esc(band.id)+'</text>';
+  if(e1||e2) for(let i=0;i<=steps;i++){
+    const y=band.top+band.h*(i/steps);
+    s+='<line class="gl" x1="'+ML+'" y1="'+y.toFixed(1)+'" x2="'+(W-MR)+'" y2="'+y.toFixed(1)+'"/>';
+  }
+  /* Y1 scale, left: the labels END at the gutter and run leftward, or they
+     would be printed across the plot they are labelling. Printed only where
+     there is a Y1 curve in the frame to read against it. */
+  if(e1&&band.y1!==false) s+=yScale(e1,band,'end',ML-8,steps);
+  /* Y2 reads the same frame from the right-hand gutter, on the same terms */
+  if(b2&&e2&&band.y2) s+=yScale(e2,band,'start',W-MR+8,steps);
+  tt.ticks.forEach(function(t){
+    const x=xOf(t);
+    s+='<line class="gl v" x1="'+x.toFixed(1)+'" y1="'+band.top.toFixed(1)+
+       '" x2="'+x.toFixed(1)+'" y2="'+(band.top+band.h).toFixed(1)+'"/>';
   });
 
-  /* ONE time axis, under the whole stack */
+  /* the time axis, under the frame */
   tt.ticks.forEach(function(t){
     s+='<text class="axt" x="'+xOf(t).toFixed(1)+'" y="'+(H-14)+'" text-anchor="middle">'+
        xLabel(t,tt.step)+'</text>';
@@ -1599,12 +1474,9 @@ function drawFrame(e1,e2){
   s+='<text class="axt" x="'+(W/2)+'" y="'+(H-1)+'" text-anchor="middle" style="letter-spacing:.08em">'+
      stamp(w[0])+'  →  '+stamp(w[1])+'</text>';
 
-  /* Axis titles run down the whole stack, not down one panel: every panel is
-     drawn against the same scale, so there is one Y1 and one Y2 on this chart
-     however many frames it is split into. */
-  const all={top:list[0].top, h:(list[list.length-1].top+list[list.length-1].h)-list[0].top};
-  if(e1) s+=axTitle(labelOf(y1()),'Y1',all,14,false);
-  if(b2&&e2) s+=axTitle(labelOf(y2()),'Y2',all,W-13,true);
+  /* each axis title runs down the side of the frame it is read from */
+  if(e1) s+=axTitle(labelOf(y1()),'Y1',band,14,false);
+  if(b2&&e2) s+=axTitle(labelOf(y2()),'Y2',band,W-13,true);
   $('axes').innerHTML=s;
 }
 function yScale(e,band,anchor,x,steps){
@@ -1629,11 +1501,9 @@ function axTitle(txt,which,band,x,dashed){
 function drawSeries(e1,e2){
   const b2=y2();
   let s='', ar='', defs='';
-  /* Every device in the band draws into it: one apiece when the plot is split,
-     all of them when it is overlaid. Nothing below this line knows which
-     arrangement it is drawing - the band and its list are the whole interface. */
-  panels().forEach(function(band){
-    band.ids.forEach(function(id){
+  /* every plotted device draws into the one frame */
+  const band=plot(); if(!band) return;
+  plotted().forEach(function(id){
     [1,2].forEach(function(which){
       if(which===2&&!b2) return;
       if(OFF[id+'|'+which]) return;
@@ -1672,7 +1542,6 @@ function drawSeries(e1,e2){
          'stroke-linejoin="round" stroke-linecap="round"'+
          (which===2?' stroke-dasharray="6 4"':'')+'/>';
     });
-    });
   });
   $('gdefs').innerHTML=defs;
   $('areas').innerHTML=ar;
@@ -1705,15 +1574,12 @@ function renderLegend(){
         '<span class="n">'+id+'</span><span class="p">'+esc(p)+'</span></span>');
     });
   });
-  /* the chip counts against the CURRENT cap, and says why the cap is what it
-     is - the reason differs by arrangement and a reader switching between them
-     should be told which limit they have just met */
-  if(SEL.length>cap())
-    out.push('<span class="lg" style="cursor:default" title="'+
-      (LAYOUT==='overlay'
-        ? 'Colour cannot keep more than four series apart in one frame for a colour-blind reader. Split the plot, or read the rest in the table below.'
-        : 'Past eight panels the strip is taller than a screen and stops being read. The rest are in the table below.')+'">'+
-      '<span class="p">+'+(SEL.length-cap())+' more in table</span></span>');
+  /* what is selected but not plotted is SAID, in the strip that would have
+     carried it. A chart that silently drops the fifth device is a chart that
+     lies about what it was asked for. */
+  if(SEL.length>PLOTCAP)
+    out.push('<span class="lg" style="cursor:default" title="Colour cannot keep more than four series apart in one frame for a colour-blind reader. The rest are in the table below.">'+
+      '<span class="p">+'+(SEL.length-PLOTCAP)+' more in table</span></span>');
   $('legend').innerHTML=out.join('');
 }
 window.legToggle=function(id,which){
@@ -1728,10 +1594,6 @@ $('chart').addEventListener('mousemove',function(e){
   const svg=$('chart'), r=svg.getBoundingClientRect();
   const vx=(e.clientX-r.left)/r.width*W, vy=(e.clientY-r.top)/r.height*H;
   if(!ROWS.length||vx<ML||vx>W-MR||vy<MT||vy>MT+PH){ hideTip(); return; }
-  /* the crosshair crosses the WHOLE stack: the reason to split the panels was
-     to read one instant across every device, and a rule that stopped at the
-     panel under the pointer would put that back the way it was */
-  const P=panels();
   const w=winRange(); if(!w){ hideTip(); return; }
   /* snap to a sampled instant: the value between two samples was never measured */
   const frac=(vx-ML)/PW;
@@ -1756,8 +1618,8 @@ $('chart').addEventListener('mousemove',function(e){
   if(!n){ hideTip(); return; }
 
   xh.setAttribute('x1',x); xh.setAttribute('x2',x);
-  xh.setAttribute('y1',P.length?P[0].top:MT);
-  xh.setAttribute('y2',P.length?(P[P.length-1].top+P[P.length-1].h):(MT+PH));
+  xh.setAttribute('y1',MT);
+  xh.setAttribute('y2',MT+PH);
   xh.style.opacity=.25;
   tip.innerHTML='<div class="tt">'+stamp(row.t)+'</div>'+html;
   const wr=wrapEl.getBoundingClientRect();
