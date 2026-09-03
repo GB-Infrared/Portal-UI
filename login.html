@@ -1,14 +1,19 @@
 <!doctype html>
-<!-- THE FRONT DOOR IS LIGHT NOW, and it has no dark.
+<!-- THE FRONT DOOR IS THE VOID, and it has no light.
 
-     It was pinned to the portal's dark theme and defended as a void - stars, an
-     aurora, a black field with a log typing itself out. The site overview it
-     hands you to has since become a daylit screen with a photograph of a sunlit
-     Earth on it, and a black sign-in opening onto that is a door into a
-     different building. The portal has one final palette and this is the light
-     half of it, so nothing is pinned on this element any more: :root already
-     carries the light values, and the dark block that used to override them has
-     been deleted rather than left switched off. -->
+     THIS NOTE SAID THE OPPOSITE UNTIL NOW, which is worse than saying nothing.
+     It read "THE FRONT DOOR IS LIGHT NOW, and it has no dark", written when the
+     page had been cut back to the portal's light palette because the site
+     overview was briefly a daylit screen. The overview went back to being a
+     night sky, this page followed it, and the note did not - so the first thing
+     anybody read about this file was contradicted sixty lines further down by
+     the second :root block, which overrides every token to the void's values.
+     See THE VOID below; that block is the one that is true.
+
+     The portal behind this door now opens DARK by default as well, so the
+     arrival is one room the whole way through: sign-in, globe, portal. Light is
+     still there, and it is what the switch in the portal header is for - but it
+     is a choice somebody makes, not the state they land in. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -280,6 +285,194 @@ body{background:
 #bootlog .warm{color:var(--brand)}
 @media (max-width:620px){ #bootlog{min-width:0;font-size:12.5px;white-space:pre-wrap} }
 
+/* =====================================================================
+   OPENING — what the panel becomes once the operator is through.
+
+   THIS REPLACED TWO MORE LINES OF LOG. Granting access used to type '[ auth ]
+   access granted' and '> SELECT A SITE' into the boot log and then navigate.
+   Both were the machine narrating: the first restated what pressing
+   AUTHENTICATE had just done, and the second announced a screen that was about
+   to arrive anyway. Neither said the one thing a reader wants in that gap —
+   how long this is going to take.
+
+   So the log stops and a LOADING STATE takes the panel. It keeps the terminal's
+   voice, because the screen has not changed character; what changes is that it
+   is now reporting progress rather than history. The operator address stays on
+   screen — it is the fact that was just established, and it is the one thing
+   worth confirming before the portal opens.
+
+   THE PANEL DOES NOT RESIZE. The log reserved four lines of room from the first
+   frame so the border would not jump while it typed; this stands in the same
+   space for the same reason. Signing in should not make the box breathe. */
+.load{min-width:520px;min-height:calc(4 * 1.9em);font-family:var(--mono);
+  display:flex;flex-direction:column;justify-content:center;gap:11px;
+  margin-top:18px;padding-top:18px;border-top:1px solid var(--line-soft)}
+/* A CLASS THAT SETS display BEATS THE hidden ATTRIBUTE. `hidden` is only a UA
+   rule - [hidden]{display:none} - so `display:flex` above outranks it and the
+   panel stood on screen from the first frame, under the boot log, showing a
+   dash and the word CONNECTING before anybody had signed in. Anything given a
+   display here has to say what hidden means for it. */
+.load[hidden]{display:none}
+.load .lop{font-size:12.5px;letter-spacing:.14em;color:var(--green)}
+
+/* ===================== THE LEDGER =====================
+   WHAT REPLACED THE SINGLE WORD, AND WHY.
+
+   The loading state said one word at a time - CONNECTING, then LOADING SITES,
+   and so on - beside a count and a bar. It answered "how far" and nothing else.
+   It could not say what had already finished, what was still to come, or what
+   any of it had produced, and a word that is replaced leaves no trace: by the
+   time the portal opened, the reader had watched four things happen and could
+   name none of them.
+
+   So all four steps are on screen at once, from the first frame, in the boot
+   log's own grammar - a timestamp, a lowercase subsystem name, leader dots, and
+   the outcome in the right-hand column. The log above types four lines bringing
+   the pages up; this types four more bringing the session up. One machine, one
+   voice, one column of outcomes to run an eye down.
+
+   THE TIMES ARE MEASURED, not written down. Each row prints the elapsed time
+   its own step actually took, off the same clock the bar is drawn from. A boot
+   log with invented timings is set dressing; these are the real numbers, which
+   is also why they are not round.
+
+   THE PANEL STILL DOES NOT BREATHE. Every row exists before the first step
+   begins - pending ones are dim and blank - so the box is its final height from
+   the frame it appears in, and nothing below it moves as the run goes on. That
+   was the rule the single-word version was keeping; a ledger keeps it by
+   reserving its rows rather than by having only one. */
+.load .lsteps{display:flex;flex-direction:column;gap:1px;font-size:12.5px;line-height:1.62}
+.load .lstep{display:flex;align-items:baseline;gap:9px;min-width:0}
+/* the clock column is fixed-width and tabular, so four timings form a column
+   rather than four numbers that happen to be near each other */
+.load .lstep .lt{flex:none;width:8.5ch;color:var(--faint);
+  font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1}
+.load .lstep .ln{flex:none;color:var(--muted);letter-spacing:.02em}
+/* THE LEADER IS A BORDER, NOT A RUN OF FULL STOPS. The boot log's dots are
+   baked into fixed strings, which is fine for a line that never changes width;
+   these rows carry names and outcomes of different lengths and have to reflow,
+   and a string of dots cannot. Same reading, one declaration. */
+.load .lstep .ld{flex:1 1 auto;min-width:14px;align-self:stretch;
+  border-bottom:1px dotted var(--line-hi);opacity:.5;margin-bottom:.34em}
+.load .lstep .lv{flex:none;color:var(--green);font-weight:500;letter-spacing:.06em}
+
+/* WAITING: dim, and genuinely blank. A pending step that showed a dash or a
+   zero would be reporting a result it does not have. */
+.load .lstep.wait .ln{color:var(--dim)}
+.load .lstep.wait .ld{opacity:.22}
+/* RUNNING: the one row in the brand colour, with a block cursor where its
+   outcome will be printed - the terminal's own way of saying "this line is
+   still being written". */
+.load .lstep.run .ln{color:var(--brand)}
+.load .lstep.run .lt{color:var(--brand);opacity:.75}
+.load .lstep.run .lv{color:var(--brand)}
+.load .lstep.run .lv::after{content:'\258C';animation:cur 1s steps(1) infinite}
+@keyframes cur{0%,49%{opacity:1}50%,100%{opacity:0}}
+/* DONE: the name settles back to the reading colour and the outcome is the only
+   thing carrying weight, which is what makes the right-hand column scannable */
+.load .lstep.done .lt{color:var(--faint)}
+
+/* SLOW: still running, but past the time it should have taken.
+
+   THIS IS THE STATE EVERY LOADING SCREEN IS MISSING. A bar that stops moving
+   and a bar that is about to move again look identical, so the reader is left
+   deciding for themselves whether the thing is broken - and the usual answer,
+   after four or five seconds of a frozen stripe, is to reload and start over.
+   A row that says SLOW has answered it: the step is still running, it is late,
+   and nothing has failed yet. The clock beside it keeps counting, which is the
+   proof.
+
+   It is amber and not red, because amber on this portal means deviation and red
+   means fault, and late is a deviation. */
+.load .lstep.slow .ln{color:var(--amber)}
+.load .lstep.slow .lt{color:var(--amber);opacity:1}
+.load .lstep.slow .lv{color:var(--amber);letter-spacing:.1em}
+
+/* FAILED: the run stopped here, and this row is why.
+
+   The whole argument for naming the steps was that a named step tells you WHICH
+   one hung. That was a promise the panel could not keep - there was no failure
+   state, so a step that died would have left the bar sitting at 48% saying
+   nothing at all. The reason is printed in the outcome column, in the place
+   every other row prints its result, so the eye finds it where it already knows
+   to look.
+
+   The rows below stay dim and BLANK. They were not attempted, and a dash or a
+   zero would be reporting a result they do not have. */
+.load .lstep.fail .ln{color:var(--red)}
+.load .lstep.fail .lt{color:var(--red);opacity:.85}
+.load .lstep.fail .lv{color:var(--red);letter-spacing:.08em}
+
+/* ---------- the bar and the count, on one line ----------
+   They are one readout - the count is the bar's value in figures - so they sit
+   on one row rather than stacked, and the row is the last thing in the panel
+   because it is the summary of the four lines above it. */
+.load .lfoot{display:flex;align-items:center;gap:14px;margin-top:3px}
+.load .lbar{position:relative;flex:1 1 auto;height:6px;border-radius:6px;
+  background:var(--line-soft);overflow:hidden}
+/* Determinate, not a barber's pole. An indeterminate stripe says "something is
+   happening" and nothing else; this is a short, known sequence of steps, so the
+   bar can say how much of it is left - which is the only question being asked. */
+/* NO CSS TRANSITION ON THE FILL. It used to travel .3s into each new width
+   while the number beside it counted on its own clock, and two readouts of the
+   same fact drifting apart is worse than either alone - the eye goes straight
+   to the disagreement. Both are driven off ONE animation frame loop (see
+   openPortal), so the fill IS the number, drawn wide instead of in figures. */
+.load .lbar i{display:block;height:100%;width:0;border-radius:6px;
+  background:linear-gradient(90deg,var(--brand),var(--green))}
+/* a stopped bar is not a paused bar. The fill holds the width it reached and
+   goes red, so the distance travelled is still readable - it says where it got
+   to, which is the same thing the failed row says in words. */
+.load .lbar.bad i{background:var(--red)}
+/* THE STEP BOUNDARIES ARE NOTCHED INTO THE BAR, at the percentages the steps
+   actually end on. It was a plain rule, and a plain rule hides the shape of the
+   work: the four steps are not equal - connecting is quick and loading the
+   sites is the long one - and the bar was drawing them as one smooth run.
+   Notched, the reader can see a stage close as the fill crosses it, and can see
+   before it starts that the second stage is twice the first.
+
+   Cut in the PAGE's colour rather than drawn in a line colour, so the notch
+   reads as a gap in the bar rather than as a fifth thing on it. */
+.load .lbar u{position:absolute;top:-1px;bottom:-1px;width:2px;
+  background:var(--panel);transform:translateX(-1px)}
+/* THE PERCENTAGE, AND IT IS THE LARGEST THING IN THE PANEL. The bar alone was
+   the whole answer once, and a 6px rule is a poor way to state a number:
+   reading it means estimating a fraction of a width, so "roughly two thirds" is
+   the most it can ever say. The count says 67.
+
+   TABULAR FIGURES, AND THE DIGITS RESERVE THEIR WIDTH. A proportional 1 is
+   about half the width of a 0, so a counter climbing 8, 9, 10 shifts what is
+   beside it on almost every frame - the jitter is more visible than the count
+   itself. tabular-nums makes every digit the same width, and the 3ch box holds
+   the room the third digit will need from the first frame, so the % never
+   moves. */
+.load .lpct{flex:none;display:flex;align-items:baseline;gap:2px;color:var(--text)}
+.load .lpct b{display:inline-block;min-width:3ch;text-align:right;
+  font-size:24px;font-weight:700;line-height:1;letter-spacing:.01em;
+  font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1}
+.load .lpct i{font-style:normal;font-size:12.5px;font-weight:600;
+  letter-spacing:.1em;color:var(--faint)}
+.load .lpct.bad b{color:var(--red)}
+/* RETRY, and it appears only when there is something to retry. It borrows the
+   AUTHENTICATE button's shape and takes the fault colour, because it is the
+   answer to the red row above it and not a second way to sign in. */
+.load .lgo.retry{padding:7px 14px;font-size:11.5px;letter-spacing:.18em;flex:none;
+  background:rgba(217,45,32,.10);border-color:var(--red);color:var(--red)}
+.load .lgo.retry:hover:not(:disabled){background:rgba(217,45,32,.18);
+  box-shadow:0 0 20px rgba(217,45,32,.20)}
+/* the live region carries the step name for a screen reader. It is not
+   displayed, because the ledger says the same thing to everybody else - but it
+   cannot be display:none, or the announcement goes with it. */
+.load .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media (max-width:620px){
+  .load{min-width:0}
+  .load .lpct b{font-size:20px}
+  .load .lsteps{font-size:11.5px}
+  .load .lstep .lt{width:8ch}
+}
+@media (prefers-reduced-motion:reduce){ .load .lstep.run .lv::after{animation:none} }
+
 .skip{position:fixed;bottom:26px;left:0;right:0;text-align:center;z-index:11;
   font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--dim)}
 
@@ -480,6 +673,37 @@ body{background:
     </div>
 
     <pre id="bootlog"></pre>
+
+    <!-- ---------- OPENING ----------
+         Hidden until the operator is through, and then it takes the log's
+         place in the panel rather than appearing under it. See the note on
+         .load for why the two lines of log that used to go here are gone. -->
+    <div class="load" id="loading" hidden>
+      <div class="lop" id="load-op">&mdash;</div>
+
+      <!-- THE FOUR STEPS, all of them, from the first frame. Built by script
+           rather than written out here because each row's timing, state and
+           outcome are all filled in as the run goes, and a row that is half
+           markup and half script is a row maintained in two places. -->
+      <div class="lsteps" id="load-steps"></div>
+
+      <!-- the footer holds the bar, the count, and - only when a run has
+           stopped - the way out of it. RETRY is appended here rather than
+           reserved, because a button that is present and disabled through every
+           successful sign-in is a screen offering to fix something that is not
+           broken. -->
+      <div class="lfoot" id="load-foot">
+        <div class="lbar" id="load-bar" role="progressbar" aria-labelledby="load-say"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="load-fill"></i></div>
+        <div class="lpct" id="load-pct" aria-hidden="true"><b id="load-num">0</b><i>%</i></div>
+      </div>
+
+      <!-- THE ANNOUNCEMENT, and it is the step NAME rather than the count. The
+           number moves every frame, and a live region on it would be a screen
+           reader reading two seconds of digits aloud; the ledger and the bar
+           say it to everyone else. -->
+      <div class="vh" id="load-say" role="status" aria-live="polite">CONNECTING</div>
+    </div>
   </div>
 </div>
 
@@ -667,10 +891,276 @@ window.goStep=function(name){
 /* ================= AUTHENTICATE =================
    A mockup: nothing is checked against anything. The refusals below exist
    because submitting an empty box is the first thing anyone tries, and a screen
-   that does nothing at all in that case cannot be reviewed. Granting access
-   types its own two lines and then opens the portal — the boot log narrates the
-   way in, which is the whole idea Fleet Control is built on. */
-function run(btn, errId, checks, lines){
+   that does nothing at all in that case cannot be reviewed.
+
+   GRANTING ACCESS NO LONGER WRITES TO THE LOG. It used to type two more lines —
+   'access granted' and '> SELECT A SITE' — and then navigate. The first
+   restated what pressing the button had just done and the second announced a
+   screen that was arriving anyway; neither answered the only question anybody
+   has in that gap, which is how long they are going to be sitting there. The
+   panel becomes a loading state instead. See the note on .load. */
+
+/* The steps, and there are four because the portal has four things to do before
+   it can show a site. They are NAMED, not numbered: 'STEP 2 OF 4' tells a
+   reader how far along they are and nothing about what is happening, and if one
+   of them ever hangs, the name is what says which one.
+
+   `at` is where that step ENDS, so the four are not evenly spaced - connecting
+   is quick, loading the sites is the long one. Four equal jumps would be a
+   progress readout that had been made up, and the notches in the bar are drawn
+   at these same numbers, so the shape is visible before the run starts.
+
+   `out` is what the step PRODUCED, printed in the right-hand column the way the
+   boot log above prints READY. '3 SITES' is the fleet this build actually
+   carries - Sangria, Rioja and Mendoza, the three the globe hands over - and
+   not a number chosen because it looked plausible. If the fleet changes, that
+   string is wrong and has to change with it; a count is a fact, and inventing
+   one here would be the front door lying about the product behind it.
+
+   `bad` is what this step says when it does NOT finish. Each one is specific,
+   because "something went wrong" is the message that sends somebody to support
+   with nothing to tell them: a step that cannot reach the server and a step
+   that reached it and got nothing back are two different faults with two
+   different fixes, and the row is the only place that distinction survives. */
+const OPENING=[
+  {say:'CONNECTING',       row:'connecting',       at:16,  out:'LINKED',  bad:'NO ROUTE'},
+  {say:'LOADING SITES',    row:'loading sites',    at:48,  out:'3 SITES', bad:'NO RESPONSE'},
+  {say:'PREPARING PORTAL', row:'preparing portal', at:79,  out:'READY',   bad:'REFUSED'},
+  {say:'OPENING',          row:'opening',          at:100, out:'GO',      bad:'TIMED OUT'}
+];
+const STEPMS=BEAT*2.2;
+/* how long the whole run is expected to take. The DESCENT is driven off this
+   rather than off the bar - see the note on the limb for why a camera must not
+   inherit the bar's four pauses. */
+const RUNMS=STEPMS*4;
+/* LATE, not broken. A step is called slow once it has run past its own budget
+   by half again - late enough that a reader has started to wonder, early enough
+   that it has not failed. */
+const SLOWAT=1.5;
+let openTimer=0, openRAF=0;
+
+/* ---- review affordances, and they are not features ----
+   Two states below cannot be reached by using the screen normally, because
+   nothing in a mockup actually fails or hangs. A design that cannot be SEEN
+   cannot be reviewed or signed off, so ?fail and ?slow put the run into them
+   on purpose: ?fail stops it at 'loading sites', ?slow makes that same step
+   overrun until the real slow detector trips.
+
+   ?fail applies to the FIRST attempt only. Pressing RETRY then completes, which
+   is the whole story a reviewer needs in one screen - it broke, it said which
+   part and why, it offered the way out, and the way out worked. */
+const DEMO=(location.search||'').toLowerCase();
+const demoFail=DEMO.indexOf('fail')>=0, demoSlow=DEMO.indexOf('slow')>=0;
+let attempt=0;
+
+/* the log's own clock format: a fixed two decimals in brackets, so the column
+   is the same width whether a step took a tenth of a second or three */
+const stepClock=ms=>'[ '+(ms/1000).toFixed(2)+' ]';
+
+/* THE COUNT IS DRAWN, NOT TRANSITIONED.
+
+   The bar used to jump to each new width and let CSS ease it there while the
+   panel waited on a timer. That is fine for a bar on its own and wrong the
+   moment a number sits beside it: two readouts of the same fact, one eased by
+   the browser and one set by a timeout, do not agree with each other, and a
+   reader looks straight at the disagreement.
+
+   So one animation frame loop drives both. Every frame computes ONE value and
+   paints it twice - as digits and as a width - which is why they cannot drift.
+   The travel is exactly the length of the step, so the number arrives on its
+   value as the word that earned it is replaced, and nothing is left catching up
+   after the sentence saying it finished has already gone.
+
+   The easing is a soft quadratic ease-OUT and not the browser's default
+   ease-in-out. A step that eases in as well as out stalls at both ends, and
+   four stalls in two seconds is a bar that appears to hang four times. */
+function openPortal(who){
+  attempt++;
+  $('bootlog').hidden=true;
+  $('loading').hidden=false;
+  $('load-op').textContent=who;
+  const say=$('load-say'), num=$('load-num'), fill=$('load-fill'), bar=$('load-bar');
+  /* a retry starts from nothing: the bar's colour, the count and any notches
+     left from the attempt before it all go, or the second run is drawn on top
+     of the first one's wreckage */
+  clearTimeout(openTimer); cancelAnimationFrame(openRAF);
+  bar.classList.remove('bad'); $('load-pct').classList.remove('bad');
+  const oldBtn=$('load-retry'); if(oldBtn) oldBtn.remove();
+  bar.querySelectorAll('u').forEach(function(u){ u.remove(); });
+
+  /* ---- the ledger, and the notches, both built from OPENING ----
+     One list describes the run, and everything on screen is drawn from it: the
+     rows, the boundaries in the bar, the announcements. Adding a fifth step is
+     one entry, not five edits in four places. */
+  $('load-steps').innerHTML=OPENING.map(function(s,n){
+    return '<div class="lstep wait" id="lstep'+n+'">'+
+      '<span class="lt"></span>'+
+      '<span class="ln">'+s.row+'</span>'+
+      '<span class="ld"></span>'+
+      '<span class="lv"></span></div>';
+  }).join('');
+  /* the last step ends at 100, which is the end of the bar and not a boundary
+     inside it - a notch there is a mark against the edge */
+  OPENING.slice(0,-1).forEach(function(s){
+    const u=document.createElement('u');
+    u.style.left=s.at+'%';
+    bar.appendChild(u);
+  });
+
+  const row=n=>$('lstep'+n);
+  function mark(n,cls){ const r=row(n); if(r) r.className='lstep '+cls; }
+  function put(n,sel,txt){
+    const r=row(n); if(!r) return;
+    const el=r.querySelector(sel);
+    /* only touch the DOM when the text actually changed - the clock below runs
+       on every frame, and writing the same string sixty times a second is sixty
+       needless layout invalidations */
+    if(el && el.textContent!==txt) el.textContent=txt;
+  }
+
+  let i=0, from=0;
+
+  /* one value, two readouts. The width keeps its decimals - a bar rounded to
+     whole percent advances in visible 5px steps across a 520px panel - and the
+     digits are rounded, because 47.3% is not a thing anybody is waiting for. */
+  function paint(p){
+    num.textContent=Math.round(p);
+    fill.style.width=p.toFixed(2)+'%';
+  }
+  paint(0);
+
+  /* the run's own clock, so every row's timing is measured from the same
+     instant the bar started rather than from whenever that row began */
+  const runT0=performance.now();
+
+  /* ---- THE DESCENT ----
+     The horizon at the foot of the screen rises while this runs, so the wait is
+     the approach to the planet the next screen opens on. It reads the CLOCK and
+     not the bar: the bar eases into four discrete steps and rests at each
+     boundary, and a camera that stalls four times in two seconds is a shot with
+     four hiccups in it. Smoothstepped, so it leaves and arrives without a jerk
+     at either end.
+
+     A retry does not restart it. limbFly refuses to go backwards, so a run that
+     failed at 48% and was retried carries on from the height it reached - you
+     do not un-travel because a request timed out. */
+  function flyTo(now){
+    if(reduced || !window.limbFly) return;
+    const t=Math.max(0,Math.min(1,(now-runT0)/RUNMS));
+    window.limbFly(t*t*(3-2*t));
+  }
+  function closeStep(n){
+    mark(n,'done');
+    put(n,'.lt', stepClock(performance.now()-runT0));
+    put(n,'.lv', OPENING[n].out);
+  }
+
+  /* THE CLOCK ON THE RUNNING ROW.
+
+     The time column used to be empty until a step finished, which left the
+     panel silent about the one thing it was measuring at exactly the moment
+     somebody wanted to know it. It counts while the step runs and freezes when
+     the step closes, so the figure a reader ends up reading is the same figure
+     they watched arrive - there is no second number to reconcile.
+
+     It is written in HUNDREDTHS and not on every frame. At 60fps the last digit
+     of a millisecond clock is a strobe: unreadable, and it says nothing a
+     hundredth does not. put() drops the write when the string has not changed,
+     so this costs one DOM write per centisecond rather than one per frame. */
+  function tick(n){
+    if(reduced) return;   /* a counter that never stops is motion */
+    put(n,'.lt', stepClock(performance.now()-runT0));
+  }
+
+  function fail(n){
+    cancelAnimationFrame(openRAF); clearTimeout(openTimer);
+    mark(n,'fail');
+    put(n,'.lt', stepClock(performance.now()-runT0));
+    put(n,'.lv', OPENING[n].bad);
+    bar.classList.add('bad'); $('load-pct').classList.add('bad');
+    bar.setAttribute('aria-invalid','true');
+    /* the announcement names the step AND the reason - a screen reader hearing
+       only "failed" is in the position the bar left everybody else in */
+    say.textContent=OPENING[n].say+' FAILED: '+OPENING[n].bad;
+    const b=document.createElement('button');
+    b.type='button'; b.className='lgo retry'; b.id='load-retry'; b.textContent='RETRY';
+    b.addEventListener('click',function(){ openPortal(who); });
+    $('load-foot').appendChild(b);
+    b.focus();
+  }
+
+  function done(){
+    /* the last step is allowed to be SEEN before the page changes under it - a
+       bar that reaches 100% and a ledger that completes in the same instant the
+       page is replaced read as a jump rather than as a finish */
+    openTimer=setTimeout(function(){ window.location.href='plants.html'; }, reduced?150:620);
+  }
+
+  (function step(){
+    const n=i, s=OPENING[i++], to=s.at;
+    say.textContent=s.say;
+    mark(n,'run');
+    /* the step that the review flags act on, and only on the first attempt */
+    const willFail=demoFail && attempt===1 && n===1;
+    /* HOW LONG IT TAKES AND HOW LONG IT SHOULD TAKE ARE TWO NUMBERS.
+
+       They were one, and that made the slow detector circular: it compared the
+       elapsed time against the very budget the review flag had just stretched,
+       so a step told to run four times longer also had four times longer to run
+       before it counted as late, and SLOW could never fire. A deadline measured
+       against the thing it is meant to catch is not a deadline. */
+    const budget = (demoSlow && n===1) ? STEPMS*4.2 : STEPMS;
+    const expect = STEPMS;
+    /* the progressbar value moves once per STEP, not once per frame: it is what
+       a screen reader is told, and it should be told four things rather than
+       four hundred */
+    bar.setAttribute('aria-valuenow', to);
+    if(reduced){
+      /* no count and no travel - the number is set, the row is closed, and the
+         next one starts. Somebody who asked for less motion has not asked for
+         less information. */
+      if(willFail){ paint(to); fail(n); return; }
+      paint(to); from=to; closeStep(n);
+      openTimer=setTimeout(i<OPENING.length?step:done, 90);
+      return;
+    }
+    /* THE CLOCK IS THE FRAME CLOCK, NOT performance.now().
+
+       This started the run by calling the frame function with a performance.now()
+       reading and then let requestAnimationFrame supply every reading after it.
+       The two are not guaranteed to be the same clock - under a headless
+       renderer they were not even close - so the second frame arrived with a
+       timestamp far BEFORE the start, k went negative, the ease squared it into
+       something much larger, and the panel counted down to -586%.
+
+       Nothing outside the loop supplies a time now. The first frame that runs
+       IS time zero, and k is clamped at both ends, so an out-of-order or
+       repeated timestamp can at worst hold the count still for a frame. */
+    let t0=-1, said=false;
+    openRAF=requestAnimationFrame(function frame(now){
+      if(t0<0) t0=now;
+      const k=Math.min(1,Math.max(0,(now-t0)/budget)), e=1-(1-k)*(1-k);
+      paint(from+(to-from)*e);
+      tick(n);
+      flyTo(now);
+      /* LATE IS SAID ONCE, and the row keeps running. The bar does not stop and
+         the count does not reset - the step is still going, it is simply past
+         the time it should have taken, and the reader is told that rather than
+         being left to infer it from a stripe that has stopped moving. */
+      if(!said && k>0 && (now-t0)>expect*SLOWAT && k<1){
+        said=true; mark(n,'run slow'); put(n,'.lv','SLOW');
+        say.textContent=OPENING[n].say+' - TAKING LONGER THAN EXPECTED';
+      }
+      if(k<1){ openRAF=requestAnimationFrame(frame); return; }
+      if(willFail){ fail(n); return; }
+      from=to;
+      closeStep(n);
+      if(i<OPENING.length) step(); else done();
+    });
+  })();
+}
+
+function run(btn, errId, checks, who){
   const bad=checks();
   if(bad){ mark(bad[0],true); $(errId).textContent=bad[1]; $(bad[0]).focus(); return; }
   const label=btn.textContent;
@@ -678,7 +1168,8 @@ function run(btn, errId, checks, lines){
   btn.innerHTML='<span class="spin"></span>'+label;
   $('loginbox').classList.remove('on');
   $('resetbox').classList.remove('on');
-  typeLines(lines, function(){ setTimeout(function(){ window.location.href='plants.html'; }, 550); });
+  document.title='ENEROPS OS · Opening';
+  openPortal(who);
 }
 
 $('lgo').addEventListener('click',function(){
@@ -688,10 +1179,7 @@ $('lgo').addEventListener('click',function(){
     if(!isEmail(u)) return ['lu','THAT IS NOT AN EMAIL ADDRESS'];
     if(!p) return ['lp','ENTER YOUR PASSKEY'];
     return null;
-  },[
-    ['', '[ auth   ]  access granted · operator ..... ', $('lu').value.trim().toUpperCase()],
-    ['warm', '>  SELECT A SITE']
-  ]);
+  }, $('lu').value.trim().toUpperCase());
 });
 
 $('rgo').addEventListener('click',function(){
@@ -704,10 +1192,7 @@ $('rgo').addEventListener('click',function(){
     if(!b) return ['rp2','TYPE THE NEW PASSKEY AGAIN'];
     if(a!==b) return ['rp2','THE TWO PASSKEYS DO NOT MATCH'];
     return null;
-  },[
-    ['', '[ auth   ]  passkey replaced · operator ... ', $('ru').value.trim().toUpperCase()],
-    ['warm', '>  SELECT A SITE']
-  ]);
+  }, $('ru').value.trim().toUpperCase());
 });
 
 /* Enter submits from any field in the box that is showing — a terminal that
@@ -744,8 +1229,34 @@ $('rgo').addEventListener('click',function(){
    of this door, and a horizon that pretended to carry sites would be this
    screen claiming to know something it has not asked for yet.
 
-   PAINTED ONCE PER RESIZE. Nothing on it moves. The stars above it twinkle on
-   their own canvas and the two never touch.
+   IT MOVES ONCE, AND ONLY ONCE: WHEN YOU ARE LET THROUGH.
+
+   It used to be painted a single time per resize, and the note here said so -
+   nothing on this screen moved except the stars twinkling on their own canvas.
+   That was right while signing in was the only thing happening. It stopped
+   being right when the wait after AUTHENTICATE became a thing with a duration:
+   a progress bar in a card is a widget borrowed from any other website, and
+   this screen already had the one image that could carry a wait without
+   borrowing anything - the planet you are about to be handed.
+
+   So the loading IS the approach. The horizon RISES and the curve DEEPENS as
+   the run goes, which is what a planet does when you come down towards it, and
+   by the time the ledger closes you are looking at a world rather than at the
+   edge of one. The site overview then opens on the whole globe: the cut lands
+   on a camera that has already been moving.
+
+   Two rules keep it honest.
+
+   IT IS DRIVEN BY THE CLOCK, NOT BY THE BAR. The bar eases into each of its
+   four steps and pauses at every boundary, which is correct for a readout of
+   discrete stages and disastrous for a camera - four decelerations in two
+   seconds is a shot that stalls four times. The descent runs off the elapsed
+   time of the whole sequence instead, smoothed end to end, so the ledger ticks
+   in stages while the move underneath it is continuous.
+
+   IT NEVER GOES BACKWARDS. A failed step freezes the camera where it is, and
+   RETRY carries on from there rather than flying back up to the door. You do
+   not un-travel because a request timed out.
    =================================================== */
 (function(){
 const cv=document.getElementById('limb');
@@ -763,25 +1274,30 @@ function sunX(){
   return v.indexOf('%')>=0 ? n/100 : n/innerWidth;
 }
 
-function paint(){
+/* THE CANVAS IS SIZED IN ONE PLACE AND DRAWN IN ANOTHER.
+
+   They were one function, which was fine at one paint per resize and wrong the
+   moment the camera moved: setting cv.width reallocates the backing store and
+   clears it, so a per-frame repaint that re-sized first would have thrown away
+   and rebuilt a full-screen buffer sixty times a second to change two numbers.
+
+   size() runs on resize and builds everything that depends only on the WINDOW -
+   the buffer, and the two gradients, which are functions of the width and the
+   sun and of nothing else. draw() runs per frame and touches only the geometry.
+   The gradients are cached for the same reason: constructing them is the most
+   expensive thing here and neither of them changes as the camera moves. */
+let W=0, H=0, GROUND=null, AIR=null;
+
+/* THE CAMERA, and it is one number: 0 at the door, 1 arrived. */
+let flyT=0;
+
+function size(){
   const dpr=Math.min(2,window.devicePixelRatio||1);
-  const W=innerWidth, H=innerHeight;
+  W=innerWidth; H=innerHeight;
   cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
   cv.style.width=W+'px'; cv.style.height=H+'px';
   lx.setTransform(dpr,0,0,dpr,0,0);
-  lx.clearRect(0,0,W,H);
 
-  /* HOW MUCH PLANET. The radius is set from the WIDTH, because the curve is
-     read across the screen rather than up it: too small and the horizon becomes
-     a hill, too large and it becomes a ruled line and the planet is gone. This
-     lands the sag at roughly a tenth of the window - unmistakably curved, and
-     still a horizon rather than a ball. */
-  const R=Math.max(W*1.85, H*2.2);
-  /* How far the cap stands above the bottom edge. Capped in pixels as well as
-     in vh, so a tall window does not put the horizon through the middle of the
-     sign-in and a short one still gets a horizon rather than a sliver. */
-  const rise=Math.max(58, Math.min(H*0.27, 230));
-  const cx=W*0.5, cy=H-rise+R;
   const sx=sunX();
   const at=function(t){ return Math.max(0,Math.min(1,t)); };
 
@@ -803,8 +1319,52 @@ function paint(){
   g.addColorStop(at(sx-0.12), '#0a1c30');
   g.addColorStop(at(sx+0.06), '#102a44');
   g.addColorStop(1,           '#153650');
+  GROUND=g;
+
+  /* ---- the atmosphere, edge on ----
+     ONE gradient says how lit the air is along the whole arc, and every stroke
+     below reads from it - so the hairline and the haze cannot disagree about
+     where the day ends. */
+  const air=lx.createLinearGradient(0,0,W,0);
+  air.addColorStop(0,           'rgba(96,140,206,0)');
+  air.addColorStop(at(sx-0.66), 'rgba(104,150,214,.10)');
+  air.addColorStop(at(sx-0.38), 'rgba(126,172,232,.34)');
+  air.addColorStop(at(sx-0.14), 'rgba(164,204,248,.72)');
+  air.addColorStop(at(sx+0.04), 'rgba(214,231,255,.96)');
+  air.addColorStop(1,           'rgba(255,236,196,.90)');
+  AIR=air;
+}
+
+function draw(){
+  if(!GROUND) return;
+  lx.clearRect(0,0,W,H);
+
+  /* HOW MUCH PLANET. The radius is set from the WIDTH, because the curve is
+     read across the screen rather than up it: too small and the horizon becomes
+     a hill, too large and it becomes a ruled line and the planet is gone. At
+     rest this lands the sag at roughly a tenth of the window - unmistakably
+     curved, and still a horizon rather than a ball.
+
+     THE CAMERA SHRINKS IT. A smaller radius on screen is a planet whose curve
+     you can see more of, which is what coming closer to a sphere this size
+     actually looks like: the horizon bends harder and the ground takes more of
+     the frame. It is not halved - a limb that turns into a ball in two seconds
+     reads as a zoom, and this is meant to read as a descent. */
+  const R=Math.max(W*1.85, H*2.2) * (1 - 0.42*flyT);
+  /* How far the cap stands above the bottom edge. Capped in pixels as well as
+     in vh, so a tall window does not put the horizon through the middle of the
+     sign-in and a short one still gets a horizon rather than a sliver.
+
+     THIS IS THE MOVE. The rest is consequence: the ground rises with it, the
+     warm under the sun rises with it, and the haze and the hairline are carried
+     up on the same arc. */
+  const base=Math.max(58, Math.min(H*0.27, 230));
+  const rise=base + (H*0.52 - base)*flyT;
+  const cx=W*0.5, cy=H-rise+R;
+  const sx=sunX();
+
   lx.beginPath(); lx.arc(cx,cy,R,0,6.283185); lx.closePath();
-  lx.fillStyle=g; lx.fill();
+  lx.fillStyle=GROUND; lx.fill();
 
   /* The ground immediately under the sun takes the warm of it - the same gold
      the wash overhead is made of, which is the whole reason the two read as one
@@ -820,29 +1380,21 @@ function paint(){
   lx.fillRect(0,H-rise-40,W,rise+40);
   lx.restore();
 
-  /* ---- the atmosphere, edge on ----
-     ONE gradient says how lit the air is along the whole arc, and every stroke
-     below reads from it - so the hairline and the haze cannot disagree about
-     where the day ends. */
-  const air=lx.createLinearGradient(0,0,W,0);
-  air.addColorStop(0,           'rgba(96,140,206,0)');
-  air.addColorStop(at(sx-0.66), 'rgba(104,150,214,.10)');
-  air.addColorStop(at(sx-0.38), 'rgba(126,172,232,.34)');
-  air.addColorStop(at(sx-0.14), 'rgba(164,204,248,.72)');
-  air.addColorStop(at(sx+0.04), 'rgba(214,231,255,.96)');
-  air.addColorStop(1,           'rgba(255,236,196,.90)');
-
   /* THE HAZE FIRST, widest and faintest, so the hairline lands on top of its
      own glow rather than under it. Seven passes rather than one wide stroke: an
      atmosphere fades off a horizon on a curve, and a single stroke of even
-     alpha is a band. */
+     alpha is a band.
+
+     The offsets stay in PIXELS as the camera moves, because an atmosphere is a
+     fixed depth of air: scaling it with the radius would thin the band out as
+     the planet grew, which is the one part of this that should not change. */
   lx.lineCap='butt';
   for(let i=7;i>=1;i--){
     lx.beginPath();
     lx.arc(cx,cy,R+i*3.6,Math.PI,6.283185);
     lx.lineWidth=i*5.2;
     lx.globalAlpha=0.085/Math.pow(i,0.86);
-    lx.strokeStyle=air;
+    lx.strokeStyle=AIR;
     lx.stroke();
   }
   lx.globalAlpha=1;
@@ -851,12 +1403,24 @@ function paint(){
   lx.beginPath();
   lx.arc(cx,cy,R+0.6,Math.PI,6.283185);
   lx.lineWidth=1.5;
-  lx.strokeStyle=air;
+  lx.strokeStyle=AIR;
   lx.stroke();
 }
 
+function paint(){ size(); draw(); }
 addEventListener('resize',paint);
 paint();
+
+/* ---- the one control the opening sequence has over this screen ----
+   A number in, a repaint out, and it only ever goes forwards. Everything about
+   WHEN to move lives with the sequence that is moving it; everything about what
+   the move looks like lives here. */
+window.limbFly=function(t){
+  t=Math.max(0,Math.min(1,t));
+  if(t<=flyT) return;                 /* never backwards - see the note above */
+  flyT=t;
+  draw();
+};
 })();
 </script>
 

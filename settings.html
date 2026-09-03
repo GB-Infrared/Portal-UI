@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -51,12 +51,153 @@
   --serif:Georgia,'Times New Roman',serif;
   --r-lg:14px; --r-md:10px; --r-sm:8px;
 }
-/* ---- DARK · same hues on navy. Only the base tokens are redefined; the
-   header/brand tokens above reference them, so they follow automatically. ---- */
+/* ---- DARK · the front door's palette, on every page behind it.
+
+   THIS IS THE SIGN-IN'S SKY, not a second design. login.html and the site
+   overview have always stood in the void; the portal stopped at the door and
+   turned white. Somebody who signs in at night now keeps the room they signed
+   in from, and these are that screen's own token values, copied rather than
+   re-picked - two dark palettes that drift apart is exactly the failure the
+   single :root above was written to avoid.
+
+   NOT ONE RULE BELOW THIS BLOCK CHANGES. Only the VALUES are redefined, so
+   every rule on the page - the cards, the tables, the charts, the dialogs -
+   goes dark by reading the same token names it already read. A page re-skinned
+   by rewriting two hundred declarations is a page with two hundred chances to
+   miss one.
+
+   The header tokens are not here because they do not need to be: --topbar and
+   its family are declared as var(--panel), var(--text) and so on, so they
+   follow whatever these say.
+
+   The colours mean here what they mean on the overview: WHITE a fixed fact,
+   EMERALD live, GOLD what has been banked. ---------------------------------- */
+html[data-theme="dark"]{
+  /* THE BROWSER'S OWN WIDGETS HAVE TO BE TOLD. Radios, tick boxes, the native
+     date popup and the scrollbars are drawn by the UA, not by anything here,
+     and left alone they stay in their light costume - four white discs in a
+     navy menu, and a calendar that opens as a white sheet. One declaration
+     hands the whole set over, which is the only way to reach the parts of a
+     control this stylesheet cannot select. */
+  color-scheme:dark;
+  accent-color:#3ad998;
+  --bg:#070c14;            /* the void itself            */
+  --panel:rgba(9,16,28,.74);   /* the same glass the overview stands on */
+  --panel-2:rgba(9,16,28,.62);
+  --line:rgba(150,180,220,.16);
+  --line-soft:rgba(150,180,220,.10);
+  --line-hi:rgba(140,175,215,.30);
+  --text:#e9f1fb;          /* white  - fixed facts, identity */
+  --muted:#8ba0bb;
+  --faint:#7d92ad;
+  --dim:#5d6e83;           /* dead readouts, and they read dead on black */
+  /* OPAQUE, and the one token here that is. The cards are glass because they
+     sit still and the void behind them is meant to show; a dropdown, a tooltip
+     or a toast is drawn OVER something a reader is trying to read, and at 96%
+     the number underneath was still legible through the menu. A floating layer
+     that lets its background through is not a layer. */
+  --elev:#0d1624;
+  --sel:rgba(127,178,238,.14);
+  --hover:rgba(150,180,220,.07);
+  --hover-soft:rgba(150,180,220,.045);
+  --row-hover:rgba(150,180,220,.09);
+  --shadow:rgba(0,0,0,.62);
+  --scrim:rgba(3,7,13,.70);
+  --grid-v:rgba(150,180,220,.07);
+  /* text ON a filled accent. White on emerald is unreadable at this weight, and
+     the accents are light here - so the ink goes dark instead. */
+  --on-accent:#07121b;
+  --green:#3ad998;         /* emerald - live */
+  --green-rgb:58,217,152;
+  --green-soft:rgba(58,217,152,.14);
+  --green-deep:#3ad998;
+  --blue:#7fb2ee;
+  --blue-soft:rgba(127,178,238,.16);
+  --red:#ff6b5e;
+  --red-soft:rgba(255,107,94,.14);
+  --crit:#ff9d94;
+  --amber:#f0b74a;
+  --amber-soft:rgba(240,183,74,.15);
+  --brand:#f0b74a;         /* gold - the wordmark, and what the day earns */
+  --brand-soft:rgba(240,183,74,.14);
+  --brand-line:rgba(240,183,74,.34);
+  /* The series hues, lifted. A mid-tone picked to carry on white sinks into
+     navy - #12a150 against #070c14 is a line you have to hunt for - so every
+     one of these is the same hue at the brightness this ground needs. The
+     charts read them as tokens and never learn a theme exists. */
+  --s1:#3ad998; --s2:#7fb2ee; --s3:#f0b74a; --s4:#b39cff;
+  --s5:#ff8ac0; --s6:#4fd3dd; --s7:#e9a03c; --s8:#9a92ff;
+  --s9:#4fd0bd; --s10:#e3c05a; --s11:#ff8ac0; --s12:#5cc0f5;
+  --k1:#6aa8ff; --k2:#f7b955; --k3:#3ad998; --k4:#ff8ac0;
+  --k5:#a99bff; --k6:#4fd3dd;
+}
+/* The one control that is not a reading: it belongs with the clock and the
+   avatar, at the right of the bar, because it is about the SCREEN rather than
+   about the plant. */
+.themebtn{width:30px;height:30px;display:grid;place-items:center;flex:none;
+  border-radius:8px;border:1px solid var(--line);background:var(--panel-2);
+  color:var(--topbar-fg-2,var(--muted));transition:background .12s,border-color .12s,color .12s}
+.themebtn:hover{border-color:var(--line-hi);background:var(--topbar-hover,var(--hover));
+  color:var(--topbar-fg,var(--text))}
+.themebtn svg{display:block}
+/* the icon shows WHAT YOU WILL GET, not what you are in: a moon on the light
+   page is an offer, a moon on the dark page is a label for a state the whole
+   screen is already stating */
+.themebtn .moon{display:none}
+html[data-theme="dark"] .themebtn .moon{display:block}
+html[data-theme="dark"] .themebtn .sun{display:none}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scrollbar-color:var(--line-hi) transparent}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.45;
      -webkit-font-smoothing:antialiased}
+
+/* ===================== THE FIELD THE GLASS STANDS ON =====================
+   DARK WAS A FLAT BLACK SLAB, and it should not have been.
+
+   The dark tokens were copied from the sign-in exactly, which was right, but
+   only half of what makes that screen work came across. Over there --panel is
+   rgba(9,16,28,.74) - GLASS - and behind it is a lit sky: a warm wash where the
+   sun is, a wide cold one carrying the rest, a star field and the limb of the
+   Earth. The panel reads as a surface because there is something behind it for
+   it to be in front of.
+
+   Here the same glass was laid on #070c14 and nothing else. 74% of near-black
+   over near-black composites to near-black: card and page came out within a
+   couple of values of each other, every border did the whole job of separating
+   them, and the screen read as one unlit sheet with type on it. The tokens were
+   never the problem - the room was empty.
+
+   So this is the sign-in's own sky, at working strength. Same three washes, same
+   places, same hues; roughly a third of the amplitude, because that screen is a
+   held moment with one panel on it and this one is a working surface covered in
+   tables. Enough to give the glass something to lift off, not enough to be read
+   as data. No stars and no limb: those are the front door's, and a horizon
+   behind a KPI table would be scenery.
+
+   ON html, NOT ON body. The root element's background paints the whole canvas
+   and does not scroll away when a long table does - a wash on body either ends
+   where the content ends or has to be pinned with background-attachment:fixed,
+   which repaints the gradient on every scroll frame. body is handed back to
+   transparent for the same reason: two backgrounds is one background and one
+   piece of dead code.
+
+   LIGHT IS UNTOUCHED. It is a daylit palette on a solid ground and it separates
+   its cards with white against grey, which needs no help from behind. */
+html[data-theme="dark"]{
+  background:
+    /* the sun, off the top right corner */
+    radial-gradient(circle 46vmax at 80% -8%,
+      rgba(255,216,146,.085) 0%, rgba(240,178,73,.032) 32%, transparent 64%),
+    /* the cold half of the same sky, wide enough to reach the far corner */
+    radial-gradient(ellipse 155% 125% at 80% -8%,
+      rgba(126,158,214,.115) 0%, rgba(90,120,180,.05) 46%, transparent 80%),
+    /* and the void closing back in under both, so the foot of a long page is
+       the deep end rather than a gradient that simply stops */
+    radial-gradient(ellipse 130% 105% at 50% 62%,
+      rgba(2,6,14,.34) 0%, rgba(0,1,5,.5) 100%),
+    var(--bg);
+}
+html[data-theme="dark"] body{background:transparent}
 ::-webkit-scrollbar{height:8px;width:8px}
 ::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:8px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -260,6 +401,11 @@ select:hover,select:focus{border-color:var(--line-hi);background-color:var(--hov
 /* in a table the same control sits in a 30px cell and sizes to its own text */
 .mbtn.mini{width:auto;min-width:158px;height:30px;font-size:12.5px;
   padding:0 26px 0 9px;background-position:right 9px center}
+/* .mini was drawn for a role cell in a table, where 158px is the room a role
+   name needs. The footer holds a two- or three-digit count and nothing else, so
+   it states its own width rather than reserving a column of air beside it. */
+.mbtn.mini.perbtn{min-width:70px;font-family:var(--mono);font-size:12px;
+  justify-content:space-between}
 
 /* ONE panel, lent to whichever button is open - two of these cannot be open at
    once, so a panel per control would only be a second thing to keep in step. */
@@ -290,11 +436,9 @@ select:hover,select:focus{border-color:var(--line-hi);background-color:var(--hov
 table{width:100%;min-width:820px;border-collapse:separate;border-spacing:0}
 thead th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   padding:9px 14px;border-bottom:1px solid var(--line-soft);text-align:left;white-space:nowrap}
-thead th.so{cursor:pointer;user-select:none}
-thead th.so:hover{color:var(--text)}
-thead th .ar{margin-left:5px;font-size:8px;color:var(--faint)}
-thead th.on{color:var(--text)}
-thead th.on .ar{color:var(--green)}
+/* THE SORT-HEADER RULES ARE GONE with the sorting - .so, .on and .ar had no
+   markup left to reach. A style for a control that no longer exists is a
+   control that comes back the first time somebody adds the class by hand. */
 tbody td{padding:9px 14px;font-size:12.5px;border-bottom:1px solid var(--line-soft);
   color:var(--muted);white-space:nowrap}
 /* the name is the one column a person chose, so it is the one in the reading
@@ -569,6 +713,50 @@ body.locked{overflow:hidden}
 </style>
 <script>/* stored theme applied before first paint, so there is no flash */
 </script>
+<script>
+/* THE THEME, SET BEFORE THE FIRST PAINT.
+
+   This runs in the head, ahead of the body, because the alternative is a white
+   flash on every navigation for anybody who chose dark - the page would paint
+   light, then the script would run, then it would repaint. A theme applied
+   after the first frame is a theme the reader watches being applied.
+
+   It is one key in localStorage, so the choice carries from Home to Alarms to
+   Settings rather than being made again on each. The sign-in and the site
+   overview never read it: they are the void either way.
+
+   DARK IS THE DEFAULT NOW, AND LIGHT IS THE CHOICE. It was the other way round.
+   The globe you arrive through is a night sky, and a portal that painted white
+   the instant you picked a site off it read as two products rather than one -
+   the arrival went void, void, white. So the portal opens in the room the site
+   overview handed it over in, and the switch in the header is there for anybody
+   who wants the daylit half of the palette.
+
+   THE DEFAULT IS ON THE TAG, NOT IN THIS SCRIPT. <html data-theme="dark"> is in
+   the markup, and all this line does is TAKE IT OFF again for somebody who
+   chose light. Written the other way round - script adds dark - the default
+   would live behind a try/catch, and a browser with storage blocked would open
+   light: the fallback would be the one theme nobody asked for. This way storage
+   can fail outright and the page is still what it says it is. */
+(function(){
+  var KEY='enerops-theme', root=document.documentElement;
+  try{ if(localStorage.getItem(KEY)==='light') root.removeAttribute('data-theme'); }catch(e){}
+  function say(){
+    var b=document.getElementById('themebtn');
+    if(!b) return;
+    /* the button names WHAT IT WILL DO, not where you are */
+    var t = root.getAttribute('data-theme')==='dark' ? 'Switch to light' : 'Switch to dark';
+    b.title=t; b.setAttribute('aria-label',t);
+  }
+  window.toggleTheme=function(){
+    var dark = root.getAttribute('data-theme')==='dark';
+    if(dark) root.removeAttribute('data-theme'); else root.setAttribute('data-theme','dark');
+    try{ localStorage.setItem(KEY, dark?'light':'dark'); }catch(e){}
+    say();
+  };
+  document.addEventListener('DOMContentLoaded', say);
+})();
+</script>
 </head>
 <body>
 
@@ -585,6 +773,19 @@ body.locked{overflow:hidden}
     <span class="btext"><span class="word">ENEROPS OS</span><span class="sub">Site Overview</span></span>
   </a>
   <div class="right">
+    <!-- LIGHT / DARK. Only the portal carries it. The sign-in and the site
+         overview are the void by design - they are one continuous arrival
+         through space, and a switch offering to make those white would be
+         offering to break the one thing those two screens are. -->
+    <button class="themebtn" type="button" id="themebtn" onclick="toggleTheme()"
+            title="Switch to dark" aria-label="Switch to dark">
+      <svg class="sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/></svg>
+      <svg class="moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5a8.6 8.6 0 1 0 10.7 10.7z"/></svg>
+    </button>
     <div class="acct" id="acct">
       <button class="avatar" onclick="toggleAcct(event)" aria-haspopup="menu" aria-expanded="false"
               id="acctbtn" title="Account">V</button>
@@ -859,9 +1060,15 @@ body.locked{overflow:hidden}
 
       <div class="tfoot">
         <span>Rows per page</span>
-        <select id="dv-per" onchange="dvDraw(true)">
-          <option>10</option><option selected>25</option><option>50</option><option>100</option>
-        </select>
+        <!-- THE PAGE'S OWN LIST, not the operating system's. Every other
+             one-of-many control on this screen is a .mbtn carrying data-ss;
+             this footer was the last <select> left, which meant the one control
+             under a table the app draws entirely by itself handed its list to
+             Windows. Same button, same panel, same keyboard - and .value still
+             carries the answer, so dvDraw reads it exactly as it did. -->
+        <button class="mbtn mini perbtn" type="button" id="dv-per" data-ss="dvper"
+                value="25" aria-haspopup="true" aria-expanded="false"
+                aria-controls="sspanel"><span class="mlab">25</span></button>
         <span class="sp"></span>
         <span class="range" id="dv-range">0-0 of 0</span>
         <button class="pgbtn" id="dv-prev" type="button" onclick="dvPage(-1)">&lsaquo;</button>
@@ -1517,20 +1724,28 @@ body.locked{overflow:hidden}
           <div class="hint">This is what they sign in with.</div>
           <div class="err"></div>
         </div>
-        <div class="mrow">
-          <div class="fld">
-            <label class="lab" for="us-phone">Contact number</label>
-            <input id="us-phone" type="tel" autocomplete="off">
-            <div class="err"></div>
-          </div>
-          <div class="fld">
-            <label class="lab" for="us-role">Role</label>
-            <button class="mbtn" type="button" id="us-role" data-ss="usrole"
-                    data-any="No role" value=""
-                    aria-haspopup="true" aria-expanded="false"
-                    aria-controls="sspanel"><span class="mlab any">No role</span></button>
-            <div class="err"></div>
-          </div>
+        <!-- ROLE IS NOT SET HERE ANY MORE. It was the fourth field in this
+             dialog, which made this the second place a role could be given -
+             Access Control below is the first, and it is the screen built for
+             it: it shows every user against every role at once, which is the
+             only view in which "who can reach what" is a question that can be
+             answered. Two places to set one thing is two places to look when it
+             is wrong, and the smaller of the two was this dropdown, which could
+             say what a role is called and nothing about what it reaches.
+
+             So this dialog is now WHO SOMEBODY IS, and Access Control is WHAT
+             THEY CAN REACH. Editing a user here leaves their role exactly as it
+             was; a new one arrives with none and is given one there.
+
+             Contact number is no longer half of a .mrow because it has nothing
+             to sit beside - a lone field in a two-column row is a field with an
+             empty column next to it. -->
+        <div class="fld">
+          <label class="lab" for="us-phone">Contact number</label>
+          <input id="us-phone" type="tel" autocomplete="off">
+          <div class="err"></div>
+          <div class="hint">A new user can sign in straight away, but reaches nothing
+            until they are given a role on <b>Access Control</b>.</div>
         </div>
       </div>
       <div class="mfoot">
@@ -1592,18 +1807,22 @@ window.T=function(msg){
 };
 
 /* ---------- theme ----------
-   THERE IS NO TOGGLE, AND THERE IS NO DARK.
+   TWO THEMES, ONE SWITCH, AND NONE OF IT RUNS HERE.
 
-   The portal shipped with both themes and a control in the header to swap
-   between them. It is gone: the palette is final, it is the light one, and a
-   switch offering a second answer to a settled question invites somebody to
-   unsettle it. Every screen - including the sign-in and the site overview,
-   which used to pin themselves to dark - now resolves to the one set of tokens
-   on :root.
+   This note used to read "THERE IS NO TOGGLE, AND THERE IS NO DARK" - the
+   portal had been cut back to the light palette on purpose. Dark came back and
+   the note did not, so the file said the opposite of what it did.
 
-   The dark block was DELETED rather than left unreferenced. A theme still
-   sitting in the stylesheet is a theme that returns the first time anyone sets
-   data-theme by hand. */
+   The argument it made is still worth answering rather than deleting: it held
+   that a second theme is a second answer to a settled question. The question is
+   not settled. The sign-in and the globe are a void, the portal is entered
+   through them, and a portal that opens white behind a night sky is a seam the
+   reader can see. So there are two, the portal opens DARK, and light is what
+   the switch is for.
+
+   The apply-before-first-paint and the toggle both live in the HEAD script, up
+   with the tokens they act on. A theme applied by this script - which runs at
+   the bottom of the body - is a theme the reader watches being applied. */
 /* ---------- account menu ---------- */
 window.toggleAcct=function(e){
   e.stopPropagation();
@@ -2059,9 +2278,26 @@ function fmtDate(iso){ const q=iso.split('-'); return q[2]+' '+MON[+q[1]-1]+' '+
 /* No Plant column: the table is one plant's register, and a column repeating the
    same value on every row is a column that has stopped saying anything. The pin
    in the card head says it once. */
+/* the keys are what a row is built from; nothing sorts on them any more */
 const DVCOL=[{k:'nm',t:'Device'},{k:'id',t:'Id'},{k:'ty',t:'Type'},
              {k:'cm',t:'Commissioned'},{k:'live',t:'Status'}];
-let dvSort='nm', dvDir=1, dvPg=0;
+
+/* THE TABLE NO LONGER SORTS, AND THE HEADERS ARE LABELS AGAIN.
+
+   Every column was click-to-sort, with a small triangle on the active one
+   saying which way it was pointing. Both are gone.
+
+   The triangle was the visible half and the half that was objected to - a glyph
+   sitting in a header that otherwise reads as a plain label, in a table where
+   nothing else is interactive except the pencil at the end of a row. Taking
+   only the triangle away was the wrong fix: it would leave a table that
+   reorders itself when a header is clicked and never says that it has, which is
+   worse than either keeping the feature or dropping it.
+
+   The order is BY NAME, always. That is the order the device list is read in,
+   the order the rename and offline dialogs offer devices in, and a dozen
+   inverters on one site do not need a second way to arrange themselves. */
+let dvPg=0;
 
 /* The site comes from the orbit, through the one key every reading page already
    reads and writes. Settings follows that choice rather than keeping its own. */
@@ -2075,14 +2311,11 @@ function dvSite(){
 function dvRows(){
   const pl=dvSite();
   const r=DEV.filter(function(d){ return d.pl===pl; });
-  const k=dvSort;
+  /* by name, and by name only - see the note on dvPg */
   r.sort(function(a,b){
-    let x=a[k], y=b[k];
-    if(k==='live'){ x=x?0:1; y=y?0:1; }
-    if(x<y) return -dvDir;
-    if(x>y) return dvDir;
-    /* a stable tail, so two rows that tie never swap places between two draws */
-    return a.nm<b.nm ? -1 : 1;
+    if(a.nm<b.nm) return -1;
+    if(a.nm>b.nm) return 1;
+    return 0;
   });
   return r;
 }
@@ -2117,9 +2350,7 @@ window.dvDraw=function(reset){
   const from=dvPg*per, slice=rows.slice(from,from+per);
 
   $('dv-head').innerHTML='<tr>'+DVCOL.map(function(c){
-    const on=c.k===dvSort;
-    return '<th class="so'+(on?' on':'')+'" onclick="dvSortBy(\''+c.k+'\')">'+c.t
-          +'<span class="ar">'+(on?(dvDir>0?'▲':'▼'):'')+'</span></th>';
+    return '<th>'+esc(c.t)+'</th>';
   }).join('')+'<th></th></tr>';
 
   $('dv-body').innerHTML = slice.length
@@ -2134,10 +2365,6 @@ window.dvDraw=function(reset){
     ? (from+1)+'-'+Math.min(from+per,rows.length)+' of '+rows.length : '0-0 of 0';
   $('dv-prev').disabled = dvPg<=0;
   $('dv-next').disabled = dvPg>=pages-1;
-};
-window.dvSortBy=function(k){
-  if(dvSort===k) dvDir=-dvDir; else { dvSort=k; dvDir=1; }
-  dvPg=0; dvDraw(false);
 };
 window.dvPage=function(n){ dvPg+=n; dvDraw(false); };
 
@@ -2783,17 +3010,12 @@ function usErr(id,msg){
 /* Role, while a person is being added. Every row says what it costs the person
    in reach — what "no role" means, and how far each role goes — because reach is
    the only thing that makes one role different from another, and this is the
-   moment it is being decided. */
-SSK.usrole={
-  label:'Role',
-  list:function(){
-    return [{v:'', t:'No role', s:'cannot reach any site', none:true}].concat(
-      ROLES.map(function(r){
-        return {v:r.id, t:r.nm,
-                s:r.sites.length===1 ? '1 site' : r.sites.length+' sites'};
-      }));
-  }
-};
+   moment it is being decided.
+
+   THAT CONTROL IS GONE, and this note is kept for the argument it makes rather
+   than for the code it described. Roles are given on Access Control now and
+   nowhere else; the reason a role list has to state its reach still holds, and
+   SSK.acrole down there is the list it holds for. */
 window.usEdit=function(id){
   usId = id || null;
   const u = usId ? USERS.filter(function(x){return x.id===usId;})[0] : null;
@@ -2801,7 +3023,6 @@ window.usEdit=function(id){
   $('us-go').textContent    = u ? 'Save changes' : 'Add user';
   $('us-first').value = u?u.first:''; $('us-last').value = u?u.last:'';
   $('us-mail').value  = u?u.mail :''; $('us-phone').value= u?u.phone:'';
-  ssValue('us-role', u?u.role:'');
   ['us-first','us-last','us-mail','us-phone'].forEach(function(x){ usErr(x,''); });
   scrimOn('usdlg');
   requestAnimationFrame(function(){ $('us-first').focus(); $('us-first').select(); });
@@ -2812,7 +3033,6 @@ window.usSave=function(e){
   ['us-first','us-last','us-mail','us-phone'].forEach(function(x){ usErr(x,''); });
   const first=$('us-first').value.trim(), last=$('us-last').value.trim();
   const mail=$('us-mail').value.trim(), phone=$('us-phone').value.trim();
-  const role=$('us-role').value;
   let bad=null;
   const stop=function(id,msg){ usErr(id,msg); bad=bad||id; };
 
@@ -2832,10 +3052,13 @@ window.usSave=function(e){
 
   if(usId){
     const u=USERS.filter(function(x){return x.id===usId;})[0];
-    u.first=first; u.last=last; u.mail=mail; u.phone=phone; u.role=role;
+    /* the role is NOT touched: it is not on this form, and writing whatever
+       happened to be in a variable would quietly strip somebody's access on a
+       save that only changed their phone number */
+    u.first=first; u.last=last; u.mail=mail; u.phone=phone;
   } else {
     USERS.push({id:'u'+(Date.now().toString(36)), first:first, last:last,
-                mail:mail, phone:phone, role:role, live:true});
+                mail:mail, phone:phone, role:'', live:true});
   }
   const said=(usId? userName({first:first,last:last})+' updated'
                   : userName({first:first,last:last})+' can now sign in');
@@ -2944,6 +3167,21 @@ window.roRm=function(id){
 /* Role, on the row it belongs to. No site count in these rows: the column to the
    right already prints the sites as chips, and a fact said twice in one row is
    two facts to keep in step. */
+/* HOW MANY ROWS AT A TIME. The list is the same four steps it always offered;
+   what changed is that the page draws it. */
+SSK.dvper={
+  label:'Rows per page',
+  /* THE SAME LADDER EVERY OTHER TABLE IN THE PORTAL OFFERS: 25 up to 100, then
+     the two sizes anyone asks for when they are scanning rather than reading.
+     It was 10/25/50/100 here and 25/50/75/100/150/200 on Alarms, Analysis and
+     KPI - one control with two answers to the same question, which is the sort
+     of difference a reader notices and cannot explain. */
+  list:function(){
+    return ['25','50','75','100','150','200'].map(function(n){ return {v:n, t:n}; });
+  },
+  pick:function(){ dvDraw(true); }
+};
+
 SSK.acrole={
   label:'Role',
   list:function(){

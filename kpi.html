@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -73,12 +73,153 @@
   --serif:Georgia,'Times New Roman',serif;
   --r-lg:14px; --r-md:10px; --r-sm:8px;
 }
-/* ---- DARK · same hues on navy. Only the base tokens are redefined; the
-   header/brand tokens above reference them, so they follow automatically. ---- */
+/* ---- DARK · the front door's palette, on every page behind it.
+
+   THIS IS THE SIGN-IN'S SKY, not a second design. login.html and the site
+   overview have always stood in the void; the portal stopped at the door and
+   turned white. Somebody who signs in at night now keeps the room they signed
+   in from, and these are that screen's own token values, copied rather than
+   re-picked - two dark palettes that drift apart is exactly the failure the
+   single :root above was written to avoid.
+
+   NOT ONE RULE BELOW THIS BLOCK CHANGES. Only the VALUES are redefined, so
+   every rule on the page - the cards, the tables, the charts, the dialogs -
+   goes dark by reading the same token names it already read. A page re-skinned
+   by rewriting two hundred declarations is a page with two hundred chances to
+   miss one.
+
+   The header tokens are not here because they do not need to be: --topbar and
+   its family are declared as var(--panel), var(--text) and so on, so they
+   follow whatever these say.
+
+   The colours mean here what they mean on the overview: WHITE a fixed fact,
+   EMERALD live, GOLD what has been banked. ---------------------------------- */
+html[data-theme="dark"]{
+  /* THE BROWSER'S OWN WIDGETS HAVE TO BE TOLD. Radios, tick boxes, the native
+     date popup and the scrollbars are drawn by the UA, not by anything here,
+     and left alone they stay in their light costume - four white discs in a
+     navy menu, and a calendar that opens as a white sheet. One declaration
+     hands the whole set over, which is the only way to reach the parts of a
+     control this stylesheet cannot select. */
+  color-scheme:dark;
+  accent-color:#3ad998;
+  --bg:#070c14;            /* the void itself            */
+  --panel:rgba(9,16,28,.74);   /* the same glass the overview stands on */
+  --panel-2:rgba(9,16,28,.62);
+  --line:rgba(150,180,220,.16);
+  --line-soft:rgba(150,180,220,.10);
+  --line-hi:rgba(140,175,215,.30);
+  --text:#e9f1fb;          /* white  - fixed facts, identity */
+  --muted:#8ba0bb;
+  --faint:#7d92ad;
+  --dim:#5d6e83;           /* dead readouts, and they read dead on black */
+  /* OPAQUE, and the one token here that is. The cards are glass because they
+     sit still and the void behind them is meant to show; a dropdown, a tooltip
+     or a toast is drawn OVER something a reader is trying to read, and at 96%
+     the number underneath was still legible through the menu. A floating layer
+     that lets its background through is not a layer. */
+  --elev:#0d1624;
+  --sel:rgba(127,178,238,.14);
+  --hover:rgba(150,180,220,.07);
+  --hover-soft:rgba(150,180,220,.045);
+  --row-hover:rgba(150,180,220,.09);
+  --shadow:rgba(0,0,0,.62);
+  --scrim:rgba(3,7,13,.70);
+  --grid-v:rgba(150,180,220,.07);
+  /* text ON a filled accent. White on emerald is unreadable at this weight, and
+     the accents are light here - so the ink goes dark instead. */
+  --on-accent:#07121b;
+  --green:#3ad998;         /* emerald - live */
+  --green-rgb:58,217,152;
+  --green-soft:rgba(58,217,152,.14);
+  --green-deep:#3ad998;
+  --blue:#7fb2ee;
+  --blue-soft:rgba(127,178,238,.16);
+  --red:#ff6b5e;
+  --red-soft:rgba(255,107,94,.14);
+  --crit:#ff9d94;
+  --amber:#f0b74a;
+  --amber-soft:rgba(240,183,74,.15);
+  --brand:#f0b74a;         /* gold - the wordmark, and what the day earns */
+  --brand-soft:rgba(240,183,74,.14);
+  --brand-line:rgba(240,183,74,.34);
+  /* The series hues, lifted. A mid-tone picked to carry on white sinks into
+     navy - #12a150 against #070c14 is a line you have to hunt for - so every
+     one of these is the same hue at the brightness this ground needs. The
+     charts read them as tokens and never learn a theme exists. */
+  --s1:#3ad998; --s2:#7fb2ee; --s3:#f0b74a; --s4:#b39cff;
+  --s5:#ff8ac0; --s6:#4fd3dd; --s7:#e9a03c; --s8:#9a92ff;
+  --s9:#4fd0bd; --s10:#e3c05a; --s11:#ff8ac0; --s12:#5cc0f5;
+  --k1:#6aa8ff; --k2:#f7b955; --k3:#3ad998; --k4:#ff8ac0;
+  --k5:#a99bff; --k6:#4fd3dd;
+}
+/* The one control that is not a reading: it belongs with the clock and the
+   avatar, at the right of the bar, because it is about the SCREEN rather than
+   about the plant. */
+.themebtn{width:30px;height:30px;display:grid;place-items:center;flex:none;
+  border-radius:8px;border:1px solid var(--line);background:var(--panel-2);
+  color:var(--topbar-fg-2,var(--muted));transition:background .12s,border-color .12s,color .12s}
+.themebtn:hover{border-color:var(--line-hi);background:var(--topbar-hover,var(--hover));
+  color:var(--topbar-fg,var(--text))}
+.themebtn svg{display:block}
+/* the icon shows WHAT YOU WILL GET, not what you are in: a moon on the light
+   page is an offer, a moon on the dark page is a label for a state the whole
+   screen is already stating */
+.themebtn .moon{display:none}
+html[data-theme="dark"] .themebtn .moon{display:block}
+html[data-theme="dark"] .themebtn .sun{display:none}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scrollbar-color:var(--line-hi) transparent}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.45;
      -webkit-font-smoothing:antialiased}
+
+/* ===================== THE FIELD THE GLASS STANDS ON =====================
+   DARK WAS A FLAT BLACK SLAB, and it should not have been.
+
+   The dark tokens were copied from the sign-in exactly, which was right, but
+   only half of what makes that screen work came across. Over there --panel is
+   rgba(9,16,28,.74) - GLASS - and behind it is a lit sky: a warm wash where the
+   sun is, a wide cold one carrying the rest, a star field and the limb of the
+   Earth. The panel reads as a surface because there is something behind it for
+   it to be in front of.
+
+   Here the same glass was laid on #070c14 and nothing else. 74% of near-black
+   over near-black composites to near-black: card and page came out within a
+   couple of values of each other, every border did the whole job of separating
+   them, and the screen read as one unlit sheet with type on it. The tokens were
+   never the problem - the room was empty.
+
+   So this is the sign-in's own sky, at working strength. Same three washes, same
+   places, same hues; roughly a third of the amplitude, because that screen is a
+   held moment with one panel on it and this one is a working surface covered in
+   tables. Enough to give the glass something to lift off, not enough to be read
+   as data. No stars and no limb: those are the front door's, and a horizon
+   behind a KPI table would be scenery.
+
+   ON html, NOT ON body. The root element's background paints the whole canvas
+   and does not scroll away when a long table does - a wash on body either ends
+   where the content ends or has to be pinned with background-attachment:fixed,
+   which repaints the gradient on every scroll frame. body is handed back to
+   transparent for the same reason: two backgrounds is one background and one
+   piece of dead code.
+
+   LIGHT IS UNTOUCHED. It is a daylit palette on a solid ground and it separates
+   its cards with white against grey, which needs no help from behind. */
+html[data-theme="dark"]{
+  background:
+    /* the sun, off the top right corner */
+    radial-gradient(circle 46vmax at 80% -8%,
+      rgba(255,216,146,.085) 0%, rgba(240,178,73,.032) 32%, transparent 64%),
+    /* the cold half of the same sky, wide enough to reach the far corner */
+    radial-gradient(ellipse 155% 125% at 80% -8%,
+      rgba(126,158,214,.115) 0%, rgba(90,120,180,.05) 46%, transparent 80%),
+    /* and the void closing back in under both, so the foot of a long page is
+       the deep end rather than a gradient that simply stops */
+    radial-gradient(ellipse 130% 105% at 50% 62%,
+      rgba(2,6,14,.34) 0%, rgba(0,1,5,.5) 100%),
+    var(--bg);
+}
+html[data-theme="dark"] body{background:transparent}
 ::-webkit-scrollbar{height:8px;width:8px}
 ::-webkit-scrollbar-thumb{background:var(--line-hi);border-radius:8px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -120,6 +261,26 @@ nav.tabs::-webkit-scrollbar{display:none}
 .topbar .right{margin-left:auto;display:flex;align-items:center;gap:14px}
 .clock{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--topbar-fg);letter-spacing:.02em}
 .refresh{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--topbar-fg-2)}
+/* The control beside it is the portal's own dropdown now, not the browser's -
+   see the note on the markup - and these are the few things a header-sized one
+   needs said. Everything else it inherits from .mbtn / .colpanel unchanged. */
+/* The word is a LABEL for the control beside it, so it stops being a link-sized
+   piece of type competing with the value: quieter, letterspaced, and it steps
+   out of the way on a narrow bar where the value is the part that matters. */
+.refresh .rl{letter-spacing:.04em;white-space:nowrap}
+/* .mbtn was drawn for the filter bar and is already this height, so only the
+   width is stated - "15 min" is the longest thing it ever holds, and a box
+   sized for that stops the header shifting when the value changes. */
+.refresh .rsel .mbtn{min-width:86px;font-family:var(--mono);font-size:12px;
+  justify-content:space-between}
+/* .colpanel hangs from its control's LEFT edge, which is right for a filter bar
+   and wrong here: this is the last control before the theme switch and the
+   avatar, so a list dropped leftward runs off the end of the bar. */
+.refresh .rsel .colpanel{left:auto;right:0;width:150px}
+/* OFF is a state, not an absence, so the label says it in the same voice the
+   dot does - dimmed, with the pulse stopped. */
+.refresh .rsel .mbtn .mlab.off{color:var(--muted)}
+@media (max-width:1180px){ .refresh .rl{display:none} }
 .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(var(--green-rgb),.55);
   animation:pulse 2s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(var(--green-rgb),.5)}70%{box-shadow:0 0 0 8px rgba(var(--green-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--green-rgb),0)}}
@@ -266,23 +427,36 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
 .seg button:not(:last-child){border-right:1px solid var(--line)}
 
 /* ---------- legend ----------
-   Identity is never colour alone: every chip carries the device name, and the
-   axis it reads is carried by the LINE STYLE drawn in the chip - solid for Y1,
-   dashed for Y2 - which is the same mark the chart draws. */
+   Identity is never colour alone: every chip carries the series name, and the
+   SHAPE drawn in the chip is the shape the plot draws with - a square for the
+   bar, a dot, a triangle. This note used to describe solid and dashed rules,
+   which was Analysis's arrangement carried over; the marks here are filled
+   shapes now, so the chips are too. */
 .legend{display:flex;gap:7px;flex-wrap:wrap;min-width:0}
 .lg{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);
   background:var(--panel-2);font-size:12px;cursor:pointer;user-select:none;white-space:nowrap;flex:none}
 .lg:hover{border-color:var(--line-hi)}
 .lg.off{opacity:.38}
-.lg i{width:16px;height:0;border-top-width:2.5px;display:inline-block;flex:none}
-.lg i.solid{border-top-style:solid}
-.lg i.dash{border-top-style:dashed}
+/* THE CHIP IS AN INLINE SVG, not a styled box. The marks stopped being things
+   CSS can draw the moment simulated became a rule with a hollow dot ON it -
+   that is two shapes in one chip - so the chip draws the same geometry the
+   plot does and there is one place a mark is defined instead of two that have
+   to be kept in step. --mkbg is the surface the hollow dot is cut out of, and
+   each context sets it to whatever it is actually sitting on. */
+.mk{display:block;width:17px;height:12px;flex:none;overflow:visible;--mkbg:var(--panel-2)}
 .lg .n{color:var(--text);font-weight:700;font-family:var(--mono);font-size:11.5px}
 .lg .p{color:var(--muted);font-weight:600;font-size:11px}
 
 /* ---------- chart ---------- */
 .chartwrap{position:relative;padding:4px 10px 14px}
-.chartwrap svg{width:100%;height:auto;display:block}
+/* DIRECT CHILD, not any descendant. This was .chartwrap svg, and it was
+   harmless for as long as the only svg in here was the plot. The moment the
+   tooltip started drawing its marks as inline svg it caught them too - .tip is
+   inside .chartwrap - and width:100%;height:auto blew a 17x12 chip up to the
+   300x150 an svg defaults to, so hovering a bar produced a tooltip the size of
+   the card with two enormous shapes in it. The plot is a direct child; nothing
+   else in here should be sized by this rule. */
+.chartwrap>svg{width:100%;height:auto;display:block}
 .gl{stroke:var(--line-soft);stroke-width:1}
 .gl.v{stroke:var(--grid-v)}
 .axt{fill:var(--faint);font-size:10.5px;font-family:var(--mono)}
@@ -293,9 +467,6 @@ select:focus{border-color:var(--line-hi);background-color:var(--hover)}
   box-shadow:0 10px 26px -8px var(--shadow);z-index:5}
 .tip .tt{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--muted);margin-bottom:5px}
 .tip .tr{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);padding:2px 0}
-.tip .tr i{width:13px;height:0;border-top-width:2.5px;flex:none}
-.tip .tr i.solid{border-top-style:solid}
-.tip .tr i.dash{border-top-style:dashed}
 .tip .tr b{margin-left:auto;font-family:var(--mono);color:var(--text);font-weight:700}
 /* the state before a query is complete - the plot keeps its frame and says what
    is missing, rather than collapsing to a bare box */
@@ -356,6 +527,18 @@ thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
 
 /* ---------- pager ---------- */
 .tfoot{display:flex;align-items:center;gap:16px;padding:11px 16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+/* THE ROWS-PER-PAGE CONTROL IS THE PAGE'S OWN DROPDOWN, not the browser's - the
+   same move the header's refresh control made, for the same reason: this footer
+   sat under a table drawn entirely by the app and then handed its one control to
+   the operating system. These are the few things a footer-sized one needs said.
+
+   IT OPENS UPWARD. .colpanel hangs below its button, which is right in a filter
+   bar at the top of a card and wrong at the bottom of one - a list dropped
+   downward from the last row of the page opens into the window's edge. */
+.tfoot .psel{flex:none}
+.tfoot .psel .mbtn{min-width:74px;height:30px;font-family:var(--mono);font-size:12px;
+  justify-content:space-between}
+.tfoot .psel .colpanel{top:auto;bottom:calc(100% + 6px);width:120px}
 .tfoot .sp{margin-left:auto}
 .pgbtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--muted)}
 .pgbtn:hover:not(:disabled){color:var(--text);border-color:var(--line-hi)}
@@ -414,8 +597,9 @@ thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
 
 /* bars, not lines: the legend and the tooltip carry a square swatch to match
    what the chart actually draws */
-.lg i.sq{width:10px;height:10px;border-radius:3px;border-top:none}
-.tip .tr i.sq{width:9px;height:9px;border-radius:2px;border-top:none}
+/* the tooltip is a lifted surface, so a hollow mark inside it is cut out of
+   that and not out of the card two layers down */
+.tip .tr .mk{--mkbg:var(--elev)}
 
 /* ---------- the row, spelled out in full ----------
    A table wider than the screen is read by scrolling sideways, and a row read
@@ -447,6 +631,50 @@ thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
 </style>
 <script>/* stored theme applied before first paint, so there is no flash */
 </script>
+<script>
+/* THE THEME, SET BEFORE THE FIRST PAINT.
+
+   This runs in the head, ahead of the body, because the alternative is a white
+   flash on every navigation for anybody who chose dark - the page would paint
+   light, then the script would run, then it would repaint. A theme applied
+   after the first frame is a theme the reader watches being applied.
+
+   It is one key in localStorage, so the choice carries from Home to Alarms to
+   Settings rather than being made again on each. The sign-in and the site
+   overview never read it: they are the void either way.
+
+   DARK IS THE DEFAULT NOW, AND LIGHT IS THE CHOICE. It was the other way round.
+   The globe you arrive through is a night sky, and a portal that painted white
+   the instant you picked a site off it read as two products rather than one -
+   the arrival went void, void, white. So the portal opens in the room the site
+   overview handed it over in, and the switch in the header is there for anybody
+   who wants the daylit half of the palette.
+
+   THE DEFAULT IS ON THE TAG, NOT IN THIS SCRIPT. <html data-theme="dark"> is in
+   the markup, and all this line does is TAKE IT OFF again for somebody who
+   chose light. Written the other way round - script adds dark - the default
+   would live behind a try/catch, and a browser with storage blocked would open
+   light: the fallback would be the one theme nobody asked for. This way storage
+   can fail outright and the page is still what it says it is. */
+(function(){
+  var KEY='enerops-theme', root=document.documentElement;
+  try{ if(localStorage.getItem(KEY)==='light') root.removeAttribute('data-theme'); }catch(e){}
+  function say(){
+    var b=document.getElementById('themebtn');
+    if(!b) return;
+    /* the button names WHAT IT WILL DO, not where you are */
+    var t = root.getAttribute('data-theme')==='dark' ? 'Switch to light' : 'Switch to dark';
+    b.title=t; b.setAttribute('aria-label',t);
+  }
+  window.toggleTheme=function(){
+    var dark = root.getAttribute('data-theme')==='dark';
+    if(dark) root.removeAttribute('data-theme'); else root.setAttribute('data-theme','dark');
+    try{ localStorage.setItem(KEY, dark?'light':'dark'); }catch(e){}
+    say();
+  };
+  document.addEventListener('DOMContentLoaded', say);
+})();
+</script>
 </head>
 <body>
 
@@ -464,15 +692,45 @@ thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
   </nav>
   <div class="right">
     <span class="clock" id="clk">12:10:03 PM</span>
-    <div class="refresh"><span class="dot" id="livedot"></span>
-      <span>Refresh</span>
-      <select id="refresh-sel" style="padding:5px 26px 5px 9px;font-size:12px">
-        <option value="off" selected>Off</option>
-        <option value="300">5 min</option>
-        <option value="600">10 min</option>
-        <option value="900">15 min</option>
-      </select>
+    <!-- REFRESH, IN THE PORTAL'S OWN DROPDOWN RATHER THAN THE BROWSER'S.
+
+         This was a bare <select>, so the one control in the header opened the
+         OPERATING SYSTEM's menu - a different typeface, a different width, a
+         different set of corners, and its own idea of what colour a list is -
+         while every other list on this page opened the panel the app draws
+         itself. Home had already been moved across and these four had not, so
+         the same control in the same corner of the same bar looked like two
+         different products depending on which tab you were on.
+
+         A <select> also cannot say anything beyond the four words inside it:
+         no heading over the list, and no way to mark OFF as a state rather
+         than as the absence of a choice.
+
+         It is this page's OWN singleSelect now - the one the filter bar below
+         uses - so there is one dropdown on this page and it is learnt once.
+
+         THE HIDDEN INPUT KEEPS THE ID THE <select> HAD. Everything downstream
+         still reads refresh-sel.value and still listens for its change event,
+         so none of it had to learn that the control in front of it changed. -->
+    <div class="refresh">
+      <span class="dot" id="livedot"></span>
+      <span class="rl">Refresh</span>
+      <div class="msel rsel" id="refresh-pick"></div>
+      <input type="hidden" id="refresh-sel" value="off">
     </div>
+    <!-- LIGHT / DARK. Only the portal carries it. The sign-in and the site
+         overview are the void by design - they are one continuous arrival
+         through space, and a switch offering to make those white would be
+         offering to break the one thing those two screens are. -->
+    <button class="themebtn" type="button" id="themebtn" onclick="toggleTheme()"
+            title="Switch to dark" aria-label="Switch to dark">
+      <svg class="sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/></svg>
+      <svg class="moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5a8.6 8.6 0 1 0 10.7 10.7z"/></svg>
+    </button>
     <div class="acct" id="acct">
       <button class="avatar" onclick="toggleAcct(event)" aria-haspopup="menu" aria-expanded="false"
               id="acctbtn" title="Account">V</button>
@@ -588,10 +846,10 @@ thead th.sep, tbody td.sep{border-left:1px solid var(--line-soft)}
     </div>
     <div class="tfoot">
       <span>Rows per page</span>
-      <select id="per" style="padding:5px 26px 5px 9px;font-size:12px">
-        <option>25</option><option>50</option><option>75</option>
-        <option selected>100</option><option>150</option><option>200</option>
-      </select>
+      <div class="msel psel" id="rows-pick"></div>
+      <!-- the hidden input keeps the id the <select> had, so the listener below
+           still reads `per`.value and still hears its change event -->
+      <input type="hidden" id="per" value="100">
       <span class="sp"></span>
       <span class="range" id="range">0-0 of 0</span>
       <button class="pgbtn" id="prev" type="button" onclick="pageBy(-1)">&lsaquo;</button>
@@ -617,18 +875,22 @@ window.T=function(msg){
 };
 
 /* ---------- theme ----------
-   THERE IS NO TOGGLE, AND THERE IS NO DARK.
+   TWO THEMES, ONE SWITCH, AND NONE OF IT RUNS HERE.
 
-   The portal shipped with both themes and a control in the header to swap
-   between them. It is gone: the palette is final, it is the light one, and a
-   switch offering a second answer to a settled question invites somebody to
-   unsettle it. Every screen - including the sign-in and the site overview,
-   which used to pin themselves to dark - now resolves to the one set of tokens
-   on :root.
+   This note used to read "THERE IS NO TOGGLE, AND THERE IS NO DARK" - the
+   portal had been cut back to the light palette on purpose. Dark came back and
+   the note did not, so the file said the opposite of what it did.
 
-   The dark block was DELETED rather than left unreferenced. A theme still
-   sitting in the stylesheet is a theme that returns the first time anyone sets
-   data-theme by hand. */
+   The argument it made is still worth answering rather than deleting: it held
+   that a second theme is a second answer to a settled question. The question is
+   not settled. The sign-in and the globe are a void, the portal is entered
+   through them, and a portal that opens white behind a night sky is a seam the
+   reader can see. So there are two, the portal opens DARK, and light is what
+   the switch is for.
+
+   The apply-before-first-paint and the toggle both live in the HEAD script, up
+   with the tokens they act on. A theme applied by this script - which runs at
+   the bottom of the body - is a theme the reader watches being applied. */
 /* ---------- account menu ---------- */
 window.toggleAcct=function(e){
   e.stopPropagation();
@@ -658,7 +920,9 @@ $('refresh-sel').addEventListener('change',function(){
   const off=this.value==='off';
   $('livedot').style.animationPlayState=off?'paused':'running';
   $('livedot').style.opacity=off?.35:1;
-  T(off?'Live refresh paused':'Live refresh on');
+  /* the toast repeats the interval rather than saying only that it is on:
+     the value is the thing that was just chosen, so it is the thing to confirm */
+  T(off?'Live refresh paused':'Live refresh · every '+(Number(this.value)/60)+' min');
 });
 $('livedot').style.animationPlayState='paused'; $('livedot').style.opacity=.35;
 
@@ -800,22 +1064,47 @@ function buildRows(){
 
    ACTUAL is measured, so it is a BAR: a bar sits on the baseline and its height
    is the whole of it, which is how a quantity that happened should read.
-   SIMULATED is a model's line through the same days, so it is a LINE - it is
-   continuous by nature, and drawn over the bars it can be read against them at
-   a glance instead of beside them.
-   FORECAST has not happened, so it is a DASHED line. The break in the stroke is
-   the difference between a reading and an expectation, and it is the one
-   difference on this chart that colour alone was being asked to carry. */
+   SIMULATED is a LINE THAT CARRIES A HOLLOW DOT ON EVERY BUCKET.
+   FORECAST is a FILLED TRIANGLE per bucket, and no line at all.
+
+   IT WAS A SOLID RULE AND A DASHED RULE, and both were read over the bars
+   rather than beside them. Over a bar chart a stroke is the worst place to put
+   a distinction: it crosses the bars at a shallow angle, the dashes land in the
+   gaps as often as on the bars, and at 31 daily buckets the two rules are thin
+   lines a few pixels apart. Telling them apart meant reading the colour, which
+   is the one thing a mark is supposed to spare you.
+
+   The two now differ by FORM, and the form also says what kind of claim each
+   one is making.
+
+   Simulated keeps its line because a model IS continuous - it has a value for
+   every day whether or not anybody looks - and the line is what lets it be read
+   against the bars in one sweep. The dots are what the bare rule was missing:
+   they put a mark on each bucket, so the line can be read value by value and
+   not only as a shape. They are HOLLOW so the bar underneath shows through the
+   middle; a filled dot at this size covers the top of its own bar.
+
+   Forecast gets no line, and that is the whole of the difference. A forecast is
+   a set of separate estimates, not a curve through anything that happened, and
+   drawing it as a broken version of the simulated rule said "the same thing,
+   less certain" when it is a different thing. Triangles say it once, with a
+   shape that survives at 4px, in greyscale, and for a reader who cannot
+   separate blue from amber - and a bucket with no forecast simply has no
+   triangle, where a broken stroke had to be interpreted. */
 const SERIES=[
   {k:'actual',    t:'Actual',    col:'var(--green)', mark:'bar'},
   {k:'simulated', t:'Simulated', col:'var(--blue)',  mark:'line'},
-  {k:'forecast',  t:'Forecast',  col:'var(--amber)', mark:'dash'}
+  {k:'forecast',  t:'Forecast',  col:'var(--amber)', mark:'tri'}
 ];
-/* the legend and the tooltip wear the same three marks the plot draws with */
+/* THE LEGEND AND THE TOOLTIP DRAW WHAT THE PLOT DRAWS. Same geometry, one
+   viewBox wide enough to hold the rule the dot sits on; the bar answers with a
+   square, because a chip is not tall enough to be a bar. */
 const MARKI=function(s){
-  return s.mark==='bar'
-    ? '<i class="sq" style="background:'+s.col+'"></i>'
-    : '<i class="'+(s.mark==='dash'?'dash':'solid')+'" style="border-top-color:'+s.col+'"></i>';
+  const c=s.col, o='<svg class="mk" viewBox="0 0 17 12" aria-hidden="true">';
+  if(s.mark==='bar') return o+'<rect x="3.5" y="1" width="10" height="10" rx="2.5" fill="'+c+'"/></svg>';
+  if(s.mark==='tri') return o+'<path d="M8.5 1.4L14.3 10.2H2.7Z" fill="'+c+'"/></svg>';
+  return o+'<path d="M1 6h15" stroke="'+c+'" stroke-width="2" stroke-linecap="round"/>'+
+         '<circle cx="8.5" cy="6" r="3.1" fill="var(--mkbg)" stroke="'+c+'" stroke-width="1.8"/></svg>';
 };
 /* off, not on: a series switched off stays off while you change the metric */
 const OFF={actual:false,simulated:false,forecast:false};
@@ -864,6 +1153,15 @@ function niceTop(v){
   return Math.ceil(v/p*1.08)*p;
 }
 const trim=(v,d)=>Number(v).toFixed(v>=1000?0:(d==null?1:d));
+/* A triangle CENTRED on the point, not standing on it. Apex at -s and base at
+   +s/2 puts the centroid exactly on the value, which is where the dot's centre
+   is - so the two series are read off the same line rather than one sitting
+   half a mark high. Half-width 0.866s makes it equilateral, and s = 1.5r gives
+   it about the same ink as a dot of radius r, so neither reads as the heavier
+   series. */
+const triPath=(x,y,s)=>'M'+x.toFixed(1)+' '+(y-s).toFixed(1)+
+  'L'+(x+s*0.866).toFixed(1)+' '+(y+s*0.5).toFixed(1)+
+  'L'+(x-s*0.866).toFixed(1)+' '+(y+s*0.5).toFixed(1)+'Z';
 
 function drawChart(){
   const m=met(), ser=live();
@@ -917,23 +1215,48 @@ function drawChart(){
          '" height="'+h.toFixed(1)+'" rx="2" fill="'+actual.col+'" opacity=".92"/>';
     });
   }
-  /* and then the modelled series, through the middle of each slot. A GAP IS A
-     GAP: the stroke breaks where a bucket has no value rather than being drawn
-     straight across it, so a forecast that starts halfway through the month
-     starts halfway across the plot. */
+  /* and then the modelled series, through the middle of each slot.
+
+     THE MARK GROWS WITH THE SLOT AND THEN STOPS. At 31 daily buckets it has to
+     fit between its neighbours; at 12 monthly ones it should not swell into a
+     blob. The band is the whole of the sizing rule, and the dot's stroke is cut
+     with it so the hollow middle survives at the small end instead of closing
+     up into a blot.
+
+     A GAP IS A GAP. The simulated rule BREAKS where a bucket has no value
+     rather than being drawn straight across it, and the forecast simply has no
+     triangle there - so a forecast that starts halfway through the month starts
+     halfway across the plot.
+
+     The line is laid down before the marks that sit on it, and the triangles
+     are outlined in the CARD's own colour: the halo IS the background, so a
+     triangle and a dot that land on the same value stay two marks instead of
+     merging, and the outline disappears against the card in both themes
+     without a second token to keep in step. */
+  const r=Math.max(2.8,Math.min(5.4,SLOT*0.17));
   ser.filter(function(s){return s.mark!=='bar';}).forEach(function(s){
-    let d='', pen=false;
+    if(s.mark==='line'){
+      let d='', pen=false;
+      ROWS.forEach(function(b,i){
+        const v=val(b,s.k);
+        if(v==null||!isFinite(v)){ pen=false; return; }
+        d+=(pen?'L':'M')+(ML+SLOT*i+SLOT/2).toFixed(1)+' '+Y(v).toFixed(1)+' ';
+        pen=true;
+      });
+      if(d) g+='<path d="'+d.trim()+'" fill="none" stroke="'+s.col+'" stroke-width="2"'+
+               ' stroke-linejoin="round" stroke-linecap="round"/>';
+    }
     ROWS.forEach(function(b,i){
       const v=val(b,s.k);
-      if(v==null||!isFinite(v)){ pen=false; return; }
+      if(v==null||!isFinite(v)) return;
       const x=ML+SLOT*i+SLOT/2, y=Y(v);
-      d+=(pen?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';
-      pen=true;
+      g+= s.mark==='tri'
+        ? '<path d="'+triPath(x,y,r*1.5)+'" fill="'+s.col+'" stroke="var(--panel)"'+
+          ' stroke-width="1" stroke-linejoin="round"/>'
+        : '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+
+          '" fill="var(--panel)" stroke="'+s.col+'" stroke-width="'+
+          Math.min(1.8,r*0.56).toFixed(2)+'"/>';
     });
-    if(!d) return;
-    g+='<path d="'+d.trim()+'" fill="none" stroke="'+s.col+'" stroke-width="2.2"'+
-       ' stroke-linejoin="round" stroke-linecap="round"'+
-       (s.mark==='dash'?' stroke-dasharray="6 4"':'')+'/>';
   });
   $('bars').innerHTML=g;
 }
@@ -1114,10 +1437,16 @@ function singleSelect(o){
   const el=$(o.value), mount=$(o.mount);
   const btn=document.createElement('button');
   btn.type='button'; btn.className='mbtn'; btn.setAttribute('aria-expanded','false');
+  if(o.title) btn.title=o.title;
   const lab=document.createElement('span'); lab.className='mlab'; btn.appendChild(lab);
   const pan=document.createElement('div'); pan.className='colpanel mpanel'; pan.hidden=true;
   mount.appendChild(btn); mount.appendChild(pan);
-  function paint(){ lab.textContent=o.render?o.render(el.value):el.value; }
+  /* `dim` marks a value that is a STATE rather than a choice - the header's
+     Off - so the label can say so in the same voice the live dot does */
+  function paint(){
+    lab.textContent=o.render?o.render(el.value):el.value;
+    lab.className='mlab'+(o.dim&&o.dim(el.value)?' off':'');
+  }
   function draw(){
     pan.innerHTML='<div class="colhead">'+esc(o.head)+'</div>'+
       o.options.map(function(v){
@@ -1147,6 +1476,22 @@ function singleSelect(o){
    predicted, and a second metric on the same axis would be a different unit */
 singleSelect({mount:'met-pick',value:'met-sel',head:'KPI metric',
   options:METRICS.map(m=>m.k), render:k=>metOf(k).t, unit:k=>metOf(k).u});
+
+/* HOW OFTEN THIS PAGE RE-READS THE PLANT, in the header, built out of the same
+   picker as everything else on the page. OFF is a real answer and not an empty
+   one, so it is rendered as a word and dimmed rather than left blank. */
+singleSelect({mount:'refresh-pick', value:'refresh-sel', head:'Live refresh',
+  title:'How often this page re-reads the plant',
+  options:['off','300','600','900'],
+  render:function(v){ return v==='off' ? 'Off' : (Number(v)/60)+' min'; },
+  dim:function(v){ return v==='off'; }});
+
+/* HOW MANY ROWS AT A TIME. One scale, in steps a reader can hold: 25 up to 100,
+   then the two sizes anyone asks for when they are scanning rather than reading. */
+singleSelect({mount:'rows-pick', value:'per', head:'Rows per page',
+  title:'How many rows this table shows at a time',
+  options:['25','50','75','100','150','200']});
+
 $('met-sel').addEventListener('change',function(){ applyQuery(); T(met().t); });
 
 /* ================= WHICH SITE THE PORTAL IS ON =================

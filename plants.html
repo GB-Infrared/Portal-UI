@@ -903,11 +903,23 @@ body.going .iris{opacity:1;--iris:0%;
   <svg class="curve" id="x-curve" viewBox="0 0 262 64" preserveAspectRatio="none"
        aria-hidden="true"></svg>
   <div class="tt"><span>05:30</span><em id="x-now">—</em><span>18:30</span></div>
+  <!-- THE ORDER IS THE CHAIN, and it reads down the left column then the right:
+       DEVICES · DAILY ENERGY · REVENUE · CO₂ AVOIDED.
+
+       Each one is made out of the one before it. The devices are what is
+       standing; what is standing makes the day's energy; the energy is worth
+       money; and the same energy is what did not have to come off the grid.
+       Read in that order the four numbers explain each other, and a reader who
+       stops after two has still stopped somewhere sensible.
+
+       It used to open on CO₂ AVOIDED, which is the end of that chain — the
+       most derived figure on the card, sitting where the eye lands first, above
+       the count it is ultimately computed from. -->
   <div class="xg">
-    <div class="c"><i>CO₂ AVOIDED</i><b class="em" id="x-co2">—</b></div>
-    <div class="c"><i>ENERGY</i><b class="gd" id="x-e">—</b></div>
-    <div class="c"><i>REVENUE</i><b class="gd" id="x-rev">—</b></div>
     <div class="c"><i>DEVICES</i><b id="x-dev">—</b></div>
+    <div class="c"><i>DAILY ENERGY</i><b class="gd" id="x-e">—</b></div>
+    <div class="c"><i>REVENUE</i><b class="gd" id="x-rev">—</b></div>
+    <div class="c"><i>CO₂ AVOIDED</i><b class="em" id="x-co2">—</b></div>
   </div>
 </aside>
 
